@@ -271,8 +271,9 @@ function renderOnlineGrid(items) {
     `;
 
     const imgEl = card.querySelector('.card-thumb');
-    imgEl.addEventListener('error', async () => {
-      console.warn('Image direct load blocked, fetching through Rust proxy:', item.thumb_url);
+    
+    // 自动加载逻辑与跨域防护：
+    const handleProxyFallback = async () => {
       try {
         const base64Data = await invoke('fetch_remote_image_base64', { url: item.thumb_url });
         if (base64Data) {
@@ -281,7 +282,9 @@ function renderOnlineGrid(items) {
       } catch (e) {
         console.error('Proxy image fetch error:', e);
       }
-    });
+    };
+
+    imgEl.addEventListener('error', handleProxyFallback);
 
     const btnApply = card.querySelector('.btn-apply-online');
     btnApply.addEventListener('click', async () => {
@@ -313,12 +316,12 @@ async function loadOnlineWallpapers() {
   const query = inputOnlineQuery ? inputOnlineQuery.value.trim() : '';
 
   try {
-    setStatus(`正在通过官方规范 API 获取 ${source} 壁纸列表（第 ${onlinePage} 页）...`);
+    setStatus(`正在通过 ${source} 壁纸源引擎获取列表（第 ${onlinePage} 页）...`);
     
     if (pageInfo) pageInfo.textContent = `第 ${onlinePage} 页`;
     if (btnPrevPage) btnPrevPage.disabled = (onlinePage <= 1);
 
-    onlineGrid.innerHTML = '<div style="grid-column: 1 / -1; padding: 40px; text-align: center; color: var(--text-secondary);">⏳ 正在通过 Rust 官方规范 API 校验与拉取在线壁纸...</div>';
+    onlineGrid.innerHTML = '<div style="grid-column: 1 / -1; padding: 40px; text-align: center; color: var(--text-secondary);">⏳ 正在拉取高清在线壁纸...</div>';
 
     const list = await invoke('fetch_online_wallpapers', {
       source,
