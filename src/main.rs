@@ -57,7 +57,7 @@ fn read_file_data_url(file_path: String) -> Option<String> {
 async fn fetch_remote_image_base64(url: String) -> Result<String, String> {
     WallpaperDownloader::fetch_image_as_base64(&url)
         .await
-        .map_err(|e| e.to_string())
+        .ok_or_else(|| "Failed to fetch image as base64".to_string())
 }
 
 #[tauri::command]
@@ -159,7 +159,6 @@ fn main() {
 
             #[cfg(target_os = "windows")]
             {
-                // 绑定 Windows 11 原生 Mica 材质，回退为 Acrylic 亚克力
                 if let Err(_) = apply_mica(&window, Some(true)) {
                     let _ = apply_acrylic(&window, Some((24, 24, 24, 180)));
                 }
