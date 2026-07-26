@@ -54,6 +54,7 @@ body {
   display: flex;
   flex: 1;
   height: calc(100vh - 28px);
+  min-width: 940px;
   background-color: var(--bg-mica-solid);
 }
 
@@ -62,6 +63,7 @@ body {
    ========================================================================== */
 .winui-nav {
   width: 220px;
+  flex-shrink: 0;
   background-color: var(--bg-mica-alt);
   border-right: 1px solid var(--border-subtle);
   display: flex;
@@ -86,6 +88,7 @@ body {
   justify-content: center;
   color: #fff;
   box-shadow: 0 2px 8px rgba(0, 120, 212, 0.4);
+  flex-shrink: 0;
 }
 
 .logo-icon {
@@ -96,6 +99,7 @@ body {
 .app-title-group {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .app-title {
@@ -103,11 +107,13 @@ body {
   font-weight: 600;
   color: var(--text-primary);
   line-height: 1.2;
+  white-space: nowrap;
 }
 
 .app-subtitle {
   font-size: 10px;
   color: var(--text-secondary);
+  white-space: nowrap;
 }
 
 .nav-menu {
@@ -183,6 +189,7 @@ body {
    ========================================================================== */
 .winui-main {
   flex: 1;
+  min-width: 720px;
   background-color: var(--bg-mica-solid);
   padding: 24px 32px;
   overflow-y: auto;
@@ -213,6 +220,7 @@ body {
   font-size: 26px;
   font-weight: 600;
   letter-spacing: -0.2px;
+  white-space: nowrap;
 }
 
 .page-desc {
@@ -227,9 +235,11 @@ body {
 .explore-filter-bar {
   display: flex;
   align-items: center;
-  gap: 20px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
   margin-bottom: 20px;
-  padding: 12px 16px;
+  padding: 12px 18px;
   background-color: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-medium);
@@ -240,6 +250,7 @@ body {
   align-items: center;
   gap: 10px;
   font-size: 13px;
+  white-space: nowrap;
 }
 
 .winui-select {
@@ -299,6 +310,8 @@ body {
   font-weight: 500;
   cursor: pointer;
   box-shadow: 0 1px 2px rgba(0,0,0,0.12);
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: all 0.15s ease;
 }
 
@@ -341,6 +354,7 @@ body {
 .btn-icon {
   width: 14px;
   height: 14px;
+  flex-shrink: 0;
 }
 
 .winui-input {
@@ -368,6 +382,7 @@ body {
   display: inline-block;
   width: 40px;
   height: 20px;
+  flex-shrink: 0;
 }
 
 .winui-toggle input {
@@ -468,6 +483,9 @@ input:checked + .toggle-slider:before {
   color: var(--text-secondary);
   margin-top: 2px;
   margin-bottom: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .card-actions {
@@ -513,18 +531,45 @@ input:checked + .toggle-slider:before {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-medium);
   padding: 14px 20px;
+  gap: 16px;
 }
 
 .setting-info {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  flex: 1;
+  min-width: 0;
 }
 
-.setting-title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
-.setting-desc { font-size: 11px; color: var(--text-secondary); }
-.setting-val-tag { font-size: 12px; color: var(--text-tertiary); }
-.setting-control { display: flex; align-items: center; gap: 8px; }
+.setting-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.setting-desc {
+  font-size: 11px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.setting-val-tag {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  word-break: break-all;
+}
+
+.setting-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 .unit-label { font-size: 12px; color: var(--text-secondary); }
 
 /* About Section Badges */
@@ -537,6 +582,7 @@ input:checked + .toggle-slider:before {
   display: flex;
   gap: 8px;
   margin-top: 10px;
+  flex-wrap: wrap;
 }
 
 .tech-badge {
@@ -546,6 +592,7 @@ input:checked + .toggle-slider:before {
   border: 1px solid rgba(96, 205, 255, 0.25);
   color: var(--accent-color);
   border-radius: 12px;
+  white-space: nowrap;
 }
 
 .current-wp-banner {
@@ -559,6 +606,7 @@ input:checked + .toggle-slider:before {
   border-radius: var(--radius-medium);
   font-size: 12px;
   color: var(--text-secondary);
+  word-break: break-all;
 }
 
 /* Status Bar */
@@ -570,6 +618,7 @@ input:checked + .toggle-slider:before {
   align-items: center;
   padding: 0 16px;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .status-indicator {
@@ -577,9 +626,13 @@ input:checked + .toggle-slider:before {
   height: 6px;
   background-color: var(--accent-color);
   border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .status-msg {
   font-size: 11px;
   color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
