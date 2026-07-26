@@ -70,7 +70,7 @@
     </aside>
 
     <!-- Main Content Stage -->
-    <main class="winui-main">
+    <main class="winui-main" id="winui-main-scroll">
 
       <!-- Gallery Page -->
       <section id="tab-gallery" class="tab-page active">
@@ -86,7 +86,7 @@
         </header>
 
         <!-- 纯壁纸缩略图画廊卡片网格 -->
-        <div class="gallery-grid pure-thumb-grid" id="gallery-grid">
+        <div class="gallery-grid pure-thumb-grid ratio-uniform" id="gallery-grid">
           <!-- Local Gallery Cards generated dynamically -->
         </div>
 
@@ -97,7 +97,7 @@
         </div>
       </section>
 
-      <!-- Explore Page (在线壁纸列表 & 分页) -->
+      <!-- Explore Page (在线壁纸列表 & 分页 / 无限滚动) -->
       <section id="tab-explore" class="tab-page">
         <header class="page-header">
           <div>
@@ -119,21 +119,24 @@
           </div>
 
           <div class="filter-group" id="group-search">
-            <input type="text" class="winui-input" id="input-online-query" placeholder="输入分类搜索 (如 nature, city)..." style="width: 220px;" />
+            <input type="text" class="winui-input" id="input-online-query" placeholder="搜索关键词 (默认为空，推荐热图)..." style="width: 240px;" />
             <button class="winui-btn" id="btn-search-online">🔍 搜索</button>
           </div>
         </div>
 
         <!-- 纯壁纸缩略图在线网格 -->
-        <div class="gallery-grid pure-thumb-grid" id="online-grid">
+        <div class="gallery-grid pure-thumb-grid ratio-uniform" id="online-grid">
           <!-- Generated dynamically -->
         </div>
 
-        <!-- WinUI 3 分页条 Pagination Bar -->
+        <!-- WinUI 3 分页条 / 无限加载提示 -->
         <div class="pagination-bar" id="pagination-bar">
           <button class="winui-btn" id="btn-prev-page" disabled>◀ 上一页</button>
           <span class="page-info" id="page-info">第 1 页</span>
           <button class="winui-btn" id="btn-next-page">下一页 ▶</button>
+        </div>
+        <div class="infinite-loader" id="infinite-loader" style="display: none;">
+          <span>♾️ 滚动加载更多精彩壁纸中...</span>
         </div>
       </section>
 
@@ -142,18 +145,44 @@
         <header class="page-header">
           <div>
             <h1 class="page-title">软件设置</h1>
-            <p class="page-desc">管理偏好设置、API 密钥、缓存路径与自动化行为</p>
+            <p class="page-desc">管理加载模式、卡片展视比例、API 密钥、保存路径与自动化行为</p>
           </div>
         </header>
 
         <div class="settings-list">
           <div class="winui-setting-card">
             <div class="setting-info">
-              <span class="setting-title">默认搜索关键词</span>
-              <span class="setting-desc">用于在线图源分类抓取（如 nature, landscape, city）</span>
+              <span class="setting-title">在线壁纸加载模式</span>
+              <span class="setting-desc">选择【分页加载】(按钮切页) 或【无限滚动】(下拉自动加载更多)</span>
             </div>
             <div class="setting-control">
-              <input type="text" class="winui-input" id="input-config-query" style="width: 220px;" />
+              <select class="winui-select" id="select-config-loadmode">
+                <option value="pagination" selected>📄 分页加载 (上一页/下一页)</option>
+                <option value="infinite">♾️ 无限滚动 (下拉自动加载更多)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="winui-setting-card">
+            <div class="setting-info">
+              <span class="setting-title">壁纸卡片展示比例</span>
+              <span class="setting-desc">选择【统一 16:10 卡片比例】或【根据图片原始比例适应显示】</span>
+            </div>
+            <div class="setting-control">
+              <select class="winui-select" id="select-config-cardratio">
+                <option value="uniform" selected>📐 统一卡片比例 (16:10 整齐裁切)</option>
+                <option value="original">🖼️ 原始图片比例 (完整适应显示)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="winui-setting-card">
+            <div class="setting-info">
+              <span class="setting-title">默认搜索关键词</span>
+              <span class="setting-desc">留空表示无分类限制推荐全量热图；也可填写如 nature, landscape</span>
+            </div>
+            <div class="setting-control">
+              <input type="text" class="winui-input" id="input-config-query" placeholder="默认为空..." style="width: 220px;" />
             </div>
           </div>
 

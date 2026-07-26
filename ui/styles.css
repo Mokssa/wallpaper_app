@@ -48,7 +48,7 @@
   -webkit-user-select: none;
 }
 
-/* WinUI 3 Smooth Thin Scrollbar (原生极简细长隐形滚动条) */
+/* WinUI 3 Smooth Thin Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -65,7 +65,7 @@
   background: rgba(255, 255, 255, 0.36);
 }
 
-/* 前端容器基础透明配置 (为 Mica/Acrylic 视效留出透射通道) */
+/* 前端容器基础透明配置 */
 html, body {
   margin: 0;
   padding: 0;
@@ -80,7 +80,7 @@ html, body {
 }
 
 /* ==========================================================================
-   1) WinUI 3 极简 Window Titlebar (自定义标题栏与拖拽区)
+   1) WinUI 3 极简 Window Titlebar
    ========================================================================== */
 .fluent-titlebar {
   height: 36px;
@@ -365,7 +365,7 @@ html, body {
   color: #ffffff;
 }
 
-/* WinUI 3 Pagination Bar */
+/* WinUI 3 Pagination Bar & Infinite Loader */
 .pagination-bar {
   display: flex;
   align-items: center;
@@ -373,6 +373,13 @@ html, body {
   gap: 16px;
   margin-top: 24px;
   padding: 16px 0;
+}
+
+.infinite-loader {
+  text-align: center;
+  padding: 20px 0;
+  color: var(--text-secondary);
+  font-size: 13px;
 }
 
 .page-info {
@@ -468,7 +475,7 @@ html, body {
   border-bottom-color: var(--accent-color);
 }
 
-/* WinUI 3 Toggle Switch (4px Radius Rule) */
+/* WinUI 3 Toggle Switch */
 .winui-toggle {
   position: relative;
   display: inline-block;
@@ -516,7 +523,7 @@ input:checked + .toggle-slider:before {
 }
 
 /* ==========================================================================
-   4) Pure Wallpaper Thumbnail Cards (纯缩略图流线卡片 & 骨架屏动画)
+   4) Pure Wallpaper Thumbnail Cards & Ratio Modes (统一比例 vs 原始自适应比例)
    ========================================================================== */
 .gallery-grid {
   display: grid;
@@ -528,7 +535,6 @@ input:checked + .toggle-slider:before {
 
 .pure-thumb-card {
   position: relative;
-  height: 148px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--border-card);
   border-radius: var(--radius-card);
@@ -539,6 +545,26 @@ input:checked + .toggle-slider:before {
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
               border-color 0.2s ease, 
               box-shadow 0.2s ease;
+}
+
+/* 统一 16:10 卡片比例模式 (Uniform) */
+.gallery-grid.ratio-uniform .pure-thumb-card {
+  height: 148px;
+}
+
+.gallery-grid.ratio-uniform .pure-card-img {
+  object-fit: cover;
+}
+
+/* 原始图片比例适应模式 (Original) */
+.gallery-grid.ratio-original .pure-thumb-card {
+  height: auto;
+  min-height: 130px;
+}
+
+.gallery-grid.ratio-original .pure-card-img {
+  object-fit: contain;
+  background-color: rgba(0, 0, 0, 0.2);
 }
 
 /* 骨架屏加载微动画 (Skeleton Shimmer) */
@@ -559,11 +585,10 @@ input:checked + .toggle-slider:before {
   box-shadow: var(--shadow-flyout);
 }
 
-/* 纯壁纸大图：无遮罩无移入悬浮提示 */
+/* 纯壁纸大图 */
 .pure-card-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
   display: block;
   opacity: 0;
   transition: opacity 0.3s ease-in, transform 0.35s ease;
@@ -596,7 +621,7 @@ input:checked + .toggle-slider:before {
 .empty-desc { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
 
 /* ==========================================================================
-   5) WinUI 3 Wallpaper Details ContentDialog (壁纸详情大图对话框)
+   5) WinUI 3 Wallpaper Details ContentDialog
    ========================================================================== */
 .winui-modal-backdrop {
   position: fixed;

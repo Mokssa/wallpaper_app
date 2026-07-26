@@ -29,25 +29,29 @@ const invoke = async (cmd, args) => {
 
 // State
 let appConfig = {
-  query: "nature,wallpaper",
+  query: "",
   cache_dir: "cache/wallpapers",
   auto_update_interval_minutes: 60,
   auto_update_enabled: false,
   unsplash_access_key: "",
+  load_mode: "pagination",
+  card_ratio: "uniform",
 };
 
 let cachedWallpapers = [];
 let onlineWallpapers = [];
 let onlinePage = 1;
 const pageLimit = 12;
+let isInfiniteLoading = false;
 let currentDetailItem = null;
-let currentDetailType = 'online'; // 'local' | 'online'
+let currentDetailType = 'online';
 
 // DOM Elements
 const btnMinimize = document.getElementById('btn-minimize');
 const btnMaximize = document.getElementById('btn-maximize');
 const btnClose = document.getElementById('btn-close');
 
+const mainScrollEl = document.getElementById('winui-main-scroll');
 const navItems = document.querySelectorAll('.nav-item');
 const tabPages = document.querySelectorAll('.tab-page');
 const statusMsgEl = document.getElementById('status-msg');
@@ -65,11 +69,15 @@ const inputOnlineQuery = document.getElementById('input-online-query');
 const btnSearchOnline = document.getElementById('btn-search-online');
 const onlineGrid = document.getElementById('online-grid');
 
+const paginationBar = document.getElementById('pagination-bar');
+const infiniteLoader = document.getElementById('infinite-loader');
 const btnPrevPage = document.getElementById('btn-prev-page');
 const btnNextPage = document.getElementById('btn-next-page');
 const pageInfo = document.getElementById('page-info');
 
 // Settings DOM
+const selectConfigLoadmode = document.getElementById('select-config-loadmode');
+const selectConfigCardratio = document.getElementById('select-config-cardratio');
 const inputConfigQuery = document.getElementById('input-config-query');
 const inputConfigUnsplashKey = document.getElementById('input-config-unsplash-key');
 const labelCacheDir = document.getElementById('label-cache-dir');
@@ -173,21 +181,45 @@ async function loadConfig() {
 function updateConfigUI() {
   if (inputConfigQuery) inputConfigQuery.value = appConfig.query || '';
   if (inputOnlineQuery) inputOnlineQuery.value = appConfig.query || '';
+  if (selectConfigLoadmode) selectConfigLoadmode.value = appConfig.load_mode || 'pagination';
+  if (selectConfigCardratio) selectConfigCardratio.value = appConfig.card_ratio || 'uniform';
   if (inputConfigUnsplashKey) inputConfigUnsplashKey.value = appConfig.unsplash_access_key || '';
   if (labelCacheDir) labelCacheDir.textContent = appConfig.cache_dir || 'cache/wallpapers';
   if (inputConfigInterval) inputConfigInterval.value = appConfig.auto_update_interval_minutes || 60;
   if (checkConfigAutoupdate) checkConfigAutoupdate.checked = !!appConfig.auto_update_enabled;
+
+  applyDisplaySettings();
+}
+
+// Apply Card Ratio & Load Mode Settings
+function applyDisplaySettings() {
+  const isUniform = (appConfig.card_ratio !== 'original');
+  if (galleryGrid) {
+    galleryGrid.classList.toggle('ratio-uniform', isUniform);
+    galleryGrid.classList.toggle('ratio-original', !isUniform);
+  }
+  if (onlineGrid) {
+    onlineGrid.classList.toggle('ratio-uniform', isUniform);
+    onlineGrid.classList.toggle('ratio-original', !isUniform);
+  }
+
+  const isInfinite = (appConfig.load_mode === 'infinite');
+  if (paginationBar) paginationBar.style.display = isInfinite ? 'none' : 'flex';
+  if (infiniteLoader) infiniteLoader.style.display = isInfinite ? 'block' : 'none';
 }
 
 // Save Config
 async function saveConfig() {
   try {
-    appConfig.query = inputConfigQuery ? inputConfigQuery.value.trim() : appConfig.query;
+    appConfig.query = inputConfigQuery ? inputConfigQuery.value.trim() : "";
+    appConfig.load_mode = selectConfigLoadmode ? selectConfigLoadmode.value : "pagination";
+    appConfig.card_ratio = selectConfigCardratio ? selectConfigCardratio.value : "uniform";
     appConfig.unsplash_access_key = inputConfigUnsplashKey ? inputConfigUnsplashKey.value.trim() : (appConfig.unsplash_access_key || "");
     appConfig.auto_update_interval_minutes = inputConfigInterval ? parseInt(inputConfigInterval.value) || 60 : 60;
     appConfig.auto_update_enabled = checkConfigAutoupdate ? checkConfigAutoupdate.checked : false;
     
     await invoke('save_config', { config: appConfig });
+    applyDisplaySettings();
     setStatus('设置已保存');
   } catch (err) {
     setStatus(`保存设置失败: ${err}`);
@@ -307,17 +339,22 @@ async function loadCurrentWallpaper() {
   }
 }
 
-// Render Online Wallpapers Grid (Chromium 原生并发多线程加载，零延迟瞬间展现)
-function renderOnlineGrid(items) {
-  onlineWallpapers = Array.isArray(items) ? items : [];
-  onlineGrid.innerHTML = '';
+// Render Online Wallpapers Grid
+function renderOnlineGrid(items, append = false) {
+  const newItems = Array.isArray(items) ? items : [];
+  if (!append) {
+    onlineWallpapers = newItems;
+    onlineGrid.innerHTML = '';
+  } else {
+    onlineWallpapers = onlineWallpapers.concat(newItems);
+  }
 
   if (onlineWallpapers.length === 0) {
     onlineGrid.innerHTML = '<div class="empty-state" style="grid-column: 1 / -1;"><div class="empty-icon">🌐</div><h2 class="empty-title">未发现在线壁纸</h2><p class="empty-desc">请尝试更换图源、调整搜索关键词或检查网络连接！</p></div>';
     return;
   }
 
-  onlineWallpapers.forEach(item => {
+  newItems.forEach(item => {
     const card = document.createElement('div');
     card.className = 'pure-thumb-card skeleton';
 
@@ -331,7 +368,6 @@ function renderOnlineGrid(items) {
       img.classList.add('loaded');
     };
 
-    // 仅当某张单图直接加载受阻时按需懒加载代理
     img.onerror = async () => {
       try {
         const base64Data = await invoke('fetch_remote_image_base64', { url: item.thumb_url });
@@ -364,8 +400,8 @@ async function downloadAndSetOnlineAction(item) {
   }
 }
 
-// Load Online Wallpapers List
-async function loadOnlineWallpapers() {
+// Load Online Wallpapers List (支持分页与无限滚动追加)
+async function loadOnlineWallpapers(append = false) {
   const source = selectSource ? selectSource.value : 'picsum';
   const query = inputOnlineQuery ? inputOnlineQuery.value.trim() : '';
 
@@ -375,7 +411,9 @@ async function loadOnlineWallpapers() {
     if (pageInfo) pageInfo.textContent = `第 ${onlinePage} 页`;
     if (btnPrevPage) btnPrevPage.disabled = (onlinePage <= 1);
 
-    onlineGrid.innerHTML = '<div style="grid-column: 1 / -1; padding: 40px; text-align: center; color: var(--text-secondary);">⏳ 正在拉取在线壁纸...</div>';
+    if (!append) {
+      onlineGrid.innerHTML = '<div style="grid-column: 1 / -1; padding: 40px; text-align: center; color: var(--text-secondary);">⏳ 正在拉取在线壁纸...</div>';
+    }
 
     const list = await invoke('fetch_online_wallpapers', {
       source,
@@ -385,13 +423,39 @@ async function loadOnlineWallpapers() {
     });
 
     const safeList = Array.isArray(list) ? list : [];
-    renderOnlineGrid(safeList);
-    setStatus(`已成功加载 ${source} 壁纸第 ${onlinePage} 页 (共 ${safeList.length} 张)`);
+    renderOnlineGrid(safeList, append);
+    setStatus(`已成功加载 ${source} 壁纸第 ${onlinePage} 页 (共 ${onlineWallpapers.length} 张)`);
   } catch (err) {
     console.error('Failed to load online wallpapers:', err);
     setStatus(`在线壁纸加载失败: ${err}`);
-    renderOnlineGrid([]);
+    if (!append) renderOnlineGrid([]);
+  } finally {
+    isInfiniteLoading = false;
   }
+}
+
+// Infinite Scroll Listener
+function setupInfiniteScroll() {
+  if (!mainScrollEl) return;
+  
+  mainScrollEl.addEventListener('scroll', () => {
+    if (appConfig.load_mode !== 'infinite') return;
+    
+    const exploreTab = document.getElementById('tab-explore');
+    if (!exploreTab || !exploreTab.classList.contains('active')) return;
+
+    const scrollTop = mainScrollEl.scrollTop;
+    const clientHeight = mainScrollEl.clientHeight;
+    const scrollHeight = mainScrollEl.scrollHeight;
+
+    if (scrollTop + clientHeight >= scrollHeight - 120) {
+      if (!isInfiniteLoading) {
+        isInfiniteLoading = true;
+        onlinePage++;
+        loadOnlineWallpapers(true);
+      }
+    }
+  });
 }
 
 // Escaping
@@ -411,6 +475,8 @@ function escapeHtml(str) {
 // Attach Event Listeners
 function setupEvents() {
   setupWindowControls();
+  setupInfiniteScroll();
+  
   if (btnRefreshGallery) btnRefreshGallery.addEventListener('click', loadWallpapers);
   if (btnBrowseDir) btnBrowseDir.addEventListener('click', pickCacheDir);
 
@@ -419,14 +485,14 @@ function setupEvents() {
       const showSearch = (selectSource.value === 'wallhaven' || selectSource.value === 'unsplash' || selectSource.value === 'picsum');
       if (groupSearch) groupSearch.style.display = showSearch ? 'flex' : 'none';
       onlinePage = 1;
-      loadOnlineWallpapers();
+      loadOnlineWallpapers(false);
     });
   }
 
   if (btnSearchOnline) {
     btnSearchOnline.addEventListener('click', () => {
       onlinePage = 1;
-      loadOnlineWallpapers();
+      loadOnlineWallpapers(false);
     });
   }
 
@@ -434,7 +500,7 @@ function setupEvents() {
     btnPrevPage.addEventListener('click', () => {
       if (onlinePage > 1) {
         onlinePage--;
-        loadOnlineWallpapers();
+        loadOnlineWallpapers(false);
       }
     });
   }
@@ -442,10 +508,12 @@ function setupEvents() {
   if (btnNextPage) {
     btnNextPage.addEventListener('click', () => {
       onlinePage++;
-      loadOnlineWallpapers();
+      loadOnlineWallpapers(false);
     });
   }
 
+  if (selectConfigLoadmode) selectConfigLoadmode.addEventListener('change', saveConfig);
+  if (selectConfigCardratio) selectConfigCardratio.addEventListener('change', saveConfig);
   if (inputConfigQuery) inputConfigQuery.addEventListener('change', saveConfig);
   if (inputConfigUnsplashKey) inputConfigUnsplashKey.addEventListener('change', saveConfig);
   if (inputConfigInterval) inputConfigInterval.addEventListener('change', saveConfig);
@@ -501,6 +569,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupEvents();
   await loadConfig();
   await loadWallpapers();
-  await loadOnlineWallpapers();
+  await loadOnlineWallpapers(false);
   await loadCurrentWallpaper();
 });
