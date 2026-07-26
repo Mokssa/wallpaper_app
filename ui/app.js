@@ -1,10 +1,10 @@
 // ==========================================================================
-// WallpaperApp Client Script (Tauri v2 IPC & Online Pagination)
+// WallpaperApp Client Script (Tauri v2 IPC, Base64 Image & Directory Picker)
 // ==========================================================================
 
 const invoke = window.__TAURI__ ? window.__TAURI__.core.invoke : async (cmd, args) => {
   console.log(`[Mock Invoke] ${cmd}`, args);
-  return [];
+  return null;
 };
 
 // State
@@ -45,6 +45,7 @@ const pageInfo = document.getElementById('page-info');
 // Settings DOM
 const inputConfigQuery = document.getElementById('input-config-query');
 const labelCacheDir = document.getElementById('label-cache-dir');
+const btnBrowseDir = document.getElementById('btn-browse-dir');
 const inputConfigInterval = document.getElementById('input-config-interval');
 const checkConfigAutoupdate = document.getElementById('check-config-autoupdate');
 const currentWpText = document.getElementById('current-wp-text');
@@ -69,9 +70,6 @@ function setupNavigation() {
       const targetPage = document.getElementById(`tab-${tabName}`);
       if (targetPage) {
         targetPage.classList.add('active');
-        if (tabName === 'explore' && onlineWallpapers.length === 0) {
-          loadOnlineWallpapers();
-        }
       }
     });
   });
@@ -113,8 +111,24 @@ async function saveConfig() {
   }
 }
 
-// Render Local Gallery
-function renderGallery(items) {
+// Pick Cache Directory
+async function pickCacheDir() {
+  try {
+    const selected = await invoke('select_cache_dir');
+    if (selected) {
+      appConfig.cache_dir = selected;
+      if (labelCacheDir) labelCacheDir.textContent = selected;
+      await invoke('save_config', { config: appConfig });
+      setStatus(`保存路径已更新为: ${selected}`);
+      await loadWallpapers();
+    }
+  } catch (err) {
+    setStatus(`选择路径失败: ${err}`);
+  }
+}
+
+// Render Local Gallery with Base64 Data URL Image Loading
+async function renderGallery(items) {
   cachedWallpapers = items || [];
   galleryGrid.innerHTML = '';
   
@@ -131,15 +145,22 @@ function renderGallery(items) {
   galleryEmptyState.style.display = 'none';
   galleryGrid.style.display = 'grid';
 
-  cachedWallpapers.forEach(item => {
+  for (const item of cachedWallpapers) {
     const card = document.createElement('div');
     card.className = 'gallery-card';
 
-    const fileUri = window.__TAURI__ ? window.__TAURI__.core.convertFileSrc(item.file_path) : item.file_path;
+    // Get Base64 image data url for 100% reliable local image rendering
+    let imgSrc = '';
+    try {
+      imgSrc = await invoke('read_file_data_url', { filePath: item.file_path });
+    } catch (e) {
+      console.warn('Failed to read image data url:', e);
+    }
+    if (!imgSrc) imgSrc = item.file_path;
 
     card.innerHTML = `
       <div class="card-thumb-wrap">
-        <img class="card-thumb" src="${fileUri}" alt="${escapeHtml(item.title)}" loading="lazy" />
+        <img class="card-thumb" src="${imgSrc}" alt="${escapeHtml(item.title)}" loading="lazy" />
       </div>
       <div class="card-content">
         <div class="card-item-title" title="${escapeHtml(item.title)}">${escapeHtml(item.title)}</div>
@@ -176,14 +197,14 @@ function renderGallery(items) {
     });
 
     galleryGrid.appendChild(card);
-  });
+  }
 }
 
 // Load Local Wallpapers
 async function loadWallpapers() {
   try {
     const items = await invoke('get_cached_wallpapers');
-    renderGallery(items);
+    await renderGallery(items);
   } catch (err) {
     setStatus(`获取本地壁纸失败: ${err}`);
   }
@@ -296,6 +317,7 @@ function escapeHtml(str) {
 // Attach Event Listeners
 function setupEvents() {
   if (btnRefreshGallery) btnRefreshGallery.addEventListener('click', loadWallpapers);
+  if (btnBrowseDir) btnBrowseDir.addEventListener('click', pickCacheDir);
 
   if (selectSource) {
     selectSource.addEventListener('change', () => {
@@ -340,5 +362,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupEvents();
   await loadConfig();
   await loadWallpapers();
+  await loadOnlineWallpapers();
   await loadCurrentWallpaper();
 });

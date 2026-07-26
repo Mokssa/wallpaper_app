@@ -9,6 +9,7 @@ use config::AppConfig;
 use downloader::{OnlineWallpaper, WallpaperDownloader, WallpaperItem};
 use wallpaper_setter::WallpaperSetter;
 
+use base64::Engine;
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -20,6 +21,32 @@ fn get_config() -> AppConfig {
 #[tauri::command]
 fn save_config(config: AppConfig) -> Result<(), String> {
     config.save().map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn select_cache_dir() -> Option<String> {
+    let folder = rfd::FileDialog::new()
+        .set_title("选择壁纸保存目录")
+        .pick_folder()?;
+    Some(folder.to_string_lossy().to_string())
+}
+
+#[tauri::command]
+fn read_file_data_url(file_path: String) -> Option<String> {
+    let path = Path::new(&file_path);
+    if path.exists() {
+        if let Ok(bytes) = fs::read(path) {
+            let encoded = base64::engine::general_purpose::STANDARD.encode(bytes);
+            let ext = path.extension().and_then(|s| s.to_str()).unwrap_or("jpg");
+            let mime = match ext.to_lowercase().as_str() {
+                "png" => "image/png",
+                "webp" => "image/webp",
+                _ => "image/jpeg",
+            };
+            return Some(format!("data:{};base64,{}", mime, encoded));
+        }
+    }
+    None
 }
 
 #[tauri::command]
@@ -97,6 +124,8 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             get_config,
             save_config,
+            select_cache_dir,
+            read_file_data_url,
             get_cached_wallpapers,
             fetch_online_wallpapers,
             download_and_set_online_wallpaper,

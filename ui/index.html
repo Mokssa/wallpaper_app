@@ -142,13 +142,14 @@
             </div>
           </div>
 
+          <!-- 自定义选择路径控制卡片 -->
           <div class="winui-setting-card">
             <div class="setting-info">
-              <span class="setting-title">本地缓存路径</span>
-              <span class="setting-desc">已下载高清壁纸与元数据的保存目录</span>
+              <span class="setting-title">本地保存路径</span>
+              <span class="setting-desc" id="label-cache-dir">cache/wallpapers</span>
             </div>
             <div class="setting-control">
-              <span class="setting-val-tag" id="label-cache-dir">cache/wallpapers</span>
+              <button class="winui-btn" id="btn-browse-dir">📂 选择文件夹...</button>
             </div>
           </div>
 
@@ -176,7 +177,7 @@
             </div>
           </div>
 
-          <!-- 关于应用 (About Section - 移动标识至此处) -->
+          <!-- 关于应用 (About Section) -->
           <div class="winui-setting-card about-card">
             <div class="setting-info">
               <span class="setting-title">关于 壁纸随心换 (WallpaperApp)</span>
