@@ -21,7 +21,7 @@
         </div>
         <div class="app-title-group">
           <span class="app-title">壁纸随心换</span>
-          <span class="app-subtitle">WinUI 3 Native Edition</span>
+          <span class="app-subtitle">WallpaperApp</span>
         </div>
       </div>
 
@@ -54,10 +54,6 @@
           <span class="nav-label">软件设置</span>
         </button>
       </nav>
-
-      <div class="nav-footer">
-        <span class="version-tag">Tauri v2 • WinUI 3 Spec</span>
-      </div>
     </aside>
 
     <!-- Main Content Stage -->
@@ -77,7 +73,7 @@
         </header>
 
         <div class="gallery-grid" id="gallery-grid">
-          <!-- Gallery Cards generated dynamically -->
+          <!-- Local Gallery Cards generated dynamically -->
         </div>
 
         <div class="empty-state" id="gallery-empty-state" style="display: none;">
@@ -87,58 +83,42 @@
         </div>
       </section>
 
-      <!-- Explore Page -->
+      <!-- Explore Page (在线壁纸列表 & 分页) -->
       <section id="tab-explore" class="tab-page">
         <header class="page-header">
           <div>
-            <h1 class="page-title">在线发现新壁纸</h1>
-            <p class="page-desc">精选微软 Bing 官方每日故事图景与 Unsplash 4K 摄影社区</p>
+            <h1 class="page-title">在线壁纸图源</h1>
+            <p class="page-desc">在线浏览 Bing 每日壁纸、Picsum 4K 摄影大图与 Wallhaven 壁纸墙</p>
           </div>
         </header>
 
-        <div class="explore-cards">
-          <!-- Bing Card -->
-          <div class="winui-card explore-card">
-            <div class="card-badge">Bing Official</div>
-            <div class="card-header">
-              <div class="card-icon-circle bing">🌞</div>
-              <div>
-                <h3 class="card-title">Bing 每日壁纸</h3>
-                <p class="card-subtitle">微软官方每日发布的故事大片</p>
-              </div>
-            </div>
-            <p class="card-body">自动抓取微软 Bing 官方每日最新桌面高清摄影图景。</p>
-            <div class="card-footer">
-              <button class="winui-btn winui-btn-primary" id="btn-fetch-bing">
-                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                下载今日必应美图
-              </button>
-            </div>
+        <!-- 工具栏与图源切换 -->
+        <div class="explore-filter-bar">
+          <div class="filter-group">
+            <label for="select-source">壁纸图源：</label>
+            <select class="winui-select" id="select-source">
+              <option value="picsum" selected>📷 Picsum 4K 摄影大图</option>
+              <option value="bing">🌞 Bing 官方每日壁纸</option>
+              <option value="wallhaven">🌌 Wallhaven 壁纸社区</option>
+            </select>
           </div>
 
-          <!-- Unsplash Card -->
-          <div class="winui-card explore-card">
-            <div class="card-badge">Unsplash 4K</div>
-            <div class="card-header">
-              <div class="card-icon-circle unsplash">🌌</div>
-              <div>
-                <h3 class="card-title">Unsplash 随机美图</h3>
-                <p class="card-subtitle">全球顶级独立摄影师作品社区</p>
-              </div>
-            </div>
-            <div class="card-body">
-              <div class="winui-field-group">
-                <label for="input-explore-query">检索主题关键词：</label>
-                <input type="text" class="winui-input" id="input-explore-query" placeholder="e.g. nature, architecture" />
-              </div>
-            </div>
-            <div class="card-footer">
-              <button class="winui-btn winui-btn-primary" id="btn-fetch-unsplash">
-                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3h5v5"/><path d="M4 20L21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>
-                随机匹配一张 4K 美图
-              </button>
-            </div>
+          <div class="filter-group" id="group-search" style="display: none;">
+            <input type="text" class="winui-input" id="input-online-query" placeholder="输入分类搜索 (如 nature, city)..." style="width: 220px;" />
+            <button class="winui-btn" id="btn-search-online">🔍 搜索</button>
           </div>
+        </div>
+
+        <!-- 在线壁纸列表网格 -->
+        <div class="gallery-grid" id="online-grid">
+          <!-- Generated dynamically -->
+        </div>
+
+        <!-- WinUI 3 分页条 Pagination Bar -->
+        <div class="pagination-bar" id="pagination-bar">
+          <button class="winui-btn" id="btn-prev-page" disabled>◀ 上一页</button>
+          <span class="page-info" id="page-info">第 1 页</span>
+          <button class="winui-btn" id="btn-next-page">下一页 ▶</button>
         </div>
       </section>
 
@@ -147,7 +127,7 @@
         <header class="page-header">
           <div>
             <h1 class="page-title">软件设置</h1>
-            <p class="page-desc">管理搜索偏好、下载缓存存储与自动化轮换</p>
+            <p class="page-desc">管理偏好设置、缓存路径、自动化行为与应用信息</p>
           </div>
         </header>
 
@@ -155,7 +135,7 @@
           <div class="winui-setting-card">
             <div class="setting-info">
               <span class="setting-title">默认搜索关键词</span>
-              <span class="setting-desc">用于 Unsplash 分类抓取（如 nature, landscape, city）</span>
+              <span class="setting-desc">用于在线图源分类抓取（如 nature, landscape, city）</span>
             </div>
             <div class="setting-control">
               <input type="text" class="winui-input" id="input-config-query" style="width: 220px;" />
@@ -193,6 +173,20 @@
                 <input type="checkbox" id="check-config-autoupdate" />
                 <span class="toggle-slider"></span>
               </label>
+            </div>
+          </div>
+
+          <!-- 关于应用 (About Section - 移动标识至此处) -->
+          <div class="winui-setting-card about-card">
+            <div class="setting-info">
+              <span class="setting-title">关于 壁纸随心换 (WallpaperApp)</span>
+              <span class="setting-desc">基于 Tauri v2 + Rust 构建的原生 Windows 11 WinUI 3 极速壁纸切换客户端</span>
+              <div class="about-tech-stack">
+                <span class="tech-badge">Rust 1.96</span>
+                <span class="tech-badge">Tauri 2.0</span>
+                <span class="tech-badge">WinUI 3 Fluent Spec</span>
+                <span class="tech-badge">v1.0.0</span>
+              </div>
             </div>
           </div>
         </div>

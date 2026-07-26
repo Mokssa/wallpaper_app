@@ -6,7 +6,7 @@ mod downloader;
 mod wallpaper_setter;
 
 use config::AppConfig;
-use downloader::{WallpaperDownloader, WallpaperItem};
+use downloader::{OnlineWallpaper, WallpaperDownloader, WallpaperItem};
 use wallpaper_setter::WallpaperSetter;
 
 use std::fs;
@@ -49,21 +49,22 @@ fn get_cached_wallpapers() -> Vec<WallpaperItem> {
 }
 
 #[tauri::command]
-async fn fetch_bing_wallpaper() -> Result<WallpaperItem, String> {
-    let config = AppConfig::load();
-    let target_dir = PathBuf::from(&config.cache_dir);
-    WallpaperDownloader::fetch_bing_wallpaper(&target_dir)
+async fn fetch_online_wallpapers(source: String, query: String, page: usize, limit: usize) -> Result<Vec<OnlineWallpaper>, String> {
+    WallpaperDownloader::fetch_online_list(&source, &query, page, limit)
         .await
         .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-async fn fetch_unsplash_wallpaper(query: String) -> Result<WallpaperItem, String> {
+async fn download_and_set_online_wallpaper(item: OnlineWallpaper) -> Result<WallpaperItem, String> {
     let config = AppConfig::load();
     let target_dir = PathBuf::from(&config.cache_dir);
-    WallpaperDownloader::fetch_unsplash_wallpaper(&target_dir, &query)
+    let downloaded = WallpaperDownloader::download_online_wallpaper(&item, &target_dir)
         .await
-        .map_err(|e| e.to_string())
+        .map_err(|e| e.to_string())?;
+
+    WallpaperSetter::set_wallpaper(&downloaded.file_path)?;
+    Ok(downloaded)
 }
 
 #[tauri::command]
@@ -97,8 +98,8 @@ fn main() {
             get_config,
             save_config,
             get_cached_wallpapers,
-            fetch_bing_wallpaper,
-            fetch_unsplash_wallpaper,
+            fetch_online_wallpapers,
+            download_and_set_online_wallpaper,
             set_desktop_wallpaper,
             delete_wallpaper,
             get_current_wallpaper

@@ -1,43 +1,55 @@
 // ==========================================================================
-// WallpaperApp Client Script (Tauri v2 IPC)
+// WallpaperApp Client Script (Tauri v2 IPC & Online Pagination)
 // ==========================================================================
 
 const invoke = window.__TAURI__ ? window.__TAURI__.core.invoke : async (cmd, args) => {
   console.log(`[Mock Invoke] ${cmd}`, args);
-  return null;
+  return [];
 };
 
 // State
 let appConfig = {
-  query: "nature,wallpaper,architecture",
+  query: "nature,wallpaper",
   cache_dir: "cache/wallpapers",
   auto_update_interval_minutes: 60,
   auto_update_enabled: false,
 };
 
 let cachedWallpapers = [];
+let onlineWallpapers = [];
+let onlinePage = 1;
+const pageLimit = 12;
 
 // DOM Elements
 const navItems = document.querySelectorAll('.nav-item');
 const tabPages = document.querySelectorAll('.tab-page');
 const statusMsgEl = document.getElementById('status-msg');
 
+// Local Gallery DOM
 const galleryGrid = document.getElementById('gallery-grid');
 const galleryEmptyState = document.getElementById('gallery-empty-state');
 const galleryCountText = document.getElementById('gallery-count-text');
 const btnRefreshGallery = document.getElementById('btn-refresh-gallery');
 
-const btnFetchBing = document.getElementById('btn-fetch-bing');
-const btnFetchUnsplash = document.getElementById('btn-fetch-unsplash');
-const inputExploreQuery = document.getElementById('input-explore-query');
+// Online Explore DOM
+const selectSource = document.getElementById('select-source');
+const groupSearch = document.getElementById('group-search');
+const inputOnlineQuery = document.getElementById('input-online-query');
+const btnSearchOnline = document.getElementById('btn-search-online');
+const onlineGrid = document.getElementById('online-grid');
 
+const btnPrevPage = document.getElementById('btn-prev-page');
+const btnNextPage = document.getElementById('btn-next-page');
+const pageInfo = document.getElementById('page-info');
+
+// Settings DOM
 const inputConfigQuery = document.getElementById('input-config-query');
 const labelCacheDir = document.getElementById('label-cache-dir');
 const inputConfigInterval = document.getElementById('input-config-interval');
 const checkConfigAutoupdate = document.getElementById('check-config-autoupdate');
 const currentWpText = document.getElementById('current-wp-text');
 
-// Helper to set status
+// Helper
 function setStatus(msg) {
   if (statusMsgEl) {
     statusMsgEl.textContent = msg;
@@ -57,6 +69,9 @@ function setupNavigation() {
       const targetPage = document.getElementById(`tab-${tabName}`);
       if (targetPage) {
         targetPage.classList.add('active');
+        if (tabName === 'explore' && onlineWallpapers.length === 0) {
+          loadOnlineWallpapers();
+        }
       }
     });
   });
@@ -78,7 +93,7 @@ async function loadConfig() {
 // Update Config UI
 function updateConfigUI() {
   if (inputConfigQuery) inputConfigQuery.value = appConfig.query || '';
-  if (inputExploreQuery) inputExploreQuery.value = appConfig.query || '';
+  if (inputOnlineQuery) inputOnlineQuery.value = appConfig.query || '';
   if (labelCacheDir) labelCacheDir.textContent = appConfig.cache_dir || 'cache/wallpapers';
   if (inputConfigInterval) inputConfigInterval.value = appConfig.auto_update_interval_minutes || 60;
   if (checkConfigAutoupdate) checkConfigAutoupdate.checked = !!appConfig.auto_update_enabled;
@@ -98,7 +113,7 @@ async function saveConfig() {
   }
 }
 
-// Render Gallery
+// Render Local Gallery
 function renderGallery(items) {
   cachedWallpapers = items || [];
   galleryGrid.innerHTML = '';
@@ -120,7 +135,6 @@ function renderGallery(items) {
     const card = document.createElement('div');
     card.className = 'gallery-card';
 
-    // File URI convert for Webview2
     const fileUri = window.__TAURI__ ? window.__TAURI__.core.convertFileSrc(item.file_path) : item.file_path;
 
     card.innerHTML = `
@@ -137,7 +151,6 @@ function renderGallery(items) {
       </div>
     `;
 
-    // Event listeners
     const btnSet = card.querySelector('.btn-set-wp');
     const btnDelete = card.querySelector('.btn-delete-wp');
 
@@ -166,19 +179,17 @@ function renderGallery(items) {
   });
 }
 
-// Load Wallpapers
+// Load Local Wallpapers
 async function loadWallpapers() {
   try {
-    setStatus('正在获取缓存壁纸列表...');
     const items = await invoke('get_cached_wallpapers');
     renderGallery(items);
-    setStatus('壁纸列表已更新');
   } catch (err) {
-    setStatus(`获取壁纸失败: ${err}`);
+    setStatus(`获取本地壁纸失败: ${err}`);
   }
 }
 
-// Load Current Wallpaper
+// Load Current Wallpaper Banner
 async function loadCurrentWallpaper() {
   try {
     const wp = await invoke('get_current_wallpaper');
@@ -190,34 +201,81 @@ async function loadCurrentWallpaper() {
   }
 }
 
-// Fetch Bing Wallpaper
-async function fetchBing() {
-  try {
-    btnFetchBing.disabled = true;
-    setStatus('正在从 Bing 获取每日壁纸...');
-    const item = await invoke('fetch_bing_wallpaper');
-    setStatus(`成功下载 Bing 壁纸: ${item.title}`);
-    await loadWallpapers();
-  } catch (err) {
-    setStatus(`获取 Bing 壁纸失败: ${err}`);
-  } finally {
-    btnFetchBing.disabled = false;
+// Render Online Wallpapers (Grid & Pagination)
+function renderOnlineGrid(items) {
+  onlineWallpapers = items || [];
+  onlineGrid.innerHTML = '';
+
+  if (onlineWallpapers.length === 0) {
+    onlineGrid.innerHTML = '<div class="empty-state" style="grid-column: 1 / -1;"><div class="empty-icon">🌐</div><h2 class="empty-title">未发现在线壁纸</h2><p class="empty-desc">请尝试更换分类或检查网络连接！</p></div>';
+    return;
   }
+
+  onlineWallpapers.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'gallery-card';
+
+    card.innerHTML = `
+      <div class="card-thumb-wrap">
+        <img class="card-thumb" src="${item.thumb_url}" alt="${escapeHtml(item.title)}" loading="lazy" />
+      </div>
+      <div class="card-content">
+        <div class="card-item-title" title="${escapeHtml(item.title)}">${escapeHtml(item.title)}</div>
+        <div class="card-item-date">👤 ${escapeHtml(item.author)} • ${escapeHtml(item.source)}</div>
+        <div class="card-actions">
+          <button class="winui-btn winui-btn-primary btn-apply-online">🖥 设为壁纸</button>
+        </div>
+      </div>
+    `;
+
+    const btnApply = card.querySelector('.btn-apply-online');
+    btnApply.addEventListener('click', async () => {
+      try {
+        btnApply.disabled = true;
+        btnApply.textContent = '⏳ 下载并应用中...';
+        setStatus(`正在下载并应用壁纸: ${item.title}...`);
+        
+        await invoke('download_and_set_online_wallpaper', { item });
+        
+        setStatus(`成功应用壁纸: ${item.title}`);
+        await loadWallpapers();
+        await loadCurrentWallpaper();
+      } catch (err) {
+        setStatus(`下载应用壁纸失败: ${err}`);
+      } finally {
+        btnApply.disabled = false;
+        btnApply.textContent = '🖥 设为壁纸';
+      }
+    });
+
+    onlineGrid.appendChild(card);
+  });
 }
 
-// Fetch Unsplash Wallpaper
-async function fetchUnsplash() {
+// Load Online Wallpapers List with Pagination
+async function loadOnlineWallpapers() {
   try {
-    btnFetchUnsplash.disabled = true;
-    const query = inputExploreQuery ? inputExploreQuery.value.trim() : appConfig.query;
-    setStatus(`正在从 Unsplash 匹配【${query}】壁纸...`);
-    const item = await invoke('fetch_unsplash_wallpaper', { query });
-    setStatus(`成功下载 Unsplash 壁纸: ${item.title}`);
-    await loadWallpapers();
+    const source = selectSource ? selectSource.value : 'picsum';
+    const query = inputOnlineQuery ? inputOnlineQuery.value.trim() : '';
+
+    setStatus(`正在获取 ${source} 壁纸列表（第 ${onlinePage} 页）...`);
+    
+    // Update pagination UI
+    if (pageInfo) pageInfo.textContent = `第 ${onlinePage} 页`;
+    if (btnPrevPage) btnPrevPage.disabled = (onlinePage <= 1);
+
+    const list = await invoke('fetch_online_wallpapers', {
+      source,
+      query,
+      page: onlinePage,
+      limit: pageLimit,
+    });
+
+    renderOnlineGrid(list);
+    setStatus(`已加载 ${source} 壁纸第 ${onlinePage} 页 (共 ${list.length} 张)`);
   } catch (err) {
-    setStatus(`获取 Unsplash 壁纸失败: ${err}`);
-  } finally {
-    btnFetchUnsplash.disabled = false;
+    setStatus(`在线壁纸加载失败: ${err}`);
+    renderOnlineGrid([]);
   }
 }
 
@@ -238,19 +296,42 @@ function escapeHtml(str) {
 // Attach Event Listeners
 function setupEvents() {
   if (btnRefreshGallery) btnRefreshGallery.addEventListener('click', loadWallpapers);
-  if (btnFetchBing) btnFetchBing.addEventListener('click', fetchBing);
-  if (btnFetchUnsplash) btnFetchUnsplash.addEventListener('click', fetchUnsplash);
+
+  if (selectSource) {
+    selectSource.addEventListener('change', () => {
+      const isWallhaven = (selectSource.value === 'wallhaven');
+      if (groupSearch) groupSearch.style.display = isWallhaven ? 'flex' : 'none';
+      onlinePage = 1;
+      loadOnlineWallpapers();
+    });
+  }
+
+  if (btnSearchOnline) {
+    btnSearchOnline.addEventListener('click', () => {
+      onlinePage = 1;
+      loadOnlineWallpapers();
+    });
+  }
+
+  if (btnPrevPage) {
+    btnPrevPage.addEventListener('click', () => {
+      if (onlinePage > 1) {
+        onlinePage--;
+        loadOnlineWallpapers();
+      }
+    });
+  }
+
+  if (btnNextPage) {
+    btnNextPage.addEventListener('click', () => {
+      onlinePage++;
+      loadOnlineWallpapers();
+    });
+  }
 
   if (inputConfigQuery) inputConfigQuery.addEventListener('change', saveConfig);
   if (inputConfigInterval) inputConfigInterval.addEventListener('change', saveConfig);
   if (checkConfigAutoupdate) checkConfigAutoupdate.addEventListener('change', saveConfig);
-
-  if (inputExploreQuery) {
-    inputExploreQuery.addEventListener('change', () => {
-      if (inputConfigQuery) inputConfigQuery.value = inputExploreQuery.value;
-      saveConfig();
-    });
-  }
 }
 
 // Initialization
