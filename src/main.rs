@@ -50,6 +50,13 @@ fn read_file_data_url(file_path: String) -> Option<String> {
 }
 
 #[tauri::command]
+async fn fetch_remote_image_base64(url: String) -> Result<String, String> {
+    WallpaperDownloader::fetch_image_as_base64(&url)
+        .await
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 fn get_cached_wallpapers() -> Vec<WallpaperItem> {
     let config = AppConfig::load();
     let cache_dir = Path::new(&config.cache_dir);
@@ -126,6 +133,7 @@ fn main() {
             save_config,
             select_cache_dir,
             read_file_data_url,
+            fetch_remote_image_base64,
             get_cached_wallpapers,
             fetch_online_wallpapers,
             download_and_set_online_wallpaper,

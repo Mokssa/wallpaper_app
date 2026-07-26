@@ -1,5 +1,5 @@
 // ==========================================================================
-// WallpaperApp Client Script (Tauri v2 IPC, Base64 Image & Directory Picker)
+// WallpaperApp Client Script (Tauri v2 IPC & Image Auto-Proxy Fix)
 // ==========================================================================
 
 const invoke = window.__TAURI__ ? window.__TAURI__.core.invoke : async (cmd, args) => {
@@ -50,7 +50,7 @@ const inputConfigInterval = document.getElementById('input-config-interval');
 const checkConfigAutoupdate = document.getElementById('check-config-autoupdate');
 const currentWpText = document.getElementById('current-wp-text');
 
-// Helper
+// Helper to set status
 function setStatus(msg) {
   if (statusMsgEl) {
     statusMsgEl.textContent = msg;
@@ -127,7 +127,7 @@ async function pickCacheDir() {
   }
 }
 
-// Render Local Gallery with Base64 Data URL Image Loading
+// Render Local Gallery
 async function renderGallery(items) {
   cachedWallpapers = items || [];
   galleryGrid.innerHTML = '';
@@ -149,7 +149,6 @@ async function renderGallery(items) {
     const card = document.createElement('div');
     card.className = 'gallery-card';
 
-    // Get Base64 image data url for 100% reliable local image rendering
     let imgSrc = '';
     try {
       imgSrc = await invoke('read_file_data_url', { filePath: item.file_path });
@@ -222,7 +221,7 @@ async function loadCurrentWallpaper() {
   }
 }
 
-// Render Online Wallpapers (Grid & Pagination)
+// Render Online Wallpapers Grid with Auto-Proxy Fix
 function renderOnlineGrid(items) {
   onlineWallpapers = items || [];
   onlineGrid.innerHTML = '';
@@ -248,6 +247,21 @@ function renderOnlineGrid(items) {
         </div>
       </div>
     `;
+
+    const imgEl = card.querySelector('.card-thumb');
+    
+    // 跨域/重定向图片加载失败时，自动通过 Rust 后端拉取 Base64 Data URL 双保险！
+    imgEl.addEventListener('error', async () => {
+      console.warn('Image direct load blocked, fetching through Rust backend proxy:', item.thumb_url);
+      try {
+        const base64Data = await invoke('fetch_remote_image_base64', { url: item.thumb_url });
+        if (base64Data) {
+          imgEl.src = base64Data;
+        }
+      } catch (e) {
+        console.error('Proxy image fetch error:', e);
+      }
+    });
 
     const btnApply = card.querySelector('.btn-apply-online');
     btnApply.addEventListener('click', async () => {
@@ -281,9 +295,11 @@ async function loadOnlineWallpapers() {
 
     setStatus(`正在获取 ${source} 壁纸列表（第 ${onlinePage} 页）...`);
     
-    // Update pagination UI
     if (pageInfo) pageInfo.textContent = `第 ${onlinePage} 页`;
     if (btnPrevPage) btnPrevPage.disabled = (onlinePage <= 1);
+
+    // Skeleton loader
+    onlineGrid.innerHTML = '<div style="grid-column: 1 / -1; padding: 40px; text-align: center; color: var(--text-secondary);">⏳ 正在通过 Rust 高速引擎拉取在线壁纸...</div>';
 
     const list = await invoke('fetch_online_wallpapers', {
       source,
@@ -293,7 +309,7 @@ async function loadOnlineWallpapers() {
     });
 
     renderOnlineGrid(list);
-    setStatus(`已加载 ${source} 壁纸第 ${onlinePage} 页 (共 ${list.length} 张)`);
+    setStatus(`已成功加载 ${source} 壁纸第 ${onlinePage} 页 (共 ${list.length} 张)`);
   } catch (err) {
     setStatus(`在线壁纸加载失败: ${err}`);
     renderOnlineGrid([]);
