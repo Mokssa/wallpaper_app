@@ -1,9 +1,29 @@
 // ==========================================================================
-// WallpaperApp Client Script (Tauri v2 WinUI 3 Window Controls & Image Proxy)
+// WallpaperApp Client Script (Tauri v2 Global IPC Interoperability)
 // ==========================================================================
 
-const invoke = window.__TAURI__ ? window.__TAURI__.core.invoke : async (cmd, args) => {
-  console.log(`[Mock Invoke] ${cmd}`, args);
+// 全平台全版本兼容的 Tauri IPC 桥接绑定
+function getTauriInvoke() {
+  if (window.__TAURI__) {
+    if (window.__TAURI__.core && typeof window.__TAURI__.core.invoke === 'function') {
+      return window.__TAURI__.core.invoke;
+    }
+    if (typeof window.__TAURI__.invoke === 'function') {
+      return window.__TAURI__.invoke;
+    }
+    if (window.__TAURI__.tauri && typeof window.__TAURI__.tauri.invoke === 'function') {
+      return window.__TAURI__.tauri.invoke;
+    }
+  }
+  return null;
+}
+
+const invoke = async (cmd, args) => {
+  const realInvoke = getTauriInvoke();
+  if (realInvoke) {
+    return await realInvoke(cmd, args);
+  }
+  console.warn(`[Tauri IPC Bridge Waiting] window.__TAURI__ unavailable for cmd: ${cmd}`, args);
   return null;
 };
 
@@ -270,22 +290,6 @@ function renderOnlineGrid(items) {
       </div>
     `;
 
-    const imgEl = card.querySelector('.card-thumb');
-    
-    // 自动加载逻辑与跨域防护：
-    const handleProxyFallback = async () => {
-      try {
-        const base64Data = await invoke('fetch_remote_image_base64', { url: item.thumb_url });
-        if (base64Data) {
-          imgEl.src = base64Data;
-        }
-      } catch (e) {
-        console.error('Proxy image fetch error:', e);
-      }
-    };
-
-    imgEl.addEventListener('error', handleProxyFallback);
-
     const btnApply = card.querySelector('.btn-apply-online');
     btnApply.addEventListener('click', async () => {
       try {
@@ -316,12 +320,12 @@ async function loadOnlineWallpapers() {
   const query = inputOnlineQuery ? inputOnlineQuery.value.trim() : '';
 
   try {
-    setStatus(`正在通过 ${source} 壁纸源引擎获取列表（第 ${onlinePage} 页）...`);
+    setStatus(`正在获取 ${source} 壁纸列表（第 ${onlinePage} 页）...`);
     
     if (pageInfo) pageInfo.textContent = `第 ${onlinePage} 页`;
     if (btnPrevPage) btnPrevPage.disabled = (onlinePage <= 1);
 
-    onlineGrid.innerHTML = '<div style="grid-column: 1 / -1; padding: 40px; text-align: center; color: var(--text-secondary);">⏳ 正在拉取高清在线壁纸...</div>';
+    onlineGrid.innerHTML = '<div style="grid-column: 1 / -1; padding: 40px; text-align: center; color: var(--text-secondary);">⏳ 正在通过 Rust 后端核心拉取在线壁纸...</div>';
 
     const list = await invoke('fetch_online_wallpapers', {
       source,
