@@ -1,0 +1,574 @@
+/* ==========================================================================
+   WinUI 3 (Fluent Design System) Spec Stylesheet
+   ========================================================================== */
+
+:root {
+  --font-family: "Segoe UI Variable Text", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
+  
+  /* WinUI 3 Dark Mode Palette */
+  --bg-mica-alt: #1c1c1c;
+  --bg-mica-solid: #202020;
+  --bg-card: #2d2d2d;
+  --bg-card-subtle: #323232;
+  --bg-hover: rgba(255, 255, 255, 0.06);
+  --bg-active: rgba(255, 255, 255, 0.09);
+  
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.14);
+  
+  --accent-color: #60cdff;
+  --accent-color-hover: #7cd5ff;
+  --accent-color-active: #40b9f2;
+  
+  --text-primary: #ffffff;
+  --text-secondary: #adadad;
+  --text-tertiary: #7a7a7a;
+  
+  --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.22);
+  --shadow-flyout: 0 8px 24px rgba(0, 0, 0, 0.35);
+  
+  --radius-small: 4px;
+  --radius-medium: 8px;
+  --radius-large: 12px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-mica-solid);
+  color: var(--text-primary);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-container {
+  display: flex;
+  flex: 1;
+  height: calc(100vh - 28px);
+  background-color: var(--bg-mica-solid);
+}
+
+/* ==========================================================================
+   WinUI 3 NavigationRail (SideNav)
+   ========================================================================== */
+.winui-nav {
+  width: 230px;
+  background-color: var(--bg-mica-alt);
+  border-right: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  padding: 16px 8px 12px 8px;
+}
+
+.nav-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 12px 20px 12px;
+}
+
+.app-logo {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #0078d4, #60cdff);
+  border-radius: var(--radius-medium);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 120, 212, 0.4);
+}
+
+.logo-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.app-title-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.app-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.app-subtitle {
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+.nav-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 40px;
+  padding: 0 12px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-medium);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 400;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.nav-item:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.nav-item:active {
+  background-color: var(--bg-active);
+}
+
+.nav-item.active {
+  background-color: rgba(255, 255, 255, 0.06);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* WinUI 3 Active Indicator Line */
+.nav-indicator {
+  position: absolute;
+  left: 3px;
+  width: 3px;
+  height: 16px;
+  background-color: var(--accent-color);
+  border-radius: 2px;
+  opacity: 0;
+  transform: scaleY(0.4);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.nav-item.active .nav-indicator {
+  opacity: 1;
+  transform: scaleY(1);
+}
+
+.nav-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.nav-label {
+  white-space: nowrap;
+}
+
+.nav-footer {
+  padding: 8px 12px;
+}
+
+.version-tag {
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
+
+/* ==========================================================================
+   Main Content Area
+   ========================================================================== */
+.winui-main {
+  flex: 1;
+  background-color: var(--bg-mica-solid);
+  padding: 24px 32px;
+  overflow-y: auto;
+}
+
+.tab-page {
+  display: none;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.tab-page.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.page-title {
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+}
+
+.page-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* ==========================================================================
+   WinUI 3 Buttons & Controls
+   ========================================================================== */
+.winui-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 16px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-medium);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.12);
+  transition: all 0.15s ease;
+}
+
+.winui-btn:hover {
+  background-color: var(--bg-hover);
+  border-color: var(--border-strong);
+}
+
+.winui-btn:active {
+  transform: scale(0.98);
+}
+
+.winui-btn-primary {
+  background-color: var(--accent-color);
+  border-color: transparent;
+  color: #000000;
+  font-weight: 600;
+}
+
+.winui-btn-primary:hover {
+  background-color: var(--accent-color-hover);
+  color: #000000;
+}
+
+.winui-btn-danger {
+  background-color: rgba(255, 99, 99, 0.12);
+  border-color: rgba(255, 99, 99, 0.2);
+  color: #ff6b6b;
+}
+
+.winui-btn-danger:hover {
+  background-color: rgba(255, 99, 99, 0.22);
+}
+
+.btn-icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* WinUI 3 Input Fields */
+.winui-input {
+  height: 32px;
+  padding: 0 12px;
+  background-color: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  border-bottom: 2px solid var(--border-strong);
+  border-radius: var(--radius-medium) var(--radius-medium) 0 0;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.winui-input:focus {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-bottom-color: var(--accent-color);
+}
+
+/* WinUI 3 Toggle Switch */
+.winui-toggle {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+}
+
+.winui-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-strong);
+  border-radius: 20px;
+  transition: 0.2s;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 12px;
+  width: 12px;
+  left: 3px;
+  bottom: 3px;
+  background-color: var(--text-secondary);
+  border-radius: 50%;
+  transition: 0.2s;
+}
+
+input:checked + .toggle-slider {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+input:checked + .toggle-slider:before {
+  transform: translateX(20px);
+  background-color: #000000;
+}
+
+/* ==========================================================================
+   Gallery Grid & Cards
+   ========================================================================== */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.gallery-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-large);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.gallery-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-flyout);
+}
+
+.card-thumb-wrap {
+  position: relative;
+  width: 100%;
+  height: 128px;
+  background-color: #111;
+  overflow: hidden;
+}
+
+.card-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.gallery-card:hover .card-thumb {
+  transform: scale(1.04);
+}
+
+.card-content {
+  padding: 12px;
+}
+
+.card-item-title {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-item-date {
+  font-size: 10px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+  margin-bottom: 12px;
+}
+
+.card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.card-actions .winui-btn {
+  flex: 1;
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-large);
+}
+
+.empty-icon { font-size: 42px; margin-bottom: 12px; }
+.empty-title { font-size: 16px; font-weight: 600; }
+.empty-desc { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+
+/* ==========================================================================
+   Explore Page Cards
+   ========================================================================== */
+.explore-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.winui-card {
+  position: relative;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-large);
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+}
+
+.card-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  background-color: rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  color: var(--accent-color);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.card-icon-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+}
+
+.card-title { font-size: 16px; font-weight: 600; }
+.card-subtitle { font-size: 11px; color: var(--text-secondary); }
+.card-body { font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 20px; }
+
+.winui-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.winui-field-group label {
+  font-size: 12px;
+  color: var(--text-primary);
+}
+
+/* ==========================================================================
+   Settings Card List (WinUI 3 SettingCard)
+   ========================================================================== */
+.settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.winui-setting-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-medium);
+  padding: 14px 20px;
+}
+
+.setting-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.setting-title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.setting-desc { font-size: 11px; color: var(--text-secondary); }
+.setting-val-tag { font-size: 12px; color: var(--text-tertiary); }
+.setting-control { display: flex; align-items: center; gap: 8px; }
+.unit-label { font-size: 12px; color: var(--text-secondary); }
+
+.current-wp-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 24px;
+  padding: 12px 16px;
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-medium);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* Status Bar */
+.winui-statusbar {
+  height: 28px;
+  background-color: var(--bg-mica-alt);
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 8px;
+}
+
+.status-indicator {
+  width: 6px;
+  height: 6px;
+  background-color: var(--accent-color);
+  border-radius: 50%;
+}
+
+.status-msg {
+  font-size: 11px;
+  color: var(--text-secondary);
+}

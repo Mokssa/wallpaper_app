@@ -1,0 +1,8 @@
+{
+  "query": "nature,wallpaper,architecture",
+  "cache_dir": "cache/wallpapers",
+  "auto_update_interval_minutes": 60,
+  "auto_update_enabled": false,
+  "batch_count": 6,
+  "wallpaper_style": "fill"
+}

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>壁纸随心换 (WallpaperApp)</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="winui-theme-dark">
+  <div class="app-container">
+
+    <!-- WinUI 3 NavigationRail SideNav -->
+    <aside class="winui-nav">
+      <div class="nav-header">
+        <div class="app-logo">
+          <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="4" ry="4"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21 15 16 10 5 21"/>
+          </svg>
+        </div>
+        <div class="app-title-group">
+          <span class="app-title">壁纸随心换</span>
+          <span class="app-subtitle">WinUI 3 Native Edition</span>
+        </div>
+      </div>
+
+      <nav class="nav-menu">
+        <button class="nav-item active" data-tab="gallery">
+          <span class="nav-indicator"></span>
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="14" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/>
+          </svg>
+          <span class="nav-label">本地壁纸库</span>
+        </button>
+
+        <button class="nav-item" data-tab="explore">
+          <span class="nav-indicator"></span>
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+          <span class="nav-label">发现新壁纸</span>
+        </button>
+
+        <button class="nav-item" data-tab="settings">
+          <span class="nav-indicator"></span>
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          <span class="nav-label">软件设置</span>
+        </button>
+      </nav>
+
+      <div class="nav-footer">
+        <span class="version-tag">Tauri v2 • WinUI 3 Spec</span>
+      </div>
+    </aside>
+
+    <!-- Main Content Stage -->
+    <main class="winui-main">
+
+      <!-- Gallery Page -->
+      <section id="tab-gallery" class="tab-page active">
+        <header class="page-header">
+          <div>
+            <h1 class="page-title">本地壁纸库</h1>
+            <p class="page-desc" id="gallery-count-text">共已缓存 0 张高分辨率壁纸，随时设为桌面</p>
+          </div>
+          <button class="winui-btn" id="btn-refresh-gallery">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            刷新列表
+          </button>
+        </header>
+
+        <div class="gallery-grid" id="gallery-grid">
+          <!-- Gallery Cards generated dynamically -->
+        </div>
+
+        <div class="empty-state" id="gallery-empty-state" style="display: none;">
+          <div class="empty-icon">📷</div>
+          <h2 class="empty-title">尚无本地缓存壁纸</h2>
+          <p class="empty-desc">切换至“发现新壁纸”，一键挑选或随机抓取在线美图！</p>
+        </div>
+      </section>
+
+      <!-- Explore Page -->
+      <section id="tab-explore" class="tab-page">
+        <header class="page-header">
+          <div>
+            <h1 class="page-title">在线发现新壁纸</h1>
+            <p class="page-desc">精选微软 Bing 官方每日故事图景与 Unsplash 4K 摄影社区</p>
+          </div>
+        </header>
+
+        <div class="explore-cards">
+          <!-- Bing Card -->
+          <div class="winui-card explore-card">
+            <div class="card-badge">Bing Official</div>
+            <div class="card-header">
+              <div class="card-icon-circle bing">🌞</div>
+              <div>
+                <h3 class="card-title">Bing 每日壁纸</h3>
+                <p class="card-subtitle">微软官方每日发布的故事大片</p>
+              </div>
+            </div>
+            <p class="card-body">自动抓取微软 Bing 官方每日最新桌面高清摄影图景。</p>
+            <div class="card-footer">
+              <button class="winui-btn winui-btn-primary" id="btn-fetch-bing">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                下载今日必应美图
+              </button>
+            </div>
+          </div>
+
+          <!-- Unsplash Card -->
+          <div class="winui-card explore-card">
+            <div class="card-badge">Unsplash 4K</div>
+            <div class="card-header">
+              <div class="card-icon-circle unsplash">🌌</div>
+              <div>
+                <h3 class="card-title">Unsplash 随机美图</h3>
+                <p class="card-subtitle">全球顶级独立摄影师作品社区</p>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="winui-field-group">
+                <label for="input-explore-query">检索主题关键词：</label>
+                <input type="text" class="winui-input" id="input-explore-query" placeholder="e.g. nature, architecture" />
+              </div>
+            </div>
+            <div class="card-footer">
+              <button class="winui-btn winui-btn-primary" id="btn-fetch-unsplash">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3h5v5"/><path d="M4 20L21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>
+                随机匹配一张 4K 美图
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Settings Page -->
+      <section id="tab-settings" class="tab-page">
+        <header class="page-header">
+          <div>
+            <h1 class="page-title">软件设置</h1>
+            <p class="page-desc">管理搜索偏好、下载缓存存储与自动化轮换</p>
+          </div>
+        </header>
+
+        <div class="settings-list">
+          <div class="winui-setting-card">
+            <div class="setting-info">
+              <span class="setting-title">默认搜索关键词</span>
+              <span class="setting-desc">用于 Unsplash 分类抓取（如 nature, landscape, city）</span>
+            </div>
+            <div class="setting-control">
+              <input type="text" class="winui-input" id="input-config-query" style="width: 220px;" />
+            </div>
+          </div>
+
+          <div class="winui-setting-card">
+            <div class="setting-info">
+              <span class="setting-title">本地缓存路径</span>
+              <span class="setting-desc">已下载高清壁纸与元数据的保存目录</span>
+            </div>
+            <div class="setting-control">
+              <span class="setting-val-tag" id="label-cache-dir">cache/wallpapers</span>
+            </div>
+          </div>
+
+          <div class="winui-setting-card">
+            <div class="setting-info">
+              <span class="setting-title">自动轮换更新间隔</span>
+              <span class="setting-desc">后台自动下载与更换桌面壁纸的时间周期（分钟）</span>
+            </div>
+            <div class="setting-control">
+              <input type="number" class="winui-input" id="input-config-interval" min="5" max="1440" value="60" style="width: 90px;" />
+              <span class="unit-label">分钟</span>
+            </div>
+          </div>
+
+          <div class="winui-setting-card">
+            <div class="setting-info">
+              <span class="setting-title">开启后台自动定时轮换</span>
+              <span class="setting-desc">在应用后台静默运行时按间隔时间点更换最新壁纸</span>
+            </div>
+            <div class="setting-control">
+              <label class="winui-toggle">
+                <input type="checkbox" id="check-config-autoupdate" />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="current-wp-banner" id="current-wp-banner">
+          <span class="banner-icon">📌</span>
+          <span class="banner-text" id="current-wp-text">当前 Windows 桌面壁纸: 未知</span>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- WinUI 3 Fluent Bottom Status Bar -->
+  <footer class="winui-statusbar">
+    <div class="status-indicator"></div>
+    <span class="status-msg" id="status-msg">应用就绪</span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
