@@ -84,7 +84,8 @@ fn get_cached_wallpapers() -> Vec<WallpaperItem> {
 
 #[tauri::command]
 async fn fetch_online_wallpapers(source: String, query: String, page: usize, limit: usize) -> Result<Vec<OnlineWallpaper>, String> {
-    WallpaperDownloader::fetch_online_list(&source, &query, page, limit)
+    let config = AppConfig::load();
+    WallpaperDownloader::fetch_online_list(&source, &query, page, limit, &config.unsplash_access_key)
         .await
         .map_err(|e| e.to_string())
 }

@@ -88,22 +88,23 @@
         <header class="page-header">
           <div>
             <h1 class="page-title">在线壁纸图源</h1>
-            <p class="page-desc">在线浏览 Bing 每日壁纸、Picsum 4K 摄影大图与 Wallhaven 壁纸墙</p>
+            <p class="page-desc">遵循官方规范接口拉取 Bing 每日壁纸、Unsplash 官方 API、Picsum 4K 摄影大图与 Wallhaven 壁纸墙</p>
           </div>
         </header>
 
         <!-- 工具栏与图源切换 -->
         <div class="explore-filter-bar">
           <div class="filter-group">
-            <label for="select-source">壁纸图源：</label>
+            <label for="select-source">官方图源：</label>
             <select class="winui-select" id="select-source">
-              <option value="picsum" selected>📷 Picsum 4K 摄影大图</option>
-              <option value="bing">🌞 Bing 官方每日壁纸</option>
-              <option value="wallhaven">🌌 Wallhaven 壁纸社区</option>
+              <option value="picsum" selected>📷 Picsum 4K 摄影大图 (Official)</option>
+              <option value="bing">🌞 Bing 官方每日壁纸 (Microsoft)</option>
+              <option value="unsplash">🌌 Unsplash 官方 API (Unsplash)</option>
+              <option value="wallhaven">🎨 Wallhaven 壁纸社区 (Wallhaven)</option>
             </select>
           </div>
 
-          <div class="filter-group" id="group-search" style="display: none;">
+          <div class="filter-group" id="group-search">
             <input type="text" class="winui-input" id="input-online-query" placeholder="输入分类搜索 (如 nature, city)..." style="width: 220px;" />
             <button class="winui-btn" id="btn-search-online">🔍 搜索</button>
           </div>
@@ -127,7 +128,7 @@
         <header class="page-header">
           <div>
             <h1 class="page-title">软件设置</h1>
-            <p class="page-desc">管理偏好设置、缓存路径、自动化行为与应用信息</p>
+            <p class="page-desc">管理偏好设置、API 密钥、缓存路径与自动化行为</p>
           </div>
         </header>
 
@@ -139,6 +140,16 @@
             </div>
             <div class="setting-control">
               <input type="text" class="winui-input" id="input-config-query" style="width: 220px;" />
+            </div>
+          </div>
+
+          <div class="winui-setting-card">
+            <div class="setting-info">
+              <span class="setting-title">Unsplash Access Key (可选)</span>
+              <span class="setting-desc">官方 Unsplash Developer Access Key（填入可提升配额限额）</span>
+            </div>
+            <div class="setting-control">
+              <input type="text" class="winui-input" id="input-config-unsplash-key" placeholder="Client-ID ..." style="width: 220px;" />
             </div>
           </div>
 
@@ -186,6 +197,7 @@
                 <span class="tech-badge">Rust 1.96</span>
                 <span class="tech-badge">Tauri 2.0</span>
                 <span class="tech-badge">WinUI 3 Fluent Spec</span>
+                <span class="tech-badge">Official APIs</span>
                 <span class="tech-badge">v1.0.0</span>
               </div>
             </div>

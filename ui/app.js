@@ -1,10 +1,10 @@
 // ==========================================================================
-// WallpaperApp Client Script (Tauri v2 IPC & Image Auto-Proxy Fix)
+// WallpaperApp Client Script (Tauri v2 Official API Refactor)
 // ==========================================================================
 
 const invoke = window.__TAURI__ ? window.__TAURI__.core.invoke : async (cmd, args) => {
   console.log(`[Mock Invoke] ${cmd}`, args);
-  return [];
+  return null;
 };
 
 // State
@@ -13,6 +13,7 @@ let appConfig = {
   cache_dir: "cache/wallpapers",
   auto_update_interval_minutes: 60,
   auto_update_enabled: false,
+  unsplash_access_key: "",
 };
 
 let cachedWallpapers = [];
@@ -44,6 +45,7 @@ const pageInfo = document.getElementById('page-info');
 
 // Settings DOM
 const inputConfigQuery = document.getElementById('input-config-query');
+const inputConfigUnsplashKey = document.getElementById('input-config-unsplash-key');
 const labelCacheDir = document.getElementById('label-cache-dir');
 const btnBrowseDir = document.getElementById('btn-browse-dir');
 const inputConfigInterval = document.getElementById('input-config-interval');
@@ -92,6 +94,7 @@ async function loadConfig() {
 function updateConfigUI() {
   if (inputConfigQuery) inputConfigQuery.value = appConfig.query || '';
   if (inputOnlineQuery) inputOnlineQuery.value = appConfig.query || '';
+  if (inputConfigUnsplashKey) inputConfigUnsplashKey.value = appConfig.unsplash_access_key || '';
   if (labelCacheDir) labelCacheDir.textContent = appConfig.cache_dir || 'cache/wallpapers';
   if (inputConfigInterval) inputConfigInterval.value = appConfig.auto_update_interval_minutes || 60;
   if (checkConfigAutoupdate) checkConfigAutoupdate.checked = !!appConfig.auto_update_enabled;
@@ -101,6 +104,7 @@ function updateConfigUI() {
 async function saveConfig() {
   try {
     appConfig.query = inputConfigQuery ? inputConfigQuery.value.trim() : appConfig.query;
+    appConfig.unsplash_access_key = inputConfigUnsplashKey ? inputConfigUnsplashKey.value.trim() : (appConfig.unsplash_access_key || "");
     appConfig.auto_update_interval_minutes = inputConfigInterval ? parseInt(inputConfigInterval.value) || 60 : 60;
     appConfig.auto_update_enabled = checkConfigAutoupdate ? checkConfigAutoupdate.checked : false;
     
@@ -222,13 +226,13 @@ async function loadCurrentWallpaper() {
   }
 }
 
-// Render Online Wallpapers Grid with Auto-Proxy Fix & Defensive Array Checking
+// Render Online Wallpapers Grid
 function renderOnlineGrid(items) {
   onlineWallpapers = Array.isArray(items) ? items : [];
   onlineGrid.innerHTML = '';
 
   if (onlineWallpapers.length === 0) {
-    onlineGrid.innerHTML = '<div class="empty-state" style="grid-column: 1 / -1;"><div class="empty-icon">🌐</div><h2 class="empty-title">未发现在线壁纸</h2><p class="empty-desc">请尝试更换分类或检查网络连接！</p></div>';
+    onlineGrid.innerHTML = '<div class="empty-state" style="grid-column: 1 / -1;"><div class="empty-icon">🌐</div><h2 class="empty-title">未发现在线壁纸</h2><p class="empty-desc">请尝试更换图源、调整搜索关键词或检查网络连接！</p></div>';
     return;
   }
 
@@ -250,10 +254,8 @@ function renderOnlineGrid(items) {
     `;
 
     const imgEl = card.querySelector('.card-thumb');
-    
-    // 跨域/重定向图片加载失败时，自动通过 Rust 后端拉取 Base64 Data URL 双保险！
     imgEl.addEventListener('error', async () => {
-      console.warn('Image direct load blocked, fetching through Rust backend proxy:', item.thumb_url);
+      console.warn('Image direct load blocked, fetching through Rust proxy:', item.thumb_url);
       try {
         const base64Data = await invoke('fetch_remote_image_base64', { url: item.thumb_url });
         if (base64Data) {
@@ -288,18 +290,18 @@ function renderOnlineGrid(items) {
   });
 }
 
-// Load Online Wallpapers List with Pagination & Defensive Handling
+// Load Online Wallpapers List with Official API Spec
 async function loadOnlineWallpapers() {
   const source = selectSource ? selectSource.value : 'picsum';
   const query = inputOnlineQuery ? inputOnlineQuery.value.trim() : '';
 
   try {
-    setStatus(`正在获取 ${source} 壁纸列表（第 ${onlinePage} 页）...`);
+    setStatus(`正在通过官方规范 API 获取 ${source} 壁纸列表（第 ${onlinePage} 页）...`);
     
     if (pageInfo) pageInfo.textContent = `第 ${onlinePage} 页`;
     if (btnPrevPage) btnPrevPage.disabled = (onlinePage <= 1);
 
-    onlineGrid.innerHTML = '<div style="grid-column: 1 / -1; padding: 40px; text-align: center; color: var(--text-secondary);">⏳ 正在通过 Rust 高速引擎拉取在线壁纸...</div>';
+    onlineGrid.innerHTML = '<div style="grid-column: 1 / -1; padding: 40px; text-align: center; color: var(--text-secondary);">⏳ 正在通过 Rust 官方规范 API 校验与拉取在线壁纸...</div>';
 
     const list = await invoke('fetch_online_wallpapers', {
       source,
@@ -339,8 +341,8 @@ function setupEvents() {
 
   if (selectSource) {
     selectSource.addEventListener('change', () => {
-      const isWallhaven = (selectSource.value === 'wallhaven');
-      if (groupSearch) groupSearch.style.display = isWallhaven ? 'flex' : 'none';
+      const showSearch = (selectSource.value === 'wallhaven' || selectSource.value === 'unsplash' || selectSource.value === 'picsum');
+      if (groupSearch) groupSearch.style.display = showSearch ? 'flex' : 'none';
       onlinePage = 1;
       loadOnlineWallpapers();
     });
@@ -370,6 +372,7 @@ function setupEvents() {
   }
 
   if (inputConfigQuery) inputConfigQuery.addEventListener('change', saveConfig);
+  if (inputConfigUnsplashKey) inputConfigUnsplashKey.addEventListener('change', saveConfig);
   if (inputConfigInterval) inputConfigInterval.addEventListener('change', saveConfig);
   if (checkConfigAutoupdate) checkConfigAutoupdate.addEventListener('change', saveConfig);
 }

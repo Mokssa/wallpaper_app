@@ -10,6 +10,7 @@ pub struct AppConfig {
     pub auto_update_enabled: bool,
     pub batch_count: usize,
     pub wallpaper_style: String,
+    pub unsplash_access_key: String,
 }
 
 impl Default for AppConfig {
@@ -21,6 +22,7 @@ impl Default for AppConfig {
             auto_update_enabled: false,
             batch_count: 6,
             wallpaper_style: "fill".to_string(),
+            unsplash_access_key: "".to_string(),
         }
     }
 }
