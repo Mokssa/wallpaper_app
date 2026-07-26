@@ -210,7 +210,7 @@ async function pickCacheDir() {
   }
 }
 
-// Render Local Gallery (纯粹无遮罩微缩卡片)
+// Render Local Gallery
 async function renderGallery(items) {
   cachedWallpapers = Array.isArray(items) ? items : [];
   galleryGrid.innerHTML = '';
@@ -272,7 +272,7 @@ async function setWallpaperAction(filePath, title) {
   }
 }
 
-// Download Wallpaper to Local (仅下载，不设为壁纸)
+// Download Wallpaper to Local
 async function downloadOnlyAction(item) {
   try {
     setStatus(`正在下载保存壁纸到本地: ${item.title}...`);
@@ -307,7 +307,7 @@ async function loadCurrentWallpaper() {
   }
 }
 
-// Render Online Wallpapers Grid (纯粹无遮罩微缩卡片 + Skeleton 骨架屏)
+// Render Online Wallpapers Grid (Chromium 原生并发多线程加载，零延迟瞬间展现)
 function renderOnlineGrid(items) {
   onlineWallpapers = Array.isArray(items) ? items : [];
   onlineGrid.innerHTML = '';
@@ -331,9 +331,18 @@ function renderOnlineGrid(items) {
       img.classList.add('loaded');
     };
 
+    // 仅当某张单图直接加载受阻时按需懒加载代理
+    img.onerror = async () => {
+      try {
+        const base64Data = await invoke('fetch_remote_image_base64', { url: item.thumb_url });
+        if (base64Data) {
+          img.src = base64Data;
+        }
+      } catch (e) {}
+    };
+
     card.appendChild(img);
 
-    // 点击卡片瞬间唤出壁纸详情大图弹窗
     card.addEventListener('click', () => {
       openWallpaperDetails(item, 'online', item.thumb_url);
     });

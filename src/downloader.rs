@@ -31,13 +31,13 @@ impl WallpaperDownloader {
     fn build_client() -> reqwest::Client {
         reqwest::Client::builder()
             .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36")
-            .timeout(std::time::Duration::from_secs(10))
+            .timeout(std::time::Duration::from_secs(8))
             .redirect(reqwest::redirect::Policy::limited(5))
             .build()
             .unwrap_or_default()
     }
 
-    /// 后端极速直接下载远程真实图片并转换为全兼容 Base64 Data URL (解决 WebView2 跨域)
+    /// 仅在按需备用时拉取特定图片转 Base64
     pub async fn fetch_image_as_base64(url: &str) -> Option<String> {
         let client = Self::build_client();
         if let Ok(res) = client.get(url).send().await {
@@ -57,7 +57,7 @@ impl WallpaperDownloader {
         None
     }
 
-    /// 纯粹、真实的在线壁纸 API 列表抓取 (无任何人工占位图)
+    /// 极速轻量 API 抓取引擎 (毫秒级响应，零延迟返回真实网络 URL)
     pub async fn fetch_online_list(
         source: &str,
         query: &str,
@@ -206,7 +206,7 @@ impl WallpaperDownloader {
             }
 
             _ => {
-                // Picsum 官方大图 API (Lorem Picsum)
+                // Picsum 官方大图 API
                 let api_url = format!("https://picsum.photos/v2/list?page={}&limit={}", page, limit);
                 if let Ok(res) = client.get(&api_url).send().await {
                     if let Ok(array) = res.json::<serde_json::Value>().await {
@@ -234,19 +234,10 @@ impl WallpaperDownloader {
             }
         }
 
-        // 后端尝试将真实的在线 HTTP 缩略图转为 Base64（解决 WebView2 跨域拦截），如失败保留真实网络 URL
-        let mut result_items = Vec::new();
-        for mut item in list {
-            if let Some(b64) = Self::fetch_image_as_base64(&item.thumb_url).await {
-                item.thumb_url = b64;
-            }
-            result_items.push(item);
-        }
-
-        Ok(result_items)
+        Ok(list)
     }
 
-    /// 下载真实在线壁纸到本地缓存
+    /// 下载在线壁纸到本地缓存
     pub async fn download_online_wallpaper(item: &OnlineWallpaper, target_dir: &Path) -> Result<WallpaperItem, Box<dyn std::error::Error + Send + Sync>> {
         let client = Self::build_client();
         let res = client.get(&item.raw_url).send().await?;
