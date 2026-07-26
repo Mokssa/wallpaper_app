@@ -19,7 +19,7 @@ pub struct OnlineWallpaper {
     pub id: String,
     pub title: String,
     pub author: String,
-    pub thumb_url: String, // 会优先填充预加载好的 Base64 Data URL 或高可用 URL
+    pub thumb_url: String,
     pub raw_url: String,
     pub source: String,
     pub copyright_link: Option<String>,
@@ -31,13 +31,13 @@ impl WallpaperDownloader {
     fn build_client() -> reqwest::Client {
         reqwest::Client::builder()
             .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36")
-            .timeout(std::time::Duration::from_secs(6))
+            .timeout(std::time::Duration::from_secs(10))
             .redirect(reqwest::redirect::Policy::limited(5))
             .build()
             .unwrap_or_default()
     }
 
-    /// 后端直接拉取图片字节并转为 Base64 Data URL (彻底解决 WebView2 跨域与网络连接拦截)
+    /// 后端极速直接下载远程真实图片并转换为全兼容 Base64 Data URL (解决 WebView2 跨域)
     pub async fn fetch_image_as_base64(url: &str) -> Option<String> {
         let client = Self::build_client();
         if let Ok(res) = client.get(url).send().await {
@@ -57,26 +57,7 @@ impl WallpaperDownloader {
         None
     }
 
-    /// 生成优雅的高清离线 SVG 壁纸 Base64 (断网或超时保底)
-    fn generate_fallback_svg_base64(title: &str, author: &str, id_num: usize) -> String {
-        let colors = [
-            ("#1e3c72", "#2a5298"),
-            ("#2b5876", "#4e4376"),
-            ("#000428", "#004e92"),
-            ("#141e30", "#243b55"),
-            ("#0f2027", "#203a43"),
-            ("#3a1c71", "#d76d77"),
-        ];
-        let (c1, c2) = colors[id_num % colors.len()];
-        let svg = format!(
-            "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"600\" height=\"380\" viewBox=\"0 0 600 380\"><defs><linearGradient id=\"g\" x1=\"0%\" y1=\"0%\" x2=\"100%\" y2=\"100%\"><stop offset=\"0%\" stop-color=\"{}\" /><stop offset=\"100%\" stop-color=\"{}\" /></linearGradient></defs><rect width=\"600\" height=\"380\" fill=\"url(#g)\" /><circle cx=\"300\" cy=\"160\" r=\"60\" fill=\"rgba(255,255,255,0.08)\" /><text x=\"300\" y=\"168\" font-family=\"Segoe UI, sans-serif\" font-size=\"28\" fill=\"rgba(255,255,255,0.7)\" text-anchor=\"middle\">📷 4K</text><text x=\"300\" y=\"260\" font-family=\"Segoe UI, sans-serif\" font-size=\"18\" font-weight=\"600\" fill=\"#ffffff\" text-anchor=\"middle\">{}</text><text x=\"300\" y=\"290\" font-family=\"Segoe UI, sans-serif\" font-size=\"13\" fill=\"rgba(255,255,255,0.6)\" text-anchor=\"middle\">{}</text></svg>",
-            c1, c2, title, author
-        );
-        let encoded = base64::engine::general_purpose::STANDARD.encode(svg.as_bytes());
-        format!("data:image/svg+xml;base64,{}", encoded)
-    }
-
-    /// 获取在线壁纸列表（Rust 后端自动转换 Base64，100% 保证前端界面完美亮起）
+    /// 纯粹、真实的在线壁纸 API 列表抓取 (无任何人工占位图)
     pub async fn fetch_online_list(
         source: &str,
         query: &str,
@@ -88,10 +69,11 @@ impl WallpaperDownloader {
         let page = if page == 0 { 1 } else { page };
         let limit = if limit == 0 { 12 } else { limit };
 
-        let mut raw_items = Vec::new();
+        let mut list = Vec::new();
 
         match source {
             "bing" => {
+                // Bing 微软官方每日壁纸
                 let idx = (page - 1) * 7;
                 let api_url = format!("https://www.bing.com/HPImageArchive.aspx?format=js&idx={}&n={}&mkt=zh-CN", idx, limit.min(8));
                 if let Ok(res) = client.get(&api_url).send().await {
@@ -117,7 +99,7 @@ impl WallpaperDownloader {
                                     (full.clone(), full)
                                 };
                                 
-                                raw_items.push(OnlineWallpaper {
+                                list.push(OnlineWallpaper {
                                     id: format!("bing_{}_{}", hsh, i + 1),
                                     title: copyright,
                                     author: "Microsoft Bing".to_string(),
@@ -133,47 +115,51 @@ impl WallpaperDownloader {
             }
 
             "unsplash" => {
+                // Unsplash 官方 API
                 let q_param = if query.is_empty() { "nature" } else { query };
                 let access_key = unsplash_key.trim();
 
+                let api_url = format!(
+                    "https://api.unsplash.com/search/photos?query={}&page={}&per_page={}&orientation=landscape",
+                    urlencoding::encode(q_param),
+                    page,
+                    limit
+                );
+                let mut req = client.get(&api_url);
                 if !access_key.is_empty() {
-                    let api_url = format!(
-                        "https://api.unsplash.com/search/photos?query={}&page={}&per_page={}&orientation=landscape",
-                        urlencoding::encode(q_param),
-                        page,
-                        limit
-                    );
-                    if let Ok(res) = client.get(&api_url).header("Authorization", format!("Client-ID {}", access_key)).send().await {
-                        if let Ok(json_res) = res.json::<serde_json::Value>().await {
-                            if let Some(results) = json_res["results"].as_array() {
-                                for img in results {
-                                    let id = img["id"].as_str().unwrap_or("");
-                                    if id.is_empty() { continue; }
+                    req = req.header("Authorization", format!("Client-ID {}", access_key));
+                }
 
-                                    let alt_desc = img["alt_description"].as_str()
-                                        .or_else(|| img["description"].as_str())
-                                        .unwrap_or("Unsplash 高清摄影壁纸");
-                                    
-                                    let author = img["user"]["name"].as_str()
-                                        .unwrap_or("Unsplash Artist");
+                if let Ok(res) = req.send().await {
+                    if let Ok(json_res) = res.json::<serde_json::Value>().await {
+                        if let Some(results) = json_res["results"].as_array() {
+                            for img in results {
+                                let id = img["id"].as_str().unwrap_or("");
+                                if id.is_empty() { continue; }
 
-                                    let thumb_url = img["urls"]["regular"].as_str()
-                                        .or_else(|| img["urls"]["small"].as_str())
-                                        .unwrap_or("");
+                                let alt_desc = img["alt_description"].as_str()
+                                    .or_else(|| img["description"].as_str())
+                                    .unwrap_or("Unsplash 摄影大图");
+                                
+                                let author = img["user"]["name"].as_str()
+                                    .unwrap_or("Unsplash Artist");
 
-                                    let raw_url = format!("{}&w=3840&q=85", img["urls"]["raw"].as_str().unwrap_or(thumb_url));
+                                let thumb_url = img["urls"]["regular"].as_str()
+                                    .or_else(|| img["urls"]["small"].as_str())
+                                    .unwrap_or("");
 
-                                    if !thumb_url.is_empty() {
-                                        raw_items.push(OnlineWallpaper {
-                                            id: format!("unsplash_{}", id),
-                                            title: alt_desc.to_string(),
-                                            author: author.to_string(),
-                                            thumb_url: thumb_url.to_string(),
-                                            raw_url,
-                                            source: "Unsplash API".to_string(),
-                                            copyright_link: img["links"]["html"].as_str().map(|s| s.to_string()),
-                                        });
-                                    }
+                                let raw_url = format!("{}&w=3840&q=85", img["urls"]["raw"].as_str().unwrap_or(thumb_url));
+
+                                if !thumb_url.is_empty() {
+                                    list.push(OnlineWallpaper {
+                                        id: format!("unsplash_{}", id),
+                                        title: alt_desc.to_string(),
+                                        author: author.to_string(),
+                                        thumb_url: thumb_url.to_string(),
+                                        raw_url,
+                                        source: "Unsplash API".to_string(),
+                                        copyright_link: img["links"]["html"].as_str().map(|s| s.to_string()),
+                                    });
                                 }
                             }
                         }
@@ -182,6 +168,7 @@ impl WallpaperDownloader {
             }
 
             "wallhaven" => {
+                // Wallhaven 社区 API
                 let q_param = if query.is_empty() { "nature" } else { query };
                 let api_url = format!(
                     "https://wallhaven.cc/api/v1/search?q={}&page={}&sorting=views&purity=100&ratios=16x9",
@@ -202,9 +189,9 @@ impl WallpaperDownloader {
                                 let res_str = img["resolution"].as_str().unwrap_or("4K");
 
                                 if !path.is_empty() {
-                                    raw_items.push(OnlineWallpaper {
+                                    list.push(OnlineWallpaper {
                                         id: format!("wallhaven_{}", id),
-                                        title: format!("Wallhaven 精选 #{} ({})", id, res_str),
+                                        title: format!("Wallhaven 壁纸 #{} ({})", id, res_str),
                                         author: format!("分类: {}", category),
                                         thumb_url: thumb.to_string(),
                                         raw_url: path.to_string(),
@@ -219,60 +206,39 @@ impl WallpaperDownloader {
             }
 
             _ => {
-                // Picsum 摄影源
-                let base_seed = (page - 1) * limit;
-                for i in 1..=limit {
-                    let img_id = base_seed + i;
-                    let thumb_url = format!("https://picsum.photos/id/{}/600/380", (img_id * 10) % 100);
-                    let raw_url = format!("https://picsum.photos/id/{}/3840/2160", (img_id * 10) % 100);
+                // Picsum 官方大图 API (Lorem Picsum)
+                let api_url = format!("https://picsum.photos/v2/list?page={}&limit={}", page, limit);
+                if let Ok(res) = client.get(&api_url).send().await {
+                    if let Ok(array) = res.json::<serde_json::Value>().await {
+                        if let Some(imgs) = array.as_array() {
+                            for img in imgs {
+                                let id = img["id"].as_str().unwrap_or("");
+                                let author = img["author"].as_str().unwrap_or("Featured Artist");
+                                
+                                let thumb_url = format!("https://picsum.photos/id/{}/600/380", id);
+                                let raw_url = format!("https://picsum.photos/id/{}/3840/2160", id);
 
-                    raw_items.push(OnlineWallpaper {
-                        id: format!("picsum_{}", img_id),
-                        title: format!("Picsum 4K 极简摄影作品 #{}", img_id),
-                        author: "Picsum Community".to_string(),
-                        thumb_url,
-                        raw_url,
-                        source: "Picsum 4K".to_string(),
-                        copyright_link: Some("https://picsum.photos".to_string()),
-                    });
+                                list.push(OnlineWallpaper {
+                                    id: format!("picsum_{}", id),
+                                    title: format!("摄影作品 by {}", author),
+                                    author: author.to_string(),
+                                    thumb_url,
+                                    raw_url,
+                                    source: "Picsum 4K".to_string(),
+                                    copyright_link: img["url"].as_str().map(|s| s.to_string()),
+                                });
+                            }
+                        }
+                    }
                 }
             }
         }
 
-        // 如果因网络波动未抓取到在线列表，生成高质感离线备选列表
-        if raw_items.is_empty() {
-            let categories = ["自然风光", "城市夜景", "极简建筑", "赛博朋克", "深空星云", "艺术抽象"];
-            for i in 1..=limit {
-                let id_num = (page - 1) * limit + i;
-                let cat = categories[(id_num - 1) % categories.len()];
-                let fallback_b64 = Self::generate_fallback_svg_base64(
-                    &format!("{} 4K 原生壁纸 #{}", cat, id_num),
-                    "WallpaperApp 精选集",
-                    id_num
-                );
-
-                raw_items.push(OnlineWallpaper {
-                    id: format!("fallback_{}", id_num),
-                    title: format!("{} 4K 原生壁纸 #{}", cat, id_num),
-                    author: "WallpaperApp 精选集".to_string(),
-                    thumb_url: fallback_b64,
-                    raw_url: format!("https://picsum.photos/id/{}/3840/2160", (id_num * 15) % 100),
-                    source: "官方精选集".to_string(),
-                    copyright_link: None,
-                });
-            }
-        }
-
-        // 后端异步并发尝试将网络 HTTP 缩略图预加载为 Base64，100% 保证 WebView2 无闪烁无拦截呈现
+        // 后端尝试将真实的在线 HTTP 缩略图转为 Base64（解决 WebView2 跨域拦截），如失败保留真实网络 URL
         let mut result_items = Vec::new();
-        for mut item in raw_items {
-            if !item.thumb_url.starts_with("data:") {
-                if let Some(b64) = Self::fetch_image_as_base64(&item.thumb_url).await {
-                    item.thumb_url = b64;
-                } else {
-                    // 如果网络直连超时，降级为保底 Base64 图像
-                    item.thumb_url = Self::generate_fallback_svg_base64(&item.title, &item.author, 1);
-                }
+        for mut item in list {
+            if let Some(b64) = Self::fetch_image_as_base64(&item.thumb_url).await {
+                item.thumb_url = b64;
             }
             result_items.push(item);
         }
@@ -280,16 +246,10 @@ impl WallpaperDownloader {
         Ok(result_items)
     }
 
-    /// 下载在线壁纸到本地缓存
+    /// 下载真实在线壁纸到本地缓存
     pub async fn download_online_wallpaper(item: &OnlineWallpaper, target_dir: &Path) -> Result<WallpaperItem, Box<dyn std::error::Error + Send + Sync>> {
         let client = Self::build_client();
-        let target_url = if item.raw_url.starts_with("http") {
-            item.raw_url.clone()
-        } else {
-            format!("https://picsum.photos/id/{}/3840/2160", 10)
-        };
-
-        let res = client.get(&target_url).send().await?;
+        let res = client.get(&item.raw_url).send().await?;
         let img_bytes = res.bytes().await?;
 
         fs::create_dir_all(target_dir)?;
@@ -301,7 +261,7 @@ impl WallpaperDownloader {
             title: item.title.clone(),
             author: item.author.clone(),
             file_path,
-            url: target_url,
+            url: item.raw_url.clone(),
             download_date: Local::now().format("%Y-%m-%d %H:%M:%S").to_string(),
         };
 
