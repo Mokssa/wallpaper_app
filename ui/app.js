@@ -4,7 +4,7 @@
 
 const invoke = window.__TAURI__ ? window.__TAURI__.core.invoke : async (cmd, args) => {
   console.log(`[Mock Invoke] ${cmd}`, args);
-  return null;
+  return [];
 };
 
 // State
@@ -129,7 +129,7 @@ async function pickCacheDir() {
 
 // Render Local Gallery
 async function renderGallery(items) {
-  cachedWallpapers = items || [];
+  cachedWallpapers = Array.isArray(items) ? items : [];
   galleryGrid.innerHTML = '';
   
   if (galleryCountText) {
@@ -206,6 +206,7 @@ async function loadWallpapers() {
     await renderGallery(items);
   } catch (err) {
     setStatus(`获取本地壁纸失败: ${err}`);
+    renderGallery([]);
   }
 }
 
@@ -221,9 +222,9 @@ async function loadCurrentWallpaper() {
   }
 }
 
-// Render Online Wallpapers Grid with Auto-Proxy Fix
+// Render Online Wallpapers Grid with Auto-Proxy Fix & Defensive Array Checking
 function renderOnlineGrid(items) {
-  onlineWallpapers = items || [];
+  onlineWallpapers = Array.isArray(items) ? items : [];
   onlineGrid.innerHTML = '';
 
   if (onlineWallpapers.length === 0) {
@@ -287,18 +288,17 @@ function renderOnlineGrid(items) {
   });
 }
 
-// Load Online Wallpapers List with Pagination
+// Load Online Wallpapers List with Pagination & Defensive Handling
 async function loadOnlineWallpapers() {
-  try {
-    const source = selectSource ? selectSource.value : 'picsum';
-    const query = inputOnlineQuery ? inputOnlineQuery.value.trim() : '';
+  const source = selectSource ? selectSource.value : 'picsum';
+  const query = inputOnlineQuery ? inputOnlineQuery.value.trim() : '';
 
+  try {
     setStatus(`正在获取 ${source} 壁纸列表（第 ${onlinePage} 页）...`);
     
     if (pageInfo) pageInfo.textContent = `第 ${onlinePage} 页`;
     if (btnPrevPage) btnPrevPage.disabled = (onlinePage <= 1);
 
-    // Skeleton loader
     onlineGrid.innerHTML = '<div style="grid-column: 1 / -1; padding: 40px; text-align: center; color: var(--text-secondary);">⏳ 正在通过 Rust 高速引擎拉取在线壁纸...</div>';
 
     const list = await invoke('fetch_online_wallpapers', {
@@ -308,9 +308,11 @@ async function loadOnlineWallpapers() {
       limit: pageLimit,
     });
 
-    renderOnlineGrid(list);
-    setStatus(`已成功加载 ${source} 壁纸第 ${onlinePage} 页 (共 ${list.length} 张)`);
+    const safeList = Array.isArray(list) ? list : [];
+    renderOnlineGrid(safeList);
+    setStatus(`已成功加载 ${source} 壁纸第 ${onlinePage} 页 (共 ${safeList.length} 张)`);
   } catch (err) {
+    console.error('Failed to load online wallpapers:', err);
     setStatus(`在线壁纸加载失败: ${err}`);
     renderOnlineGrid([]);
   }
