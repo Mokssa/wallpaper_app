@@ -1,5 +1,5 @@
 // ==========================================================================
-// WallpaperApp Client Script (Tauri v2 Official API Refactor)
+// WallpaperApp Client Script (Tauri v2 WinUI 3 Window Controls & Image Proxy)
 // ==========================================================================
 
 const invoke = window.__TAURI__ ? window.__TAURI__.core.invoke : async (cmd, args) => {
@@ -22,6 +22,10 @@ let onlinePage = 1;
 const pageLimit = 12;
 
 // DOM Elements
+const btnMinimize = document.getElementById('btn-minimize');
+const btnMaximize = document.getElementById('btn-maximize');
+const btnClose = document.getElementById('btn-close');
+
 const navItems = document.querySelectorAll('.nav-item');
 const tabPages = document.querySelectorAll('.tab-page');
 const statusMsgEl = document.getElementById('status-msg');
@@ -56,6 +60,19 @@ const currentWpText = document.getElementById('current-wp-text');
 function setStatus(msg) {
   if (statusMsgEl) {
     statusMsgEl.textContent = msg;
+  }
+}
+
+// Window Controls Setup
+function setupWindowControls() {
+  if (btnMinimize) {
+    btnMinimize.addEventListener('click', () => invoke('window_minimize'));
+  }
+  if (btnMaximize) {
+    btnMaximize.addEventListener('click', () => invoke('window_toggle_maximize'));
+  }
+  if (btnClose) {
+    btnClose.addEventListener('click', () => invoke('window_close'));
   }
 }
 
@@ -336,6 +353,7 @@ function escapeHtml(str) {
 
 // Attach Event Listeners
 function setupEvents() {
+  setupWindowControls();
   if (btnRefreshGallery) btnRefreshGallery.addEventListener('click', loadWallpapers);
   if (btnBrowseDir) btnBrowseDir.addEventListener('click', pickCacheDir);
 

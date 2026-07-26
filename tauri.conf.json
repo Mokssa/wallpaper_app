@@ -9,13 +9,15 @@
   "app": {
     "windows": [
       {
-        "title": "壁纸随心换 (WallpaperApp) - WinUI 3 Style",
+        "title": "壁纸随心换 (WallpaperApp)",
         "width": 1020,
         "height": 680,
         "minWidth": 940,
         "minHeight": 600,
         "resizable": true,
-        "decorations": true,
+        "decorations": false,
+        "transparent": true,
+        "shadow": true,
         "center": true
       }
     ],

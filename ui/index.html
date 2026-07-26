@@ -7,6 +7,19 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body class="winui-theme-dark">
+  <!-- WinUI 3 原生 Fluent 标题栏 (支持 Mica 拖拽区与窗口控制) -->
+  <div class="fluent-titlebar">
+    <div class="titlebar-drag-region" data-tauri-drag-region>
+      <img src="icons/32x32.png" class="titlebar-icon" alt="App Icon" />
+      <span class="titlebar-title">壁纸随心换 (WallpaperApp)</span>
+    </div>
+    <div class="titlebar-actions">
+      <button class="titlebar-btn" id="btn-minimize" title="最小化">&#xE921;</button>
+      <button class="titlebar-btn" id="btn-maximize" title="最大化">&#xE922;</button>
+      <button class="titlebar-btn close" id="btn-close" title="关闭">&#xE8BB;</button>
+    </div>
+  </div>
+
   <div class="app-container">
 
     <!-- WinUI 3 NavigationRail SideNav -->
@@ -197,7 +210,7 @@
                 <span class="tech-badge">Rust 1.96</span>
                 <span class="tech-badge">Tauri 2.0</span>
                 <span class="tech-badge">WinUI 3 Fluent Spec</span>
-                <span class="tech-badge">Official APIs</span>
+                <span class="tech-badge">Mica & Acrylic</span>
                 <span class="tech-badge">v1.0.0</span>
               </div>
             </div>

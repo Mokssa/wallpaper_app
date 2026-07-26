@@ -12,6 +12,10 @@ use wallpaper_setter::WallpaperSetter;
 use base64::Engine;
 use std::fs;
 use std::path::{Path, PathBuf};
+use tauri::Manager;
+
+#[cfg(target_os = "windows")]
+use window_vibrancy::{apply_acrylic, apply_mica};
 
 #[tauri::command]
 fn get_config() -> AppConfig {
@@ -126,8 +130,43 @@ fn get_current_wallpaper() -> Option<String> {
     WallpaperSetter::get_current_wallpaper()
 }
 
+// 窗口控制命令
+#[tauri::command]
+fn window_minimize(window: tauri::Window) {
+    let _ = window.minimize();
+}
+
+#[tauri::command]
+fn window_toggle_maximize(window: tauri::Window) {
+    if let Ok(is_max) = window.is_maximized() {
+        if is_max {
+            let _ = window.unmaximize();
+        } else {
+            let _ = window.maximize();
+        }
+    }
+}
+
+#[tauri::command]
+fn window_close(window: tauri::Window) {
+    let _ = window.close();
+}
+
 fn main() {
     tauri::Builder::default()
+        .setup(|app| {
+            let window = app.get_webview_window("main").unwrap();
+
+            #[cfg(target_os = "windows")]
+            {
+                // 绑定 Windows 11 原生 Mica 材质，回退为 Acrylic 亚克力
+                if let Err(_) = apply_mica(&window, Some(true)) {
+                    let _ = apply_acrylic(&window, Some((24, 24, 24, 180)));
+                }
+            }
+
+            Ok(())
+        })
         .plugin(tauri_plugin_single_instance_init())
         .invoke_handler(tauri::generate_handler![
             get_config,
@@ -140,7 +179,10 @@ fn main() {
             download_and_set_online_wallpaper,
             set_desktop_wallpaper,
             delete_wallpaper,
-            get_current_wallpaper
+            get_current_wallpaper,
+            window_minimize,
+            window_toggle_maximize,
+            window_close
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

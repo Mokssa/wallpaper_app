@@ -1,35 +1,43 @@
 /* ==========================================================================
-   WinUI 3 (Fluent Design System) Spec Stylesheet
+   Tauri v2 + WinUI 3 (Fluent Design System) Standard Design Tokens & Styles
    ========================================================================== */
 
 :root {
-  --font-family: "Segoe UI Variable Text", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-fluent: "Segoe UI Variable Text", "Segoe UI", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
   
-  /* WinUI 3 Dark Mode Palette */
-  --bg-mica-alt: #1c1c1c;
-  --bg-mica-solid: #202020;
-  --bg-card: #2d2d2d;
-  --bg-card-subtle: #323232;
-  --bg-hover: rgba(255, 255, 255, 0.06);
-  --bg-active: rgba(255, 255, 255, 0.09);
+  /* WinUI 3 Dark Mode Design Tokens */
+  --bg-app: transparent;
+  --bg-card: rgba(45, 45, 45, 0.75);
+  --bg-card-hover: rgba(55, 55, 55, 0.85);
+  --bg-control: rgba(255, 255, 255, 0.06);
+  --bg-control-hover: rgba(255, 255, 255, 0.10);
+  --bg-control-active: rgba(255, 255, 255, 0.04);
   
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.14);
-  
-  --accent-color: #60cdff;
-  --accent-color-hover: #7cd5ff;
-  --accent-color-active: #40b9f2;
-  
+  --border-card: rgba(255, 255, 255, 0.08);
+  --border-card-hover: rgba(255, 255, 255, 0.15);
+  --border-control: rgba(255, 255, 255, 0.10);
+  --border-control-bottom: rgba(255, 255, 255, 0.22);
+
   --text-primary: #ffffff;
-  --text-secondary: #adadad;
-  --text-tertiary: #7a7a7a;
-  
-  --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.22);
-  --shadow-flyout: 0 8px 24px rgba(0, 0, 0, 0.35);
-  
-  --radius-small: 4px;
-  --radius-medium: 8px;
-  --radius-large: 12px;
+  --text-secondary: #9e9e9e;
+  --text-tertiary: #6c6c6c;
+
+  --accent-color: #60cdff;
+  --accent-color-hover: #4cc2ff;
+  --accent-color-active: #3aa8e6;
+  --accent-text: #000000;
+
+  --status-success: #6ccb5f;
+  --status-warning: #fce100;
+  --status-danger: #ff99a4;
+  --bg-infobar: rgba(39, 39, 39, 0.85);
+
+  --radius-card: 8px;
+  --radius-control: 4px;
+  --radius-dialog: 8px;
+
+  --shadow-card: 0 2px 4px rgba(0, 0, 0, 0.25);
+  --shadow-flyout: 0 8px 16px rgba(0, 0, 0, 0.45);
 }
 
 * {
@@ -40,32 +48,103 @@
   -webkit-user-select: none;
 }
 
-body {
-  font-family: var(--font-family);
-  background-color: var(--bg-mica-solid);
+/* 前端容器基础透明配置 (为 Mica/Acrylic 视效留出透射通道) */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  background: transparent !important;
   color: var(--text-primary);
-  height: 100vh;
+  font-family: var(--font-fluent);
+  user-select: none;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.app-container {
-  display: flex;
-  flex: 1;
-  height: calc(100vh - 28px);
-  min-width: 940px;
-  background-color: var(--bg-mica-solid);
+  box-sizing: border-box;
 }
 
 /* ==========================================================================
-   WinUI 3 NavigationRail (SideNav)
+   1) WinUI 3 极简 Window Titlebar (自定义标题栏与拖拽区)
+   ========================================================================== */
+.fluent-titlebar {
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 12px;
+  font-size: 12px;
+  background: rgba(26, 26, 26, 0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-card);
+  flex-shrink: 0;
+}
+
+.titlebar-drag-region {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: default;
+}
+
+.titlebar-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.titlebar-title {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.titlebar-actions {
+  display: flex;
+  height: 100%;
+}
+
+.titlebar-btn {
+  width: 46px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", sans-serif;
+  font-size: 10px;
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+
+.titlebar-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.titlebar-btn.close:hover {
+  background: #c42b1c;
+  color: #ffffff;
+}
+
+/* App Container */
+.app-container {
+  display: flex;
+  flex: 1;
+  height: calc(100vh - 64px);
+  min-width: 940px;
+  background: rgba(32, 32, 32, 0.75);
+  backdrop-filter: blur(20px);
+}
+
+/* ==========================================================================
+   2) WinUI 3 NavigationRail (SideNav)
    ========================================================================== */
 .winui-nav {
   width: 220px;
   flex-shrink: 0;
-  background-color: var(--bg-mica-alt);
-  border-right: 1px solid var(--border-subtle);
+  background: rgba(26, 26, 26, 0.65);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid var(--border-card);
   display: flex;
   flex-direction: column;
   padding: 16px 8px 12px 8px;
@@ -82,7 +161,7 @@ body {
   width: 32px;
   height: 32px;
   background: linear-gradient(135deg, #0078d4, #60cdff);
-  border-radius: var(--radius-medium);
+  border-radius: var(--radius-card);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -132,7 +211,7 @@ body {
   padding: 0 12px;
   background: transparent;
   border: none;
-  border-radius: var(--radius-medium);
+  border-radius: var(--radius-card);
   color: var(--text-secondary);
   font-size: 13px;
   font-weight: 400;
@@ -142,21 +221,20 @@ body {
 }
 
 .nav-item:hover {
-  background-color: var(--bg-hover);
+  background-color: var(--bg-control-hover);
   color: var(--text-primary);
 }
 
 .nav-item:active {
-  background-color: var(--bg-active);
+  background-color: var(--bg-control-active);
 }
 
 .nav-item.active {
-  background-color: rgba(255, 255, 255, 0.06);
+  background-color: rgba(255, 255, 255, 0.08);
   color: var(--text-primary);
   font-weight: 600;
 }
 
-/* WinUI 3 Active Indicator Line */
 .nav-indicator {
   position: absolute;
   left: 3px;
@@ -185,12 +263,12 @@ body {
 }
 
 /* ==========================================================================
-   Main Content Area
+   3) Main Content Area & Controls (4px / 8px Rule)
    ========================================================================== */
 .winui-main {
   flex: 1;
   min-width: 720px;
-  background-color: var(--bg-mica-solid);
+  background: transparent;
   padding: 24px 32px;
   overflow-y: auto;
 }
@@ -229,9 +307,7 @@ body {
   margin-top: 4px;
 }
 
-/* ==========================================================================
-   Filter Bar & Controls
-   ========================================================================== */
+/* Filter Bar */
 .explore-filter-bar {
   display: flex;
   align-items: center;
@@ -240,9 +316,10 @@ body {
   gap: 16px;
   margin-bottom: 20px;
   padding: 12px 18px;
-  background-color: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-medium);
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-card);
+  backdrop-filter: blur(20px);
 }
 
 .filter-group {
@@ -256,9 +333,9 @@ body {
 .winui-select {
   height: 32px;
   padding: 0 12px;
-  background-color: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-medium);
+  background-color: var(--bg-control);
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-control);
   color: var(--text-primary);
   font-size: 13px;
   font-family: inherit;
@@ -271,9 +348,7 @@ body {
   color: #ffffff;
 }
 
-/* ==========================================================================
-   Pagination Bar
-   ========================================================================== */
+/* WinUI 3 Pagination Bar */
 .pagination-bar {
   display: flex;
   align-items: center;
@@ -291,9 +366,7 @@ body {
   text-align: center;
 }
 
-/* ==========================================================================
-   WinUI 3 Buttons & Controls
-   ========================================================================== */
+/* WinUI 3 Buttons & Controls (4px Radius Rule) */
 .winui-btn {
   display: inline-flex;
   align-items: center;
@@ -301,9 +374,10 @@ body {
   gap: 8px;
   height: 32px;
   padding: 0 16px;
-  background-color: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-medium);
+  background: var(--bg-control);
+  border: 1px solid var(--border-control);
+  border-bottom-color: var(--border-control-bottom);
+  border-radius: var(--radius-control);
   color: var(--text-primary);
   font-size: 12px;
   font-family: inherit;
@@ -312,7 +386,7 @@ body {
   box-shadow: 0 1px 2px rgba(0,0,0,0.12);
   white-space: nowrap;
   flex-shrink: 0;
-  transition: all 0.15s ease;
+  transition: all 0.1s ease;
 }
 
 .winui-btn:disabled {
@@ -321,34 +395,35 @@ body {
 }
 
 .winui-btn:hover:not(:disabled) {
-  background-color: var(--bg-hover);
-  border-color: var(--border-strong);
+  background: var(--bg-control-hover);
+  border-color: var(--border-card-hover);
 }
 
 .winui-btn:active:not(:disabled) {
+  background: var(--bg-control-active);
   transform: scale(0.98);
 }
 
 .winui-btn-primary {
-  background-color: var(--accent-color);
+  background: var(--accent-color);
   border-color: transparent;
   color: #000000;
   font-weight: 600;
 }
 
 .winui-btn-primary:hover:not(:disabled) {
-  background-color: var(--accent-color-hover);
+  background: var(--accent-color-hover);
   color: #000000;
 }
 
 .winui-btn-danger {
-  background-color: rgba(255, 99, 99, 0.12);
+  background: rgba(255, 99, 99, 0.12);
   border-color: rgba(255, 99, 99, 0.2);
   color: #ff6b6b;
 }
 
 .winui-btn-danger:hover:not(:disabled) {
-  background-color: rgba(255, 99, 99, 0.22);
+  background: rgba(255, 99, 99, 0.22);
 }
 
 .btn-icon {
@@ -360,10 +435,10 @@ body {
 .winui-input {
   height: 32px;
   padding: 0 12px;
-  background-color: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--border-subtle);
-  border-bottom: 2px solid var(--border-strong);
-  border-radius: var(--radius-medium) var(--radius-medium) 0 0;
+  background: var(--bg-control);
+  border: 1px solid var(--border-control);
+  border-bottom: 2px solid var(--border-control-bottom);
+  border-radius: var(--radius-control) var(--radius-control) 0 0;
   color: var(--text-primary);
   font-size: 13px;
   font-family: inherit;
@@ -372,11 +447,11 @@ body {
 }
 
 .winui-input:focus {
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: rgba(0, 0, 0, 0.25);
   border-bottom-color: var(--accent-color);
 }
 
-/* WinUI 3 Toggle Switch */
+/* WinUI 3 Toggle Switch (4px Radius Rule) */
 .winui-toggle {
   position: relative;
   display: inline-block;
@@ -396,7 +471,7 @@ body {
   cursor: pointer;
   top: 0; left: 0; right: 0; bottom: 0;
   background-color: rgba(255, 255, 255, 0.1);
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--border-control);
   border-radius: 20px;
   transition: 0.2s;
 }
@@ -424,26 +499,30 @@ input:checked + .toggle-slider:before {
 }
 
 /* ==========================================================================
-   Gallery Grid & Cards
+   4) Gallery Grid & Cards (8px Card Radius Rule)
    ========================================================================== */
 .gallery-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
   gap: 16px;
+  will-change: transform;
+  contain: content;
 }
 
 .gallery-card {
-  background-color: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-large);
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-card);
   overflow: hidden;
   box-shadow: var(--shadow-card);
+  backdrop-filter: blur(20px);
   transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .gallery-card:hover {
   transform: translateY(-2px);
-  border-color: var(--border-strong);
+  background: var(--bg-card-hover);
+  border-color: var(--border-card-hover);
   box-shadow: var(--shadow-flyout);
 }
 
@@ -505,9 +584,10 @@ input:checked + .toggle-slider:before {
   justify-content: center;
   padding: 60px 20px;
   text-align: center;
-  background-color: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-large);
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-card);
+  backdrop-filter: blur(20px);
 }
 
 .empty-icon { font-size: 42px; margin-bottom: 12px; }
@@ -515,7 +595,7 @@ input:checked + .toggle-slider:before {
 .empty-desc { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
 
 /* ==========================================================================
-   Settings Card List (WinUI 3 SettingCard & About Section)
+   5) Settings Card List (WinUI 3 SettingCard Spec)
    ========================================================================== */
 .settings-list {
   display: flex;
@@ -527,9 +607,10 @@ input:checked + .toggle-slider:before {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-medium);
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-card);
+  backdrop-filter: blur(20px);
   padding: 14px 20px;
   gap: 16px;
 }
@@ -575,7 +656,7 @@ input:checked + .toggle-slider:before {
 /* About Section Badges */
 .about-card {
   margin-top: 12px;
-  background-color: rgba(255, 255, 255, 0.02);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .about-tech-stack {
@@ -601,9 +682,9 @@ input:checked + .toggle-slider:before {
   gap: 10px;
   margin-top: 20px;
   padding: 12px 16px;
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-medium);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-card);
   font-size: 12px;
   color: var(--text-secondary);
   word-break: break-all;
@@ -612,8 +693,9 @@ input:checked + .toggle-slider:before {
 /* Status Bar */
 .winui-statusbar {
   height: 28px;
-  background-color: var(--bg-mica-alt);
-  border-top: 1px solid var(--border-subtle);
+  background: rgba(26, 26, 26, 0.85);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border-card);
   display: flex;
   align-items: center;
   padding: 0 16px;
