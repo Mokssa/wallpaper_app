@@ -36,9 +36,49 @@ struct WallpaperApp {
     current_wallpaper_path: Option<String>,
 }
 
+fn setup_custom_fonts(ctx: &egui::Context) {
+    let mut fonts = egui::FontDefinitions::default();
+
+    // 优先读取 Windows 系统自带的微软雅黑/黑体字体，支持全量中文字符渲染
+    let font_paths = [
+        "C:\\Windows\\Fonts\\msyh.ttc",
+        "C:\\Windows\\Fonts\\msyh.ttf",
+        "C:\\Windows\\Fonts\\msyhl.ttc",
+        "C:\\Windows\\Fonts\\simhei.ttf",
+        "C:\\Windows\\Fonts\\simsun.ttc",
+    ];
+
+    for path in font_paths {
+        if let Ok(font_data) = fs::read(path) {
+            fonts.font_data.insert(
+                "cjk_font".to_owned(),
+                egui::FontData::from_owned(font_data),
+            );
+
+            // 将中文字体加入最高优先级，确保所有中文 glyph 均能正确渲染
+            fonts
+                .families
+                .entry(egui::FontFamily::Proportional)
+                .or_default()
+                .insert(0, "cjk_font".to_owned());
+
+            fonts
+                .families
+                .entry(egui::FontFamily::Monospace)
+                .or_default()
+                .insert(0, "cjk_font".to_owned());
+
+            break;
+        }
+    }
+
+    ctx.set_fonts(fonts);
+}
+
 impl WallpaperApp {
     fn new(cc: &eframe::CreationContext<'_>) -> Self {
         egui_extras::install_image_loaders(&cc.egui_ctx);
+        setup_custom_fonts(&cc.egui_ctx);
 
         let config = AppConfig::load();
         let (tx, rx) = channel();
