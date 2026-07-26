@@ -34,10 +34,10 @@
 
   --radius-card: 8px;
   --radius-control: 4px;
-  --radius-dialog: 8px;
+  --radius-dialog: 12px;
 
   --shadow-card: 0 2px 4px rgba(0, 0, 0, 0.25);
-  --shadow-flyout: 0 8px 16px rgba(0, 0, 0, 0.45);
+  --shadow-flyout: 0 12px 28px rgba(0, 0, 0, 0.55);
 }
 
 * {
@@ -46,6 +46,23 @@
   padding: 0;
   user-select: none;
   -webkit-user-select: none;
+}
+
+/* WinUI 3 Smooth Thin Scrollbar (原生极简细长隐形滚动条) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.36);
 }
 
 /* 前端容器基础透明配置 (为 Mica/Acrylic 视效留出透射通道) */
@@ -499,7 +516,7 @@ input:checked + .toggle-slider:before {
 }
 
 /* ==========================================================================
-   4) Gallery Grid & Cards (8px Card Radius Rule)
+   4) Pure Wallpaper Thumbnail Cards (纯缩略图流线化卡片)
    ========================================================================== */
 .gallery-grid {
   display: grid;
@@ -509,71 +526,95 @@ input:checked + .toggle-slider:before {
   contain: content;
 }
 
-.gallery-card {
+.pure-thumb-card {
+  position: relative;
+  height: 148px;
   background: var(--bg-card);
   border: 1px solid var(--border-card);
   border-radius: var(--radius-card);
   overflow: hidden;
   box-shadow: var(--shadow-card);
+  cursor: pointer;
   backdrop-filter: blur(20px);
-  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1), border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.gallery-card:hover {
-  transform: translateY(-2px);
-  background: var(--bg-card-hover);
-  border-color: var(--border-card-hover);
+.pure-thumb-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  border-color: var(--accent-color);
   box-shadow: var(--shadow-flyout);
 }
 
-.card-thumb-wrap {
-  position: relative;
-  width: 100%;
-  height: 124px;
-  background-color: #111;
-  overflow: hidden;
-}
-
-.card-thumb {
+.pure-card-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
+  transition: transform 0.35s ease;
 }
 
-.gallery-card:hover .card-thumb {
-  transform: scale(1.04);
+.pure-thumb-card:hover .pure-card-img {
+  transform: scale(1.06);
 }
 
-.card-content {
-  padding: 12px;
-}
-
-.card-item-title {
-  font-size: 13px;
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.card-item-date {
-  font-size: 10px;
-  color: var(--text-secondary);
-  margin-top: 2px;
-  margin-bottom: 12px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.card-actions {
+/* 悬浮蒙层与操作提示 Overlay */
+.pure-card-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.2) 60%, rgba(0, 0, 0, 0) 100%);
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 10px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
-.card-actions .winui-btn {
+.pure-thumb-card:hover .pure-card-overlay {
+  opacity: 1;
+}
+
+.overlay-top {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.overlay-tag {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  border-radius: 10px;
+  color: #fff;
+}
+
+.overlay-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.overlay-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
+
+.overlay-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.overlay-btn {
   flex: 1;
+  height: 28px;
+  padding: 0 8px;
+  font-size: 11px;
 }
 
 /* Empty State */
@@ -595,8 +636,141 @@ input:checked + .toggle-slider:before {
 .empty-desc { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
 
 /* ==========================================================================
-   5) Settings Card List (WinUI 3 SettingCard Spec)
+   5) WinUI 3 Wallpaper Details ContentDialog (壁纸详情大图对话框)
    ========================================================================== */
+.winui-modal-backdrop {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(16px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.winui-modal-backdrop.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.winui-modal-dialog {
+  width: 580px;
+  max-width: 90vw;
+  background: rgba(36, 36, 36, 0.92);
+  border: 1px solid var(--border-card-hover);
+  border-radius: var(--radius-dialog);
+  box-shadow: var(--shadow-flyout);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: scale(0.95) translateY(10px);
+  transition: transform 0.2s cubic-bezier(0.1, 0.9, 0.2, 1);
+}
+
+.winui-modal-backdrop.active .winui-modal-dialog {
+  transform: scale(1) translateY(0);
+}
+
+.modal-header {
+  height: 48px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-card);
+}
+
+.modal-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.modal-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 16px;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-control);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close-btn:hover {
+  background: var(--bg-control-hover);
+  color: #fff;
+}
+
+.modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.modal-image-preview {
+  width: 100%;
+  height: 260px;
+  background: #111;
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.modal-image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.modal-wallpaper-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-card);
+  padding: 12px 16px;
+}
+
+.meta-row {
+  display: flex;
+  font-size: 12px;
+}
+
+.meta-label {
+  color: var(--text-secondary);
+  width: 95px;
+  flex-shrink: 0;
+}
+
+.meta-val {
+  color: var(--text-primary);
+  font-weight: 500;
+  word-break: break-all;
+}
+
+.modal-footer {
+  height: 60px;
+  padding: 0 20px;
+  background: rgba(28, 28, 28, 0.6);
+  border-top: 1px solid var(--border-card);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Settings Card List */
 .settings-list {
   display: flex;
   flex-direction: column;
@@ -636,12 +810,6 @@ input:checked + .toggle-slider:before {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.setting-val-tag {
-  font-size: 12px;
-  color: var(--text-tertiary);
-  word-break: break-all;
 }
 
 .setting-control {

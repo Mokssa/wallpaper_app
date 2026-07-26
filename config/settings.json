@@ -4,5 +4,6 @@
   "auto_update_interval_minutes": 60,
   "auto_update_enabled": false,
   "batch_count": 6,
-  "wallpaper_style": "fill"
+  "wallpaper_style": "fill",
+  "unsplash_access_key": ""
 }

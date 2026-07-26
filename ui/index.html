@@ -85,8 +85,9 @@
           </button>
         </header>
 
-        <div class="gallery-grid" id="gallery-grid">
-          <!-- Local Gallery Cards generated dynamically -->
+        <!-- 纯壁纸缩略图画廊卡片网格 -->
+        <div class="gallery-grid pure-thumb-grid" id="gallery-grid">
+          <!-- Local Gallery Pure Image Cards generated dynamically -->
         </div>
 
         <div class="empty-state" id="gallery-empty-state" style="display: none;">
@@ -123,8 +124,8 @@
           </div>
         </div>
 
-        <!-- 在线壁纸列表网格 -->
-        <div class="gallery-grid" id="online-grid">
+        <!-- 纯壁纸缩略图在线网格 -->
+        <div class="gallery-grid pure-thumb-grid" id="online-grid">
           <!-- Generated dynamically -->
         </div>
 
@@ -224,6 +225,35 @@
       </section>
 
     </main>
+  </div>
+
+  <!-- WinUI 3 壁纸详情大图弹窗 (Wallpaper Details ContentDialog) -->
+  <div class="winui-modal-backdrop" id="detail-modal">
+    <div class="winui-modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-wallpaper-title">壁纸详情</h3>
+        <button class="modal-close-btn" id="btn-close-modal">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-image-preview">
+          <img id="modal-wallpaper-img" src="" alt="Wallpaper Preview" />
+        </div>
+        <div class="modal-wallpaper-meta">
+          <div class="meta-row"><span class="meta-label">壁纸名称：</span><span class="meta-val" id="modal-meta-title">-</span></div>
+          <div class="meta-row"><span class="meta-label">创作者/分类：</span><span class="meta-val" id="modal-meta-author">-</span></div>
+          <div class="meta-row"><span class="meta-label">图源来源：</span><span class="meta-val" id="modal-meta-source">-</span></div>
+          <div class="meta-row" id="modal-meta-date-row"><span class="meta-label">下载时间：</span><span class="meta-val" id="modal-meta-date">-</span></div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="winui-btn winui-btn-danger" id="modal-btn-delete" style="display: none;">🗑 删除壁纸</button>
+        <div style="flex: 1;"></div>
+        <button class="winui-btn" id="modal-btn-cancel">关闭</button>
+        <button class="winui-btn winui-btn-primary" id="modal-btn-apply">🖥 设为桌面壁纸</button>
+      </div>
+    </div>
   </div>
 
   <!-- WinUI 3 Fluent Bottom Status Bar -->

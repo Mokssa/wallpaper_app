@@ -1,5 +1,5 @@
 // ==========================================================================
-// WallpaperApp Client Script (Tauri v2 Global IPC Interoperability)
+// WallpaperApp Client Script (Pure Image Cards & WinUI 3 Details Modal)
 // ==========================================================================
 
 // 全平台全版本兼容的 Tauri IPC 桥接绑定
@@ -40,6 +40,8 @@ let cachedWallpapers = [];
 let onlineWallpapers = [];
 let onlinePage = 1;
 const pageLimit = 12;
+let currentDetailItem = null;
+let currentDetailType = 'online'; // 'local' | 'online'
 
 // DOM Elements
 const btnMinimize = document.getElementById('btn-minimize');
@@ -76,6 +78,20 @@ const inputConfigInterval = document.getElementById('input-config-interval');
 const checkConfigAutoupdate = document.getElementById('check-config-autoupdate');
 const currentWpText = document.getElementById('current-wp-text');
 
+// Modal Elements
+const detailModal = document.getElementById('detail-modal');
+const btnCloseModal = document.getElementById('btn-close-modal');
+const modalTitle = document.getElementById('modal-wallpaper-title');
+const modalImg = document.getElementById('modal-wallpaper-img');
+const modalMetaTitle = document.getElementById('modal-meta-title');
+const modalMetaAuthor = document.getElementById('modal-meta-author');
+const modalMetaSource = document.getElementById('modal-meta-source');
+const modalMetaDateRow = document.getElementById('modal-meta-date-row');
+const modalMetaDate = document.getElementById('modal-meta-date');
+const modalBtnDelete = document.getElementById('modal-btn-delete');
+const modalBtnCancel = document.getElementById('modal-btn-cancel');
+const modalBtnApply = document.getElementById('modal-btn-apply');
+
 // Helper to set status
 function setStatus(msg) {
   if (statusMsgEl) {
@@ -85,15 +101,9 @@ function setStatus(msg) {
 
 // Window Controls Setup
 function setupWindowControls() {
-  if (btnMinimize) {
-    btnMinimize.addEventListener('click', () => invoke('window_minimize'));
-  }
-  if (btnMaximize) {
-    btnMaximize.addEventListener('click', () => invoke('window_toggle_maximize'));
-  }
-  if (btnClose) {
-    btnClose.addEventListener('click', () => invoke('window_close'));
-  }
+  if (btnMinimize) btnMinimize.addEventListener('click', () => invoke('window_minimize'));
+  if (btnMaximize) btnMaximize.addEventListener('click', () => invoke('window_toggle_maximize'));
+  if (btnClose) btnClose.addEventListener('click', () => invoke('window_close'));
 }
 
 // Navigation Tabs Switch
@@ -112,6 +122,35 @@ function setupNavigation() {
       }
     });
   });
+}
+
+// Open Details Modal Dialog
+function openWallpaperDetails(item, type = 'online', imgSrc = '') {
+  currentDetailItem = item;
+  currentDetailType = type;
+
+  modalTitle.textContent = type === 'local' ? '本地壁纸详情' : '在线壁纸详情';
+  modalImg.src = imgSrc || item.thumb_url || item.url || '';
+  modalMetaTitle.textContent = item.title || '壁纸作品';
+  modalMetaAuthor.textContent = item.author || '未知作者';
+  modalMetaSource.textContent = item.source || (type === 'local' ? '本地图库' : '在线源');
+
+  if (type === 'local' && item.download_date) {
+    modalMetaDateRow.style.display = 'flex';
+    modalMetaDate.textContent = item.download_date;
+    modalBtnDelete.style.display = 'inline-flex';
+  } else {
+    modalMetaDateRow.style.display = 'none';
+    modalBtnDelete.style.display = 'none';
+  }
+
+  detailModal.classList.add('active');
+}
+
+// Close Details Modal Dialog
+function closeWallpaperDetails() {
+  detailModal.classList.remove('active');
+  currentDetailItem = null;
 }
 
 // Load Config
@@ -168,7 +207,7 @@ async function pickCacheDir() {
   }
 }
 
-// Render Local Gallery
+// Render Local Gallery (纯缩略图卡片模式)
 async function renderGallery(items) {
   cachedWallpapers = Array.isArray(items) ? items : [];
   galleryGrid.innerHTML = '';
@@ -188,7 +227,7 @@ async function renderGallery(items) {
 
   for (const item of cachedWallpapers) {
     const card = document.createElement('div');
-    card.className = 'gallery-card';
+    card.className = 'pure-thumb-card';
 
     let imgSrc = '';
     try {
@@ -199,44 +238,44 @@ async function renderGallery(items) {
     if (!imgSrc) imgSrc = item.file_path;
 
     card.innerHTML = `
-      <div class="card-thumb-wrap">
-        <img class="card-thumb" src="${imgSrc}" alt="${escapeHtml(item.title)}" loading="lazy" />
-      </div>
-      <div class="card-content">
-        <div class="card-item-title" title="${escapeHtml(item.title)}">${escapeHtml(item.title)}</div>
-        <div class="card-item-date">🕒 ${escapeHtml(item.download_date)}</div>
-        <div class="card-actions">
-          <button class="winui-btn winui-btn-primary btn-set-wp">🖥 设为壁纸</button>
-          <button class="winui-btn winui-btn-danger btn-delete-wp">🗑 删除</button>
+      <img class="pure-card-img" src="${imgSrc}" alt="${escapeHtml(item.title)}" loading="lazy" />
+      <div class="pure-card-overlay">
+        <div class="overlay-top">
+          <span class="overlay-tag">本地</span>
+        </div>
+        <div class="overlay-bottom">
+          <div class="overlay-title">${escapeHtml(item.title)}</div>
+          <div class="overlay-actions">
+            <button class="winui-btn winui-btn-primary overlay-btn btn-quick-set">🖥 设为壁纸</button>
+            <button class="winui-btn overlay-btn btn-quick-details">ℹ️ 详情</button>
+          </div>
         </div>
       </div>
     `;
 
-    const btnSet = card.querySelector('.btn-set-wp');
-    const btnDelete = card.querySelector('.btn-delete-wp');
-
-    btnSet.addEventListener('click', async () => {
-      try {
-        setStatus(`正在设置桌面壁纸: ${item.title}...`);
-        await invoke('set_desktop_wallpaper', { pathStr: item.file_path });
-        setStatus(`成功设置桌面壁纸: ${item.title}`);
-        loadCurrentWallpaper();
-      } catch (err) {
-        setStatus(`设置壁纸失败: ${err}`);
+    // 点击卡片直接唤出详情页
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('.btn-quick-set')) {
+        e.stopPropagation();
+        setWallpaperAction(item.file_path, item.title);
+        return;
       }
-    });
-
-    btnDelete.addEventListener('click', async () => {
-      try {
-        await invoke('delete_wallpaper', { filePath: item.file_path });
-        setStatus(`已删除壁纸: ${item.title}`);
-        loadWallpapers();
-      } catch (err) {
-        setStatus(`删除失败: ${err}`);
-      }
+      openWallpaperDetails(item, 'local', imgSrc);
     });
 
     galleryGrid.appendChild(card);
+  }
+}
+
+// Setting Wallpaper Helper
+async function setWallpaperAction(filePath, title) {
+  try {
+    setStatus(`正在设置桌面壁纸: ${title}...`);
+    await invoke('set_desktop_wallpaper', { pathStr: filePath });
+    setStatus(`成功设置桌面壁纸: ${title}`);
+    loadCurrentWallpaper();
+  } catch (err) {
+    setStatus(`设置壁纸失败: ${err}`);
   }
 }
 
@@ -263,7 +302,7 @@ async function loadCurrentWallpaper() {
   }
 }
 
-// Render Online Wallpapers Grid
+// Render Online Wallpapers Grid (纯缩略图卡片模式)
 function renderOnlineGrid(items) {
   onlineWallpapers = Array.isArray(items) ? items : [];
   onlineGrid.innerHTML = '';
@@ -275,46 +314,52 @@ function renderOnlineGrid(items) {
 
   onlineWallpapers.forEach(item => {
     const card = document.createElement('div');
-    card.className = 'gallery-card';
+    card.className = 'pure-thumb-card';
 
     card.innerHTML = `
-      <div class="card-thumb-wrap">
-        <img class="card-thumb" src="${item.thumb_url}" alt="${escapeHtml(item.title)}" loading="lazy" />
-      </div>
-      <div class="card-content">
-        <div class="card-item-title" title="${escapeHtml(item.title)}">${escapeHtml(item.title)}</div>
-        <div class="card-item-date">👤 ${escapeHtml(item.author)} • ${escapeHtml(item.source)}</div>
-        <div class="card-actions">
-          <button class="winui-btn winui-btn-primary btn-apply-online">🖥 设为壁纸</button>
+      <img class="pure-card-img" src="${item.thumb_url}" alt="${escapeHtml(item.title)}" loading="lazy" />
+      <div class="pure-card-overlay">
+        <div class="overlay-top">
+          <span class="overlay-tag">${escapeHtml(item.source)}</span>
+        </div>
+        <div class="overlay-bottom">
+          <div class="overlay-title">${escapeHtml(item.title)}</div>
+          <div class="overlay-actions">
+            <button class="winui-btn winui-btn-primary overlay-btn btn-quick-set">🖥 设为壁纸</button>
+            <button class="winui-btn overlay-btn btn-quick-details">ℹ️ 详情</button>
+          </div>
         </div>
       </div>
     `;
 
-    const btnApply = card.querySelector('.btn-apply-online');
-    btnApply.addEventListener('click', async () => {
-      try {
-        btnApply.disabled = true;
-        btnApply.textContent = '⏳ 下载并应用中...';
-        setStatus(`正在下载并应用壁纸: ${item.title}...`);
-        
-        await invoke('download_and_set_online_wallpaper', { item });
-        
-        setStatus(`成功应用壁纸: ${item.title}`);
-        await loadWallpapers();
-        await loadCurrentWallpaper();
-      } catch (err) {
-        setStatus(`下载应用壁纸失败: ${err}`);
-      } finally {
-        btnApply.disabled = false;
-        btnApply.textContent = '🖥 设为壁纸';
+    // 点击卡片直接唤出壁纸详情页
+    card.addEventListener('click', async (e) => {
+      if (e.target.closest('.btn-quick-set')) {
+        e.stopPropagation();
+        downloadAndSetOnlineAction(item);
+        return;
       }
+      openWallpaperDetails(item, 'online', item.thumb_url);
     });
 
     onlineGrid.appendChild(card);
   });
 }
 
-// Load Online Wallpapers List with Official API Spec
+// Download & Set Online Action Helper
+async function downloadAndSetOnlineAction(item) {
+  try {
+    setStatus(`正在下载并应用壁纸: ${item.title}...`);
+    await invoke('download_and_set_online_wallpaper', { item });
+    setStatus(`成功应用壁纸: ${item.title}`);
+    await loadWallpapers();
+    await loadCurrentWallpaper();
+  } catch (err) {
+    setStatus(`应用壁纸失败: ${err}`);
+  }
+}
+
+// Load Online Wallpapers List
 async function loadOnlineWallpapers() {
   const source = selectSource ? selectSource.value : 'picsum';
   const query = inputOnlineQuery ? inputOnlineQuery.value.trim() : '';
@@ -325,7 +370,7 @@ async function loadOnlineWallpapers() {
     if (pageInfo) pageInfo.textContent = `第 ${onlinePage} 页`;
     if (btnPrevPage) btnPrevPage.disabled = (onlinePage <= 1);
 
-    onlineGrid.innerHTML = '<div style="grid-column: 1 / -1; padding: 40px; text-align: center; color: var(--text-secondary);">⏳ 正在通过 Rust 后端核心拉取在线壁纸...</div>';
+    onlineGrid.innerHTML = '<div style="grid-column: 1 / -1; padding: 40px; text-align: center; color: var(--text-secondary);">⏳ 正在拉取在线壁纸...</div>';
 
     const list = await invoke('fetch_online_wallpapers', {
       source,
@@ -400,6 +445,41 @@ function setupEvents() {
   if (inputConfigUnsplashKey) inputConfigUnsplashKey.addEventListener('change', saveConfig);
   if (inputConfigInterval) inputConfigInterval.addEventListener('change', saveConfig);
   if (checkConfigAutoupdate) checkConfigAutoupdate.addEventListener('change', saveConfig);
+
+  // Modal Dialog Actions
+  if (btnCloseModal) btnCloseModal.addEventListener('click', closeWallpaperDetails);
+  if (modalBtnCancel) modalBtnCancel.addEventListener('click', closeWallpaperDetails);
+  if (detailModal) {
+    detailModal.addEventListener('click', (e) => {
+      if (e.target === detailModal) closeWallpaperDetails();
+    });
+  }
+
+  if (modalBtnApply) {
+    modalBtnApply.addEventListener('click', async () => {
+      if (!currentDetailItem) return;
+      if (currentDetailType === 'local') {
+        await setWallpaperAction(currentDetailItem.file_path, currentDetailItem.title);
+      } else {
+        await downloadAndSetOnlineAction(currentDetailItem);
+      }
+      closeWallpaperDetails();
+    });
+  }
+
+  if (modalBtnDelete) {
+    modalBtnDelete.addEventListener('click', async () => {
+      if (!currentDetailItem || currentDetailType !== 'local') return;
+      try {
+        await invoke('delete_wallpaper', { filePath: currentDetailItem.file_path });
+        setStatus(`已删除壁纸: ${currentDetailItem.title}`);
+        closeWallpaperDetails();
+        loadWallpapers();
+      } catch (err) {
+        setStatus(`删除壁纸失败: ${err}`);
+      }
+    });
+  }
 }
 
 // Initialization
