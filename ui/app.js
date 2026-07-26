@@ -89,6 +89,7 @@ const modalMetaSource = document.getElementById('modal-meta-source');
 const modalMetaDateRow = document.getElementById('modal-meta-date-row');
 const modalMetaDate = document.getElementById('modal-meta-date');
 const modalBtnDelete = document.getElementById('modal-btn-delete');
+const modalBtnDownload = document.getElementById('modal-btn-download');
 const modalBtnCancel = document.getElementById('modal-btn-cancel');
 const modalBtnApply = document.getElementById('modal-btn-apply');
 
@@ -135,13 +136,15 @@ function openWallpaperDetails(item, type = 'online', imgSrc = '') {
   modalMetaAuthor.textContent = item.author || '未知作者';
   modalMetaSource.textContent = item.source || (type === 'local' ? '本地图库' : '在线源');
 
-  if (type === 'local' && item.download_date) {
+  if (type === 'local') {
     modalMetaDateRow.style.display = 'flex';
-    modalMetaDate.textContent = item.download_date;
+    modalMetaDate.textContent = item.download_date || '-';
     modalBtnDelete.style.display = 'inline-flex';
+    if (modalBtnDownload) modalBtnDownload.style.display = 'none';
   } else {
     modalMetaDateRow.style.display = 'none';
     modalBtnDelete.style.display = 'none';
+    if (modalBtnDownload) modalBtnDownload.style.display = 'inline-flex';
   }
 
   detailModal.classList.add('active');
@@ -207,7 +210,7 @@ async function pickCacheDir() {
   }
 }
 
-// Render Local Gallery (纯缩略图卡片模式)
+// Render Local Gallery (纯粹无遮罩微缩卡片)
 async function renderGallery(items) {
   cachedWallpapers = Array.isArray(items) ? items : [];
   galleryGrid.innerHTML = '';
@@ -227,7 +230,7 @@ async function renderGallery(items) {
 
   for (const item of cachedWallpapers) {
     const card = document.createElement('div');
-    card.className = 'pure-thumb-card';
+    card.className = 'pure-thumb-card skeleton';
 
     let imgSrc = '';
     try {
@@ -237,29 +240,19 @@ async function renderGallery(items) {
     }
     if (!imgSrc) imgSrc = item.file_path;
 
-    card.innerHTML = `
-      <img class="pure-card-img" src="${imgSrc}" alt="${escapeHtml(item.title)}" loading="lazy" />
-      <div class="pure-card-overlay">
-        <div class="overlay-top">
-          <span class="overlay-tag">本地</span>
-        </div>
-        <div class="overlay-bottom">
-          <div class="overlay-title">${escapeHtml(item.title)}</div>
-          <div class="overlay-actions">
-            <button class="winui-btn winui-btn-primary overlay-btn btn-quick-set">🖥 设为壁纸</button>
-            <button class="winui-btn overlay-btn btn-quick-details">ℹ️ 详情</button>
-          </div>
-        </div>
-      </div>
-    `;
+    const img = document.createElement('img');
+    img.className = 'pure-card-img';
+    img.alt = item.title || 'Wallpaper';
+    img.src = imgSrc;
 
-    // 点击卡片直接唤出详情页
-    card.addEventListener('click', (e) => {
-      if (e.target.closest('.btn-quick-set')) {
-        e.stopPropagation();
-        setWallpaperAction(item.file_path, item.title);
-        return;
-      }
+    img.onload = () => {
+      card.classList.remove('skeleton');
+      img.classList.add('loaded');
+    };
+
+    card.appendChild(img);
+
+    card.addEventListener('click', () => {
       openWallpaperDetails(item, 'local', imgSrc);
     });
 
@@ -276,6 +269,18 @@ async function setWallpaperAction(filePath, title) {
     loadCurrentWallpaper();
   } catch (err) {
     setStatus(`设置壁纸失败: ${err}`);
+  }
+}
+
+// Download Wallpaper to Local (仅下载，不设为壁纸)
+async function downloadOnlyAction(item) {
+  try {
+    setStatus(`正在下载保存壁纸到本地: ${item.title}...`);
+    await invoke('download_and_set_online_wallpaper', { item });
+    setStatus(`已成功保存壁纸到本地: ${item.title}`);
+    await loadWallpapers();
+  } catch (err) {
+    setStatus(`保存壁纸失败: ${err}`);
   }
 }
 
@@ -302,7 +307,7 @@ async function loadCurrentWallpaper() {
   }
 }
 
-// Render Online Wallpapers Grid (纯缩略图卡片模式)
+// Render Online Wallpapers Grid (纯粹无遮罩微缩卡片 + Skeleton 骨架屏)
 function renderOnlineGrid(items) {
   onlineWallpapers = Array.isArray(items) ? items : [];
   onlineGrid.innerHTML = '';
@@ -314,31 +319,22 @@ function renderOnlineGrid(items) {
 
   onlineWallpapers.forEach(item => {
     const card = document.createElement('div');
-    card.className = 'pure-thumb-card';
+    card.className = 'pure-thumb-card skeleton';
 
-    card.innerHTML = `
-      <img class="pure-card-img" src="${item.thumb_url}" alt="${escapeHtml(item.title)}" loading="lazy" />
-      <div class="pure-card-overlay">
-        <div class="overlay-top">
-          <span class="overlay-tag">${escapeHtml(item.source)}</span>
-        </div>
-        <div class="overlay-bottom">
-          <div class="overlay-title">${escapeHtml(item.title)}</div>
-          <div class="overlay-actions">
-            <button class="winui-btn winui-btn-primary overlay-btn btn-quick-set">🖥 设为壁纸</button>
-            <button class="winui-btn overlay-btn btn-quick-details">ℹ️ 详情</button>
-          </div>
-        </div>
-      </div>
-    `;
+    const img = document.createElement('img');
+    img.className = 'pure-card-img';
+    img.alt = item.title || 'Wallpaper';
+    img.src = item.thumb_url;
 
-    // 点击卡片直接唤出壁纸详情页
-    card.addEventListener('click', async (e) => {
-      if (e.target.closest('.btn-quick-set')) {
-        e.stopPropagation();
-        downloadAndSetOnlineAction(item);
-        return;
-      }
+    img.onload = () => {
+      card.classList.remove('skeleton');
+      img.classList.add('loaded');
+    };
+
+    card.appendChild(img);
+
+    // 点击卡片瞬间唤出壁纸详情大图弹窗
+    card.addEventListener('click', () => {
       openWallpaperDetails(item, 'online', item.thumb_url);
     });
 
@@ -452,6 +448,14 @@ function setupEvents() {
   if (detailModal) {
     detailModal.addEventListener('click', (e) => {
       if (e.target === detailModal) closeWallpaperDetails();
+    });
+  }
+
+  if (modalBtnDownload) {
+    modalBtnDownload.addEventListener('click', async () => {
+      if (!currentDetailItem) return;
+      await downloadOnlyAction(currentDetailItem);
+      closeWallpaperDetails();
     });
   }
 

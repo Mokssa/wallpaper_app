@@ -516,7 +516,7 @@ input:checked + .toggle-slider:before {
 }
 
 /* ==========================================================================
-   4) Pure Wallpaper Thumbnail Cards (纯缩略图流线化卡片)
+   4) Pure Wallpaper Thumbnail Cards (纯缩略图流线卡片 & 骨架屏动画)
    ========================================================================== */
 .gallery-grid {
   display: grid;
@@ -529,92 +529,52 @@ input:checked + .toggle-slider:before {
 .pure-thumb-card {
   position: relative;
   height: 148px;
-  background: var(--bg-card);
+  background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--border-card);
   border-radius: var(--radius-card);
   overflow: hidden;
   box-shadow: var(--shadow-card);
   cursor: pointer;
   backdrop-filter: blur(20px);
-  transition: transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1), border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
+              border-color 0.2s ease, 
+              box-shadow 0.2s ease;
+}
+
+/* 骨架屏加载微动画 (Skeleton Shimmer) */
+.pure-thumb-card.skeleton {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.03) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s infinite ease-in-out;
+}
+
+@keyframes skeletonShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 .pure-thumb-card:hover {
-  transform: translateY(-4px) scale(1.02);
+  transform: translateY(-3px) scale(1.02);
   border-color: var(--accent-color);
   box-shadow: var(--shadow-flyout);
 }
 
+/* 纯壁纸大图：无遮罩无移入悬浮提示 */
 .pure-card-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.35s ease;
-}
-
-.pure-thumb-card:hover .pure-card-img {
-  transform: scale(1.06);
-}
-
-/* 悬浮蒙层与操作提示 Overlay */
-.pure-card-overlay {
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.2) 60%, rgba(0, 0, 0, 0) 100%);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 10px;
+  display: block;
   opacity: 0;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.3s ease-in, transform 0.35s ease;
 }
 
-.pure-thumb-card:hover .pure-card-overlay {
+.pure-card-img.loaded {
   opacity: 1;
 }
 
-.overlay-top {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.overlay-tag {
-  font-size: 10px;
-  font-weight: 600;
-  padding: 2px 8px;
-  background: rgba(0, 0, 0, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(8px);
-  border-radius: 10px;
-  color: #fff;
-}
-
-.overlay-bottom {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.overlay-title {
-  font-size: 12px;
-  font-weight: 600;
-  color: #fff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
-}
-
-.overlay-actions {
-  display: flex;
-  gap: 6px;
-}
-
-.overlay-btn {
-  flex: 1;
-  height: 28px;
-  padding: 0 8px;
-  font-size: 11px;
+.pure-thumb-card:hover .pure-card-img {
+  transform: scale(1.04);
 }
 
 /* Empty State */
@@ -668,7 +628,7 @@ input:checked + .toggle-slider:before {
   flex-direction: column;
   overflow: hidden;
   transform: scale(0.95) translateY(10px);
-  transition: transform 0.2s cubic-bezier(0.1, 0.9, 0.2, 1);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .winui-modal-backdrop.active .winui-modal-dialog {

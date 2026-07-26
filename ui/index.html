@@ -13,7 +13,7 @@
       <img src="icons/32x32.png" class="titlebar-icon" alt="App Icon" />
       <span class="titlebar-title">壁纸随心换 (WallpaperApp)</span>
     </div>
-    <div class="titlebar-actions">
+    <div class="titlebar-actions" data-tauri-drag-region="false">
       <button class="titlebar-btn" id="btn-minimize" title="最小化">&#xE921;</button>
       <button class="titlebar-btn" id="btn-maximize" title="最大化">&#xE922;</button>
       <button class="titlebar-btn close" id="btn-close" title="关闭">&#xE8BB;</button>
@@ -87,7 +87,7 @@
 
         <!-- 纯壁纸缩略图画廊卡片网格 -->
         <div class="gallery-grid pure-thumb-grid" id="gallery-grid">
-          <!-- Local Gallery Pure Image Cards generated dynamically -->
+          <!-- Local Gallery Cards generated dynamically -->
         </div>
 
         <div class="empty-state" id="gallery-empty-state" style="display: none;">
@@ -250,7 +250,7 @@
       <div class="modal-footer">
         <button class="winui-btn winui-btn-danger" id="modal-btn-delete" style="display: none;">🗑 删除壁纸</button>
         <div style="flex: 1;"></div>
-        <button class="winui-btn" id="modal-btn-cancel">关闭</button>
+        <button class="winui-btn" id="modal-btn-download">⬇️ 下载保存到本地</button>
         <button class="winui-btn winui-btn-primary" id="modal-btn-apply">🖥 设为桌面壁纸</button>
       </div>
     </div>
