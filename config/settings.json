@@ -1,9 +1,11 @@
 {
-  "query": "nature,wallpaper,architecture",
+  "query": "",
   "cache_dir": "cache/wallpapers",
   "auto_update_interval_minutes": 60,
   "auto_update_enabled": false,
   "batch_count": 6,
   "wallpaper_style": "fill",
-  "unsplash_access_key": ""
+  "unsplash_access_key": "",
+  "load_mode": "infinite",
+  "card_ratio": "original"
 }
