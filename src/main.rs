@@ -12,7 +12,8 @@ use wallpaper_setter::WallpaperSetter;
 use base64::Engine;
 use std::fs;
 use std::path::{Path, PathBuf};
-use tauri::Manager;
+use tauri::{Manager, menu::{Menu, MenuItem}, tray::{TrayIconBuilder, TrayIconEvent}};
+use auto_launch::AutoLaunch;
 
 #[cfg(target_os = "windows")]
 use window_vibrancy::{apply_acrylic, apply_mica};
@@ -149,7 +150,34 @@ fn window_toggle_maximize(window: tauri::Window) {
 
 #[tauri::command]
 fn window_close(window: tauri::Window) {
-    let _ = window.close();
+    let _ = window.hide();
+}
+
+#[tauri::command]
+fn show_main_window(app: tauri::AppHandle) {
+    if let Some(window) = app.get_webview_window("main") {
+        let _ = window.show();
+        let _ = window.set_focus();
+    }
+}
+
+#[tauri::command]
+fn get_auto_launch_enabled() -> Result<bool, String> {
+    let app_path = std::env::current_exe().map_err(|e| e.to_string())?;
+    let auto = AutoLaunch::new("wallpaper_app", &app_path.to_string_lossy(), &[] as &[&str]);
+    auto.is_enabled().map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn set_auto_launch_enabled(enabled: bool) -> Result<(), String> {
+    let app_path = std::env::current_exe().map_err(|e| e.to_string())?;
+    let auto = AutoLaunch::new("wallpaper_app", &app_path.to_string_lossy(), &[] as &[&str]);
+
+    if enabled {
+        auto.enable().map_err(|e| e.to_string())
+    } else {
+        auto.disable().map_err(|e| e.to_string())
+    }
 }
 
 fn main() {
@@ -163,6 +191,37 @@ fn main() {
                     let _ = apply_acrylic(&window, Some((24, 24, 24, 180)));
                 }
             }
+
+            // 创建系统托盘菜单
+            let show_item = MenuItem::with_id(app, "show", "显示主窗口", true, None::<&str>)?;
+            let quit_item = MenuItem::with_id(app, "quit", "退出", true, None::<&str>)?;
+            let menu = Menu::with_items(app, &[&show_item, &quit_item])?;
+
+            // 创建系统托盘图标
+            TrayIconBuilder::new()
+                .icon(app.default_window_icon().unwrap().clone())
+                .menu(&menu)
+                .on_menu_event(|app, event| match event.id.as_ref() {
+                    "show" => {
+                        if let Some(window) = app.get_webview_window("main") {
+                            let _ = window.show();
+                            let _ = window.set_focus();
+                        }
+                    }
+                    "quit" => {
+                        std::process::exit(0);
+                    }
+                    _ => {}
+                })
+                .on_tray_icon_event(|tray, event| {
+                    if let TrayIconEvent::DoubleClick { .. } = event {
+                        if let Some(app) = tray.app_handle().get_webview_window("main") {
+                            let _ = app.show();
+                            let _ = app.set_focus();
+                        }
+                    }
+                })
+                .build(app)?;
 
             Ok(())
         })
@@ -181,7 +240,10 @@ fn main() {
             get_current_wallpaper,
             window_minimize,
             window_toggle_maximize,
-            window_close
+            window_close,
+            show_main_window,
+            get_auto_launch_enabled,
+            set_auto_launch_enabled
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

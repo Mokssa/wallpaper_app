@@ -84,6 +84,7 @@ const labelCacheDir = document.getElementById('label-cache-dir');
 const btnBrowseDir = document.getElementById('btn-browse-dir');
 const inputConfigInterval = document.getElementById('input-config-interval');
 const checkConfigAutoupdate = document.getElementById('check-config-autoupdate');
+const checkAutoLaunch = document.getElementById('check-auto-launch');
 const currentWpText = document.getElementById('current-wp-text');
 
 // Modal Elements
@@ -187,6 +188,15 @@ function updateConfigUI() {
   if (labelCacheDir) labelCacheDir.textContent = appConfig.cache_dir || 'cache/wallpapers';
   if (inputConfigInterval) inputConfigInterval.value = appConfig.auto_update_interval_minutes || 60;
   if (checkConfigAutoupdate) checkConfigAutoupdate.checked = !!appConfig.auto_update_enabled;
+
+  // 加载开机自启状态
+  if (checkAutoLaunch) {
+    invoke('get_auto_launch_enabled').then(enabled => {
+      checkAutoLaunch.checked = !!enabled;
+    }).catch(err => {
+      console.warn('Failed to get auto launch status:', err);
+    });
+  }
 
   applyDisplaySettings();
 }
@@ -350,7 +360,7 @@ function renderOnlineGrid(items, append = false) {
   }
 
   if (onlineWallpapers.length === 0) {
-    onlineGrid.innerHTML = '<div class="empty-state" style="grid-column: 1 / -1;"><div class="empty-icon">🌐</div><h2 class="empty-title">未发现在线壁纸</h2><p class="empty-desc">请尝试更换图源、调整搜索关键词或检查网络连接！</p></div>';
+    onlineGrid.innerHTML = '<div class="empty-state" style="grid-column: 1 / -1;"><div class="empty-icon"></div><h2 class="empty-title">未发现在线壁纸</h2><p class="empty-desc">请尝试更换图源、调整搜索关键词或检查网络连接！</p></div>';
     return;
   }
 
@@ -518,6 +528,20 @@ function setupEvents() {
   if (inputConfigUnsplashKey) inputConfigUnsplashKey.addEventListener('change', saveConfig);
   if (inputConfigInterval) inputConfigInterval.addEventListener('change', saveConfig);
   if (checkConfigAutoupdate) checkConfigAutoupdate.addEventListener('change', saveConfig);
+
+  // 开机自启事件监听器
+  if (checkAutoLaunch) {
+    checkAutoLaunch.addEventListener('change', async () => {
+      try {
+        await invoke('set_auto_launch_enabled', { enabled: checkAutoLaunch.checked });
+        showStatusMsg(`开机自启已${checkAutoLaunch.checked ? '开启' : '关闭'}`, 'success');
+      } catch (err) {
+        console.error('Failed to set auto launch:', err);
+        showStatusMsg('设置开机自启失败', 'error');
+        checkAutoLaunch.checked = !checkAutoLaunch.checked;
+      }
+    });
+  }
 
   // Modal Dialog Actions
   if (btnCloseModal) btnCloseModal.addEventListener('click', closeWallpaperDetails);

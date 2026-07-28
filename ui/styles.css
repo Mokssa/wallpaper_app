@@ -3,7 +3,7 @@
    ========================================================================== */
 
 :root {
-  --font-fluent: "Segoe UI Variable Text", "Segoe UI", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+  --font-fluent: "PingFang SC", "Segoe UI Variable Text", "Segoe UI", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
   
   /* WinUI 3 Dark Mode Design Tokens */
   --bg-app: transparent;
@@ -102,6 +102,8 @@ html, body {
   align-items: center;
   gap: 8px;
   cursor: default;
+  -webkit-app-region: drag;
+  app-region: drag;
 }
 
 .titlebar-icon {
@@ -117,6 +119,8 @@ html, body {
 .titlebar-actions {
   display: flex;
   height: 100%;
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
 }
 
 .titlebar-btn {
@@ -177,13 +181,11 @@ html, body {
 .app-logo {
   width: 32px;
   height: 32px;
-  background: linear-gradient(135deg, #0078d4, #60cdff);
+  background: transparent;
   border-radius: var(--radius-card);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(0, 120, 212, 0.4);
   flex-shrink: 0;
 }
 
