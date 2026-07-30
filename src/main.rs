@@ -104,13 +104,17 @@ async fn download_and_set_online_wallpaper(item: OnlineWallpaper) -> Result<Wall
         .map_err(|e| e.to_string())?;
 
     WallpaperSetter::set_wallpaper(&downloaded.file_path)?;
+    let _ = WallpaperSetter::set_wallpaper_style(&config.wallpaper_style);
     Ok(downloaded)
 }
 
 #[tauri::command]
 fn set_desktop_wallpaper(path_str: String) -> Result<(), String> {
+    let config = AppConfig::load();
     let path = Path::new(&path_str);
-    WallpaperSetter::set_wallpaper(path)
+    WallpaperSetter::set_wallpaper(path)?;
+    let _ = WallpaperSetter::set_wallpaper_style(&config.wallpaper_style);
+    Ok(())
 }
 
 #[tauri::command]

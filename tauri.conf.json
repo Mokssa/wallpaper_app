@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "wallpaper_app",
+  "productName": "Wallpaper",
   "version": "0.1.0",
   "identifier": "com.wallpaperapp.dev",
   "build": {
@@ -10,7 +10,7 @@
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "壁纸随心换 (WallpaperApp)",
+        "title": "Wallpaper",
         "width": 1020,
         "height": 680,
         "minWidth": 940,

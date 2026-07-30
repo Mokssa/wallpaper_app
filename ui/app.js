@@ -43,6 +43,8 @@ let onlineWallpapers = [];
 let onlinePage = 1;
 const pageLimit = 12;
 let isInfiniteLoading = false;
+let isOnlineLoading = false;   // 防止并发翻页请求
+let searchDebounceTimer = null; // 搜索防抖计时器
 let currentDetailItem = null;
 let currentDetailType = 'online';
 
@@ -412,12 +414,16 @@ async function downloadAndSetOnlineAction(item) {
 
 // Load Online Wallpapers List (支持分页与无限滚动追加)
 async function loadOnlineWallpapers(append = false) {
+  // 防止并发请求（翻页/换源快速点击）
+  if (isOnlineLoading) return;
+  isOnlineLoading = true;
+
   const source = selectSource ? selectSource.value : 'picsum';
   const query = inputOnlineQuery ? inputOnlineQuery.value.trim() : '';
 
   try {
     setStatus(`正在获取 ${source} 壁纸列表（第 ${onlinePage} 页）...`);
-    
+
     if (pageInfo) pageInfo.textContent = `第 ${onlinePage} 页`;
     if (btnPrevPage) btnPrevPage.disabled = (onlinePage <= 1);
 
@@ -440,6 +446,7 @@ async function loadOnlineWallpapers(append = false) {
     setStatus(`在线壁纸加载失败: ${err}`);
     if (!append) renderOnlineGrid([]);
   } finally {
+    isOnlineLoading = false;
     isInfiniteLoading = false;
   }
 }
@@ -506,6 +513,19 @@ function setupEvents() {
     });
   }
 
+  // 搜索框回车触发（带 500ms 防抖，避免快速输入打爆 API）
+  if (inputOnlineQuery) {
+    inputOnlineQuery.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(() => {
+          onlinePage = 1;
+          loadOnlineWallpapers(false);
+        }, 500);
+      }
+    });
+  }
+
   if (btnPrevPage) {
     btnPrevPage.addEventListener('click', () => {
       if (onlinePage > 1) {
@@ -534,10 +554,10 @@ function setupEvents() {
     checkAutoLaunch.addEventListener('change', async () => {
       try {
         await invoke('set_auto_launch_enabled', { enabled: checkAutoLaunch.checked });
-        showStatusMsg(`开机自启已${checkAutoLaunch.checked ? '开启' : '关闭'}`, 'success');
+        setStatus(`开机自启已${checkAutoLaunch.checked ? '开启' : '关闭'}`);
       } catch (err) {
         console.error('Failed to set auto launch:', err);
-        showStatusMsg('设置开机自启失败', 'error');
+        setStatus('设置开机自启失败');
         checkAutoLaunch.checked = !checkAutoLaunch.checked;
       }
     });

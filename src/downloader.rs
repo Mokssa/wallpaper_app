@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
 use chrono::Local;
 use base64::Engine;
 
@@ -37,8 +39,33 @@ impl WallpaperDownloader {
             .unwrap_or_default()
     }
 
-    /// 仅在按需备用时拉取特定图片转 Base64
+    fn url_hash(url: &str) -> u64 {
+        let mut h = DefaultHasher::new();
+        url.hash(&mut h);
+        h.finish()
+    }
+
+    /// 获取缩略图磁盘缓存路径
+    fn thumb_cache_path(url: &str) -> PathBuf {
+        let hash = Self::url_hash(url);
+        PathBuf::from("cache/thumbs").join(format!("{:016x}.jpg", hash))
+    }
+
+    /// 仅在按需备用时拉取特定图片转 Base64（优先读磁盘缓存）
     pub async fn fetch_image_as_base64(url: &str) -> Option<String> {
+        let cache_path = Self::thumb_cache_path(url);
+
+        // 命中磁盘缓存 → 直接返回，零网络开销
+        if cache_path.exists() {
+            if let Ok(bytes) = fs::read(&cache_path) {
+                if !bytes.is_empty() {
+                    let encoded = base64::engine::general_purpose::STANDARD.encode(&bytes);
+                    return Some(format!("data:image/jpeg;base64,{}", encoded));
+                }
+            }
+        }
+
+        // 缓存未命中 → 下载并写入缓存
         let client = Self::build_client();
         if let Ok(res) = client.get(url).send().await {
             let content_type = res.headers()
@@ -46,10 +73,16 @@ impl WallpaperDownloader {
                 .and_then(|v| v.to_str().ok())
                 .unwrap_or("image/jpeg")
                 .to_string();
-            
+
             if let Ok(bytes) = res.bytes().await {
                 if !bytes.is_empty() {
-                    let encoded = base64::engine::general_purpose::STANDARD.encode(bytes);
+                    // 写入缓存目录
+                    if let Some(parent) = cache_path.parent() {
+                        let _ = fs::create_dir_all(parent);
+                    }
+                    let _ = fs::write(&cache_path, &bytes);
+
+                    let encoded = base64::engine::general_purpose::STANDARD.encode(&bytes);
                     return Some(format!("data:{};base64,{}", content_type, encoded));
                 }
             }
