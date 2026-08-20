@@ -1,54 +1,293 @@
 /* ==========================================================================
-   Tauri v2 + WinUI 3 (Fluent Design System) Standard Design Tokens & Styles
+   WallpaperApp - Flutter & Material Design 3 (M3) Modern Desktop Design System
+   With Mihon / Material You Multi-Theme Engine, Segoe UI + Microsoft YaHei UI
    ========================================================================== */
 
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Quicksand:wght@500;600;700&display=swap');
+
 :root {
-  --font-fluent: "PingFang SC", "Segoe UI Variable Text", "Segoe UI", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-  
-  /* WinUI 3 Dark Mode Design Tokens */
-  --bg-app: transparent;
-  --bg-card: rgba(45, 45, 45, 0.75);
-  --bg-card-hover: rgba(55, 55, 55, 0.85);
-  --bg-control: rgba(255, 255, 255, 0.06);
-  --bg-control-hover: rgba(255, 255, 255, 0.10);
-  --bg-control-active: rgba(255, 255, 255, 0.04);
-  
-  --border-card: rgba(255, 255, 255, 0.08);
-  --border-card-hover: rgba(255, 255, 255, 0.15);
-  --border-control: rgba(255, 255, 255, 0.10);
-  --border-control-bottom: rgba(255, 255, 255, 0.22);
+  /* 默认字体：鸿蒙舒适圆润 + Nunito / 微软雅黑 UI */
+  --font-family: "HarmonyOS Sans SC", "HarmonyOS Sans", "PingFang SC", "Nunito", "Microsoft YaHei UI", -apple-system, sans-serif;
 
-  --text-primary: #ffffff;
-  --text-secondary: #9e9e9e;
-  --text-tertiary: #6c6c6c;
+  /* --- Default Theme: Violet Lavender --- */
+  --md-sys-color-primary: #a78bfa;
+  --md-sys-color-primary-container: #5b21b6;
+  --md-sys-color-on-primary-container: #ede9fe;
+  --md-sys-color-primary-gradient: linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #38bdf8 100%);
+  --md-sys-color-primary-hover: #9061f9;
+  --md-sys-color-primary-active: #7c3aed;
 
-  --accent-color: #60cdff;
-  --accent-color-hover: #4cc2ff;
-  --accent-color-active: #3aa8e6;
-  --accent-text: #000000;
+  --md-sys-color-secondary: #38bdf8;
+  --md-sys-color-secondary-container: rgba(56, 189, 248, 0.15);
+  --md-sys-color-on-secondary-container: #bae6fd;
 
-  --status-success: #6ccb5f;
-  --status-warning: #fce100;
-  --status-danger: #ff99a4;
-  --bg-infobar: rgba(39, 39, 39, 0.85);
+  --md-sys-color-surface: #0f1117;
+  --md-sys-color-surface-dim: #090a0f;
+  --md-sys-color-surface-container-lowest: #131620;
+  --md-sys-color-surface-container-low: #171b26;
+  --md-sys-color-surface-container: #1d2232;
+  --md-sys-color-surface-container-high: #242b3d;
+  --md-sys-color-surface-container-highest: #2e364c;
 
-  --radius-card: 8px;
-  --radius-control: 4px;
-  --radius-dialog: 12px;
+  --md-sys-color-outline: rgba(255, 255, 255, 0.10);
+  --md-sys-color-outline-variant: rgba(255, 255, 255, 0.05);
+  --md-sys-color-outline-focus: rgba(167, 139, 250, 0.6);
 
-  --shadow-card: 0 2px 4px rgba(0, 0, 0, 0.25);
-  --shadow-flyout: 0 12px 28px rgba(0, 0, 0, 0.55);
+  --md-sys-color-on-surface: #f1f5f9;
+  --md-sys-color-on-surface-variant: #94a3b8;
+  --md-sys-color-on-surface-muted: #64748b;
+
+  --md-sys-color-error: #f87171;
+  --md-sys-color-error-container: rgba(239, 68, 68, 0.18);
+  --md-sys-color-success: #34d399;
+  --md-sys-color-success-container: rgba(16, 185, 129, 0.18);
+
+  /* Corner Radii */
+  --md-shape-corner-xs: 4px;
+  --md-shape-corner-sm: 8px;
+  --md-shape-corner-md: 12px;
+  --md-shape-corner-lg: 14px;
+  --md-shape-corner-xl: 20px;
+  --md-shape-corner-2xl: 26px;
+  --md-shape-corner-full: 9999px;
+
+  /* Elevation Shadows */
+  --md-sys-elevation-1: 0 1px 3px rgba(0, 0, 0, 0.35), 0 1px 2px rgba(0, 0, 0, 0.24);
+  --md-sys-elevation-2: 0 4px 12px rgba(0, 0, 0, 0.45), 0 2px 4px rgba(0, 0, 0, 0.3);
+  --md-sys-elevation-3: 0 8px 20px rgba(0, 0, 0, 0.55), 0 4px 8px rgba(0, 0, 0, 0.35);
+  --md-sys-elevation-4: 0 14px 32px rgba(0, 0, 0, 0.65), 0 6px 12px rgba(0, 0, 0, 0.4);
+  --md-sys-elevation-primary-glow: 0 6px 20px -3px rgba(139, 92, 246, 0.45);
+
+  /* Motion */
+  --md-sys-motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+  --md-sys-motion-easing-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --md-sys-motion-duration-short: 180ms;
+  --md-sys-motion-duration-medium: 260ms;
 }
 
+/* ==========================================================================
+   Mihon / Material You Dynamic Theme Palettes
+   ========================================================================== */
+
+/* 1) Mihon Blue */
+body.theme-blue {
+  --md-sys-color-primary: #38bdf8;
+  --md-sys-color-primary-container: #0369a1;
+  --md-sys-color-on-primary-container: #e0f2fe;
+  --md-sys-color-primary-gradient: linear-gradient(135deg, #0284c7 0%, #0ea5e9 50%, #38bdf8 100%);
+  --md-sys-color-primary-hover: #0284c7;
+  --md-sys-color-outline-focus: rgba(56, 189, 248, 0.6);
+  --md-sys-elevation-primary-glow: 0 6px 20px -3px rgba(14, 165, 233, 0.45);
+}
+
+/* 2) Teal Turquoise */
+body.theme-teal {
+  --md-sys-color-primary: #2dd4bf;
+  --md-sys-color-primary-container: #0f766e;
+  --md-sys-color-on-primary-container: #ccfbf1;
+  --md-sys-color-primary-gradient: linear-gradient(135deg, #0d9488 0%, #14b8a6 50%, #2dd4bf 100%);
+  --md-sys-color-primary-hover: #0d9488;
+  --md-sys-color-outline-focus: rgba(45, 212, 191, 0.6);
+  --md-sys-elevation-primary-glow: 0 6px 20px -3px rgba(20, 184, 166, 0.45);
+}
+
+/* 3) Sakura Pink */
+body.theme-pink {
+  --md-sys-color-primary: #f472b6;
+  --md-sys-color-primary-container: #be185d;
+  --md-sys-color-on-primary-container: #fce7f3;
+  --md-sys-color-primary-gradient: linear-gradient(135deg, #db2777 0%, #ec4899 50%, #f472b6 100%);
+  --md-sys-color-primary-hover: #db2777;
+  --md-sys-color-outline-focus: rgba(244, 114, 182, 0.6);
+  --md-sys-elevation-primary-glow: 0 6px 20px -3px rgba(236, 72, 153, 0.45);
+}
+
+/* 4) Sunset Amber */
+body.theme-amber {
+  --md-sys-color-primary: #fbbf24;
+  --md-sys-color-primary-container: #b45309;
+  --md-sys-color-on-primary-container: #fef3c7;
+  --md-sys-color-primary-gradient: linear-gradient(135deg, #d97706 0%, #f59e0b 50%, #fbbf24 100%);
+  --md-sys-color-primary-hover: #d97706;
+  --md-sys-color-outline-focus: rgba(251, 191, 36, 0.6);
+  --md-sys-elevation-primary-glow: 0 6px 20px -3px rgba(245, 158, 11, 0.45);
+}
+
+/* 5) Emerald Forest */
+body.theme-green {
+  --md-sys-color-primary: #34d399;
+  --md-sys-color-primary-container: #047857;
+  --md-sys-color-on-primary-container: #d1fae5;
+  --md-sys-color-primary-gradient: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);
+  --md-sys-color-primary-hover: #059669;
+  --md-sys-color-outline-focus: rgba(52, 211, 153, 0.6);
+  --md-sys-elevation-primary-glow: 0 6px 20px -3px rgba(16, 185, 129, 0.45);
+}
+
+/* 6) Crimson Flame */
+body.theme-crimson {
+  --md-sys-color-primary: #f87171;
+  --md-sys-color-primary-container: #b91c1c;
+  --md-sys-color-on-primary-container: #fee2e2;
+  --md-sys-color-primary-gradient: linear-gradient(135deg, #dc2626 0%, #ef4444 50%, #f87171 100%);
+  --md-sys-color-primary-hover: #dc2626;
+  --md-sys-color-outline-focus: rgba(248, 113, 113, 0.6);
+  --md-sys-elevation-primary-glow: 0 6px 20px -3px rgba(239, 68, 68, 0.45);
+}
+
+/* --- Mihon Pure Black AMOLED Mode --- */
+body.theme-amoled {
+  --md-sys-color-surface: #000000 !important;
+  --md-sys-color-surface-dim: #000000 !important;
+  --md-sys-color-surface-container-lowest: #000000 !important;
+  --md-sys-color-surface-container-low: #0a0a0a !important;
+  --md-sys-color-surface-container: #121212 !important;
+  --md-sys-color-surface-container-high: #1a1a1a !important;
+  --md-sys-color-surface-container-highest: #242424 !important;
+  --md-sys-color-outline: rgba(255, 255, 255, 0.12) !important;
+  --md-sys-color-outline-variant: rgba(255, 255, 255, 0.06) !important;
+}
+
+body.theme-amoled .flutter-scaffold {
+  background: #000000 !important;
+}
+
+/* ==========================================================================
+   Font Family Presets (圆润、幼圆、现代、文楷、小米几何)
+   ========================================================================== */
+
+/* 预设 1: 鸿蒙舒适圆体 (HarmonyOS Rounded) - 柔和饱满、圆润无锐角 */
+body.font-rounded {
+  --font-family: "HarmonyOS Sans SC", "HarmonyOS Sans", "PingFang SC", "Nunito", "Microsoft YaHei UI", -apple-system, sans-serif;
+  letter-spacing: 0.15px;
+}
+
+/* 预设 2: 软萌可爱幼圆 (Cute YouYuan) - 极致圆润曲率、软萌亲和 */
+body.font-youyuan {
+  --font-family: "YouYuan", "幼圆", "HGMaruGothicMPRO", "Quicksand", "Nunito", "Comic Sans MS", "Microsoft YaHei UI", sans-serif;
+  letter-spacing: 0.25px;
+}
+
+/* 预设 3: 现代极简屏显 (Fluent WinUI) - 经典清晰、Windows 11 Segoe UI */
+body.font-fluent {
+  --font-family: "Segoe UI Variable Display", "Segoe UI", "Microsoft YaHei UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: 0px;
+}
+
+/* 预设 4: 霞鹜悠然文楷 (Literary WenKai) - 诗意典雅、温润手书 */
+body.font-wenkai {
+  --font-family: "LXGW WenKai", "霞鹜文楷", "STKaiti", "KaiTi", "Georgia", serif;
+  letter-spacing: 0.3px;
+}
+
+/* 预设 5: 小米几何质感 (MiSans Modern) - 科技几何、现代圆角 */
+body.font-misans {
+  --font-family: "MiSans", "OPPOSans", "Source Han Sans SC", "Noto Sans SC", "Microsoft YaHei UI", sans-serif;
+  letter-spacing: 0.15px;
+}
+
+/* 字体选择器卡片样式 */
+.font-preset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 12px;
+  width: 100%;
+}
+
+.font-preset-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: var(--md-shape-corner-lg);
+  background: var(--md-sys-color-surface-container-high);
+  border: 1.5px solid var(--md-sys-color-outline);
+  cursor: pointer;
+  position: relative;
+  transition: all var(--md-sys-motion-duration-short) ease;
+}
+
+.font-preset-chip:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+}
+
+.font-preset-chip.active {
+  border-color: var(--md-sys-color-primary);
+  background: var(--md-sys-color-surface-container-highest);
+  box-shadow: 0 0 14px var(--md-sys-color-outline-focus);
+}
+
+.font-preset-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: 20px;
+}
+
+.font-preset-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--md-sys-color-on-surface);
+}
+
+.font-preset-tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: var(--md-shape-corner-full);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--md-sys-color-primary);
+}
+
+.font-preset-preview {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 4px 0 2px 0;
+  color: var(--md-sys-color-on-surface);
+}
+
+.font-preset-desc {
+  font-size: 12px;
+  color: var(--md-sys-color-on-surface-variant);
+  line-height: 1.4;
+}
+
+.font-check-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--md-sys-color-primary);
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.font-check-badge svg {
+  width: 11px;
+  height: 11px;
+  stroke: #0f1117;
+}
+
+.font-preset-chip.active .font-check-badge {
+  display: flex;
+}
+
+/* ==========================================================================
+   Base Layout & Typography (Segoe UI + Microsoft YaHei UI, Min 14px)
+   ========================================================================== */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
   user-select: none;
   -webkit-user-select: none;
+  font-family: var(--font-family) !important;
 }
 
-/* WinUI 3 Smooth Thin Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -57,41 +296,53 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.16);
-  border-radius: 4px;
-  transition: background 0.2s ease;
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: var(--md-shape-corner-full);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.36);
+  background: rgba(255, 255, 255, 0.32);
 }
 
-/* 前端容器基础透明配置 */
 html, body {
   margin: 0;
   padding: 0;
   height: 100%;
   width: 100%;
-  background: transparent !important;
-  color: var(--text-primary);
-  font-family: var(--font-fluent);
-  user-select: none;
+  background: var(--md-sys-color-surface) !important;
+  color: var(--md-sys-color-on-surface);
+  font-family: var(--font-family);
+  font-size: 14px;
+  line-height: 1.5;
   overflow: hidden;
-  box-sizing: border-box;
+  position: relative;
+  transition: background-color var(--md-sys-motion-duration-medium) ease;
+}
+
+.flutter-scaffold {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  background: radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.07) 0%, transparent 40%),
+              radial-gradient(circle at 90% 80%, rgba(56, 189, 248, 0.05) 0%, transparent 45%),
+              var(--md-sys-color-surface);
+  overflow: hidden;
 }
 
 /* ==========================================================================
-   1) WinUI 3 极简 Window Titlebar
+   1) Titlebar
    ========================================================================== */
-.fluent-titlebar {
-  height: 36px;
+.flutter-titlebar {
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-left: 12px;
-  font-size: 12px;
-  background: rgba(26, 26, 26, 0.85);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border-card);
+  padding: 0 8px 0 14px;
+  background: rgba(15, 17, 23, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--md-sys-color-outline);
+  z-index: 100;
   flex-shrink: 0;
 }
 
@@ -100,126 +351,156 @@ html, body {
   height: 100%;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   cursor: default;
   -webkit-app-region: drag;
   app-region: drag;
 }
 
-.titlebar-icon {
-  width: 16px;
-  height: 16px;
+.titlebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.titlebar-logo {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--md-sys-color-primary-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.titlebar-logo svg {
+  width: 14px;
+  height: 14px;
+  fill: #ffffff;
 }
 
 .titlebar-title {
-  font-size: 12px;
-  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: var(--md-sys-color-on-surface);
 }
 
 .titlebar-actions {
   display: flex;
+  align-items: center;
+  gap: 4px;
   height: 100%;
   -webkit-app-region: no-drag;
   app-region: no-drag;
 }
 
 .titlebar-btn {
-  width: 46px;
-  height: 100%;
+  width: 34px;
+  height: 28px;
+  border-radius: var(--md-shape-corner-sm);
   display: flex;
   align-items: center;
   justify-content: center;
   border: none;
   background: transparent;
-  color: var(--text-primary);
-  font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", sans-serif;
-  font-size: 10px;
+  color: var(--md-sys-color-on-surface-variant);
   cursor: pointer;
-  transition: background 0.1s ease;
+  transition: all var(--md-sys-motion-duration-short) ease;
+}
+
+.titlebar-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
 }
 
 .titlebar-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--md-sys-color-on-surface);
 }
 
 .titlebar-btn.close:hover {
-  background: #c42b1c;
+  background: #ef4444;
   color: #ffffff;
 }
 
-/* App Container */
-.app-container {
+/* ==========================================================================
+   2) Flutter Navigation Rail
+   ========================================================================== */
+.app-body {
   display: flex;
   flex: 1;
-  height: calc(100vh - 64px);
-  min-width: 940px;
-  background: rgba(32, 32, 32, 0.75);
-  backdrop-filter: blur(20px);
+  overflow: hidden;
+  position: relative;
 }
 
-/* ==========================================================================
-   2) WinUI 3 NavigationRail (SideNav)
-   ========================================================================== */
-.winui-nav {
-  width: 220px;
-  flex-shrink: 0;
-  background: rgba(26, 26, 26, 0.65);
-  backdrop-filter: blur(20px);
-  border-right: 1px solid var(--border-card);
+.flutter-nav-rail {
+  width: 210px;
+  background: var(--md-sys-color-surface-container-lowest);
+  border-right: 1px solid var(--md-sys-color-outline);
   display: flex;
   flex-direction: column;
-  padding: 16px 8px 12px 8px;
+  padding: 14px 10px;
+  flex-shrink: 0;
+  justify-content: space-between;
+  gap: 12px;
 }
 
-.nav-header {
+.nav-rail-top {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.nav-profile-card {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 4px 12px 20px 12px;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: var(--md-shape-corner-md);
+  background: var(--md-sys-color-surface-container-low);
+  border: 1px solid var(--md-sys-color-outline-variant);
 }
 
-.app-logo {
+.nav-profile-avatar {
   width: 32px;
   height: 32px;
-  background: transparent;
-  border-radius: var(--radius-card);
+  border-radius: 8px;
+  background: var(--md-sys-color-primary-gradient);
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
   flex-shrink: 0;
 }
 
-.logo-icon {
-  width: 20px;
-  height: 20px;
+.nav-profile-avatar svg {
+  width: 18px;
+  height: 18px;
+  fill: #ffffff;
 }
 
-.app-title-group {
+.nav-profile-info {
   display: flex;
   flex-direction: column;
-  min-width: 0;
+  overflow: hidden;
 }
 
-.app-title {
+.nav-profile-name {
   font-size: 15px;
   font-weight: 600;
-  color: var(--text-primary);
-  line-height: 1.3;
+  color: var(--md-sys-color-on-surface);
   white-space: nowrap;
-  letter-spacing: 0.01em;
-}
-
-.app-subtitle {
-  font-size: 10px;
-  color: var(--text-secondary);
-  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 .nav-menu {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  flex: 1;
+  gap: 6px;
 }
 
 .nav-item {
@@ -227,650 +508,1456 @@ html, body {
   display: flex;
   align-items: center;
   gap: 12px;
-  height: 40px;
-  padding: 0 12px;
-  background: transparent;
+  padding: 10px 16px;
+  border-radius: var(--md-shape-corner-full);
   border: none;
-  border-radius: var(--radius-card);
-  color: var(--text-secondary);
-  font-size: 13px;
-  font-weight: 400;
-  font-family: inherit;
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 15px;
+  font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  text-align: left;
+  transition: all var(--md-sys-motion-duration-short) ease;
+}
+
+.nav-item svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  flex-shrink: 0;
+  transition: transform var(--md-sys-motion-duration-short) ease;
 }
 
 .nav-item:hover {
-  background-color: var(--bg-control-hover);
-  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--md-sys-color-on-surface);
 }
 
-.nav-item:active {
-  background-color: var(--bg-control-active);
+.nav-item:hover svg {
+  transform: scale(1.06);
 }
 
 .nav-item.active {
-  background-color: rgba(255, 255, 255, 0.08);
-  color: var(--text-primary);
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
   font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
-.nav-indicator {
-  position: absolute;
-  left: 3px;
-  width: 3px;
+.nav-item.active svg {
+  stroke: var(--md-sys-color-on-primary-container);
+}
+
+.nav-rail-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.btn-quick-random {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: var(--md-shape-corner-full);
+  background: var(--md-sys-color-primary-gradient);
+  border: none;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--md-sys-elevation-primary-glow);
+  transition: all var(--md-sys-motion-duration-short) ease;
+  width: 100%;
+}
+
+.btn-quick-random:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+.btn-quick-random:active {
+  transform: translateY(1px);
+}
+
+.btn-quick-random svg {
+  width: 16px;
   height: 16px;
-  background-color: var(--accent-color);
-  border-radius: 2px;
-  opacity: 0;
-  transform: scaleY(0.4);
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-.nav-item.active .nav-indicator {
-  opacity: 1;
-  transform: scaleY(1);
-}
-
-.nav-icon {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-}
-
-.nav-label {
-  white-space: nowrap;
+  stroke: currentColor;
 }
 
 /* ==========================================================================
-   3) Main Content Area & Controls (4px / 8px Rule)
+   3) Main Stage & Pure Visual Grid
    ========================================================================== */
-.winui-main {
+.flutter-main {
   flex: 1;
-  min-width: 720px;
-  background: transparent;
-  padding: 24px 32px;
+  height: 100%;
   overflow-y: auto;
+  overflow-x: hidden;
+  padding: 18px 24px 48px 24px;
+  position: relative;
 }
 
 .tab-page {
   display: none;
-  animation: fadeIn 0.2s ease-out;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity var(--md-sys-motion-duration-medium) ease,
+              transform var(--md-sys-motion-duration-medium) ease;
 }
 
 .tab-page.active {
   display: block;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .page-header {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 20px;
-}
-
-.page-title {
-  font-size: 26px;
-  font-weight: 600;
-  letter-spacing: -0.2px;
-  white-space: nowrap;
-}
-
-.page-desc {
-  font-size: 12px;
-  color: var(--text-secondary);
-  margin-top: 4px;
-}
-
-/* Filter Bar */
-.explore-filter-bar {
-  display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 16px;
-  margin-bottom: 20px;
-  padding: 12px 18px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-card);
-  border-radius: var(--radius-card);
-  backdrop-filter: blur(20px);
+  margin-bottom: 16px;
+  gap: 12px;
 }
 
-.filter-group {
+.page-title-wrap {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 13px;
-  white-space: nowrap;
 }
 
-.winui-select {
-  height: 32px;
-  padding: 0 12px;
-  background-color: var(--bg-control);
-  border: 1px solid var(--border-control);
-  border-radius: var(--radius-control);
-  color: var(--text-primary);
-  font-size: 13px;
-  font-family: inherit;
-  outline: none;
-  cursor: pointer;
-}
-
-.winui-select option {
-  background-color: #2b2b2b;
-  color: #ffffff;
-}
-
-/* WinUI 3 Pagination Bar & Infinite Loader */
-.pagination-bar {
+.page-title {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: var(--md-sys-color-on-surface);
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 16px;
-  margin-top: 24px;
-  padding: 16px 0;
+  gap: 10px;
 }
 
-.infinite-loader {
-  text-align: center;
-  padding: 20px 0;
-  color: var(--text-secondary);
-  font-size: 13px;
-}
-
-.page-info {
-  font-size: 13px;
+.page-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: var(--md-shape-corner-full);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--md-sys-color-primary);
+  font-size: 14px;
   font-weight: 600;
-  color: var(--text-primary);
-  min-width: 70px;
-  text-align: center;
+  border: 1px solid var(--md-sys-color-outline);
 }
 
-/* WinUI 3 Buttons & Controls (4px Radius Rule) */
-.winui-btn {
+/* ==========================================================================
+   4) Sticky Explore Header & Contextual Controls (各图源专属组件)
+   ========================================================================== */
+.explore-control-surface {
+  background: var(--md-sys-color-surface-container-low);
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: var(--md-shape-corner-lg);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: var(--md-sys-elevation-1);
+}
+
+.explore-control-surface.sticky {
+  position: sticky;
+  top: -18px;
+  margin: -18px -24px 16px -24px;
+  padding: 14px 24px;
+  z-index: 50;
+  background: var(--md-sys-color-surface-container);
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 1px solid var(--md-sys-color-outline);
+  border-radius: 0;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
+}
+
+.explore-header-top-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.segmented-group {
+  display: inline-flex;
+  align-items: center;
+  background: var(--md-sys-color-surface-container-highest);
+  padding: 4px;
+  border-radius: var(--md-shape-corner-full);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  gap: 4px;
+}
+
+.segmented-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 32px;
-  padding: 0 16px;
-  background: var(--bg-control);
-  border: 1px solid var(--border-control);
-  border-bottom-color: var(--border-control-bottom);
-  border-radius: var(--radius-control);
-  color: var(--text-primary);
-  font-size: 12px;
-  font-family: inherit;
+  padding: 6px 16px;
+  border-radius: var(--md-shape-corner-full);
+  border: none;
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--md-sys-motion-duration-short) ease,
+              color var(--md-sys-motion-duration-short) ease,
+              box-shadow var(--md-sys-motion-duration-short) ease;
+  white-space: nowrap;
+}
+
+.segmented-btn svg {
+  width: 17px;
+  height: 17px;
+  fill: currentColor;
+  flex-shrink: 0;
+}
+
+.source-brand-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  border-radius: 4px;
+  flex-shrink: 0;
+  display: inline-block;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.28));
+  transition: all var(--md-sys-motion-duration-short) ease;
+}
+
+.segmented-btn:hover {
+  color: var(--md-sys-color-on-surface);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.segmented-btn.active {
+  background: var(--md-sys-color-primary-gradient);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.segmented-btn.active svg {
+  fill: #ffffff;
+}
+
+/* Contextual Search & Filter Bar */
+.explore-contextual-bar {
+  width: 100%;
+}
+
+.contextual-panel {
+  display: none;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.contextual-panel.active {
+  display: flex;
+}
+
+.contextual-hint-badge {
+  font-size: 13.5px;
+  color: var(--md-sys-color-on-surface-variant);
+  background: var(--md-sys-color-surface-container-high);
+  padding: 5px 12px;
+  border-radius: var(--md-shape-corner-full);
+  border: 1px solid var(--md-sys-color-outline);
+}
+
+.contextual-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.contextual-chips {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.context-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: var(--md-shape-corner-full);
+  border: 1px solid var(--md-sys-color-outline);
+  background: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.12);
-  white-space: nowrap;
-  flex-shrink: 0;
-  transition: all 0.1s ease;
+  transition: all 0.15s ease;
 }
 
-.winui-btn:disabled {
+.context-chip:hover {
+  background: var(--md-sys-color-surface-container-highest);
+  color: var(--md-sys-color-on-surface);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.context-chip.active {
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  border-color: var(--md-sys-color-primary);
+  font-weight: 500;
+}
+
+.wallhaven-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+/* Modern Search Box */
+.modern-search-box {
+  display: flex;
+  align-items: center;
+  background: var(--md-sys-color-surface-container-high);
+  border: 1.5px solid var(--md-sys-color-outline);
+  border-radius: var(--md-shape-corner-full);
+  padding: 3px 6px 3px 14px;
+  gap: 8px;
+  width: 100%;
+  max-width: 420px;
+  transition: all var(--md-sys-motion-duration-short) ease;
+}
+
+.modern-search-box:focus-within {
+  border-color: var(--md-sys-color-primary);
+  background: var(--md-sys-color-surface-container-highest);
+  box-shadow: 0 0 0 3px var(--md-sys-color-outline-focus);
+}
+
+.modern-search-box svg.search-icon {
+  width: 16px;
+  height: 16px;
+  stroke: var(--md-sys-color-on-surface-muted);
+  flex-shrink: 0;
+}
+
+.modern-search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--md-sys-color-on-surface);
+  font-size: 14px;
+}
+
+.modern-search-input::placeholder {
+  color: var(--md-sys-color-on-surface-muted);
+}
+
+.search-clear-btn {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: var(--md-sys-color-on-surface-muted);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+}
+
+.search-clear-btn.show {
+  display: flex;
+}
+
+.modern-search-btn {
+  border: none;
+  background: var(--md-sys-color-primary);
+  color: #0f1117;
+  padding: 5px 14px;
+  border-radius: var(--md-shape-corner-full);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.modern-search-btn:hover {
+  transform: scale(1.03);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Unsplash Access Key Prompt Card */
+.unsplash-prompt-card {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 48px 24px;
+  background: var(--md-sys-color-surface-container-low);
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: var(--md-shape-corner-xl);
+  box-shadow: var(--md-sys-elevation-2);
+  gap: 12px;
+  max-width: 520px;
+  margin: 20px auto;
+}
+
+.unsplash-prompt-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  object-fit: contain;
+  margin-bottom: 4px;
+}
+
+.unsplash-prompt-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--md-sys-color-on-surface);
+}
+
+.unsplash-prompt-desc {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--md-sys-color-on-surface-variant);
+  max-width: 440px;
+}
+
+/* ==========================================================================
+   5) Tight Pure Image Grid
+   ========================================================================== */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  width: 100%;
+}
+
+.gallery-grid.ratio-uniform .m3-wallpaper-card {
+  aspect-ratio: 16 / 10;
+}
+
+.gallery-grid.ratio-original .m3-wallpaper-card {
+  min-height: 170px;
+  height: auto;
+}
+
+.m3-wallpaper-card {
+  position: relative;
+  border-radius: var(--md-shape-corner-md);
+  overflow: hidden;
+  background: var(--md-sys-color-surface-container);
+  border: 1px solid var(--md-sys-color-outline);
+  box-shadow: var(--md-sys-elevation-1);
+  cursor: pointer;
+  transition: transform var(--md-sys-motion-duration-short) ease,
+              box-shadow var(--md-sys-motion-duration-short) ease,
+              border-color var(--md-sys-motion-duration-short) ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.m3-wallpaper-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--md-sys-elevation-3);
+  border-color: var(--md-sys-color-primary);
+}
+
+.m3-card-img-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  overflow: hidden;
+  background: var(--md-sys-color-surface-container-highest);
+}
+
+.m3-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.4s var(--md-sys-motion-easing-standard);
+}
+
+.m3-card-img.loaded {
+  opacity: 1;
+}
+
+.m3-wallpaper-card:hover .m3-card-img {
+  transform: scale(1.05);
+}
+
+/* Skeleton Loading */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+}
+.skeleton::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 150%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    transparent 100%
+  );
+  animation: shimmer 1.6s infinite;
+  z-index: 2;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(200%); }
+}
+
+.m3-card-badge {
+  display: none !important;
+}
+
+.m3-card-actions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 6px;
+  z-index: 5;
+  opacity: 0;
+  transform: translateY(-3px);
+  transition: all var(--md-sys-motion-duration-short) ease;
+}
+
+.m3-wallpaper-card:hover .m3-card-actions {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.m3-action-icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--md-shape-corner-full);
+  background: rgba(15, 17, 23, 0.85);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--md-sys-motion-duration-short) ease;
+}
+
+.m3-action-icon-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+}
+
+.m3-action-icon-btn:hover {
+  background: var(--md-sys-color-primary);
+  color: #0f1117;
+  transform: scale(1.1);
+}
+
+/* Empty State */
+.flutter-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 50px 20px;
+  text-align: center;
+  gap: 12px;
+}
+
+.empty-state-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--md-shape-corner-lg);
+  background: var(--md-sys-color-surface-container-high);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--md-sys-color-outline);
+}
+
+.empty-state-icon svg {
+  width: 28px;
+  height: 28px;
+  stroke: var(--md-sys-color-primary);
+}
+
+.empty-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+}
+
+/* ==========================================================================
+   6) Buttons & Pagination Bar
+   ========================================================================== */
+.m3-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: var(--md-shape-corner-full);
+  border: 1px solid transparent;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--md-sys-motion-duration-short) ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.m3-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+}
+
+.m3-btn-primary {
+  background: var(--md-sys-color-primary-gradient);
+  color: #ffffff;
+  box-shadow: var(--md-sys-elevation-primary-glow);
+}
+
+.m3-btn-primary:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+.m3-btn-tonal {
+  background: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface);
+  border-color: var(--md-sys-color-outline);
+}
+
+.m3-btn-tonal:hover {
+  background: var(--md-sys-color-surface-container-highest);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.m3-btn-danger {
+  background: var(--md-sys-color-error-container);
+  color: var(--md-sys-color-error);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.m3-btn-danger:hover {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.m3-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+  transform: none !important;
 }
 
-.winui-btn:hover:not(:disabled) {
-  background: var(--bg-control-hover);
-  border-color: var(--border-card-hover);
+.m3-pagination-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 24px;
 }
 
-.winui-btn:active:not(:disabled) {
-  background: var(--bg-control-active);
-  transform: scale(0.98);
+.m3-pagination-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--md-sys-color-surface-container-high);
+  border: 1px solid var(--md-sys-color-outline);
+  padding: 6px 14px;
+  border-radius: var(--md-shape-corner-full);
 }
 
-.winui-btn-primary {
-  background: var(--accent-color);
-  border-color: transparent;
-  color: #000000;
+.pagination-page-label {
+  font-size: 14px;
   font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+  padding: 0 8px;
 }
 
-.winui-btn-primary:hover:not(:disabled) {
-  background: var(--accent-color-hover);
-  color: #000000;
+.infinite-loader-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 14px;
 }
 
-.winui-btn-danger {
-  background: rgba(255, 99, 99, 0.12);
-  border-color: rgba(255, 99, 99, 0.2);
-  color: #ff6b6b;
+.m3-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid rgba(255, 255, 255, 0.15);
+  border-top-color: var(--md-sys-color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
 }
 
-.winui-btn-danger:hover:not(:disabled) {
-  background: rgba(255, 99, 99, 0.22);
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
-.btn-icon {
-  width: 14px;
-  height: 14px;
+/* ==========================================================================
+   7) Material 3 Styled Select & Inputs
+   ========================================================================== */
+.m3-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: var(--md-sys-color-surface-container-high);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 14px;
+  border: 1px solid var(--md-sys-color-outline);
+  color: var(--md-sys-color-on-surface);
+  padding: 8px 36px 8px 14px;
+  border-radius: var(--md-shape-corner-md);
+  font-size: 14px;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  transition: all var(--md-sys-motion-duration-short) ease;
+  box-shadow: var(--md-sys-elevation-1);
+}
+
+.m3-select:hover {
+  background-color: var(--md-sys-color-surface-container-highest);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.m3-select:focus {
+  border-color: var(--md-sys-color-primary);
+  box-shadow: 0 0 0 2px var(--md-sys-color-outline-focus);
+}
+
+.m3-select option {
+  background-color: var(--md-sys-color-surface-container-highest);
+  color: var(--md-sys-color-on-surface);
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+/* Random Source Chip Grid (零遮挡、原生嵌入、完美呈现官方图标) */
+.source-chip-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+  width: 100%;
+  padding-top: 6px;
+}
+
+.source-chip-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--md-shape-corner-md);
+  background: var(--md-sys-color-surface-container-high);
+  border: 1.5px solid var(--md-sys-color-outline);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+  transition: all var(--md-sys-motion-duration-short) ease;
+  position: relative;
+  user-select: none;
+}
+
+.source-chip-item:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+  background: var(--md-sys-color-surface-container-highest);
+  transform: translateY(-1px);
+}
+
+.source-chip-item.active {
+  border-color: var(--md-sys-color-primary);
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  font-weight: 600;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+
+.source-check-icon {
+  margin-left: auto;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--md-sys-color-primary);
+  display: none;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
 
-.winui-input {
-  height: 32px;
-  padding: 0 12px;
-  background: var(--bg-control);
-  border: 1px solid var(--border-control);
-  border-bottom: 2px solid var(--border-control-bottom);
-  border-radius: var(--radius-control) var(--radius-control) 0 0;
-  color: var(--text-primary);
-  font-size: 13px;
-  font-family: inherit;
+.source-check-icon svg {
+  width: 11px;
+  height: 11px;
+  stroke: #0f1117;
+}
+
+.source-chip-item.active .source-check-icon {
+  display: flex;
+}
+
+.m3-input {
+  background: var(--md-sys-color-surface-container-high);
+  border: 1px solid var(--md-sys-color-outline);
+  color: var(--md-sys-color-on-surface);
+  padding: 8px 14px;
+  border-radius: var(--md-shape-corner-md);
+  font-size: 14px;
   outline: none;
-  transition: border-color 0.15s ease, background-color 0.15s ease;
+  transition: all var(--md-sys-motion-duration-short) ease;
 }
 
-.winui-input:focus {
-  background-color: rgba(0, 0, 0, 0.25);
-  border-bottom-color: var(--accent-color);
+.m3-input:focus {
+  border-color: var(--md-sys-color-primary);
+  box-shadow: 0 0 0 2px var(--md-sys-color-outline-focus);
 }
 
-/* WinUI 3 Toggle Switch */
-.winui-toggle {
+/* Flutter Styled Switch */
+.flutter-switch {
   position: relative;
   display: inline-block;
-  width: 40px;
-  height: 20px;
-  flex-shrink: 0;
+  width: 48px;
+  height: 26px;
 }
 
-.winui-toggle input {
+.flutter-switch input {
   opacity: 0;
   width: 0;
   height: 0;
 }
 
-.toggle-slider {
+.switch-track {
   position: absolute;
   cursor: pointer;
   top: 0; left: 0; right: 0; bottom: 0;
-  background-color: rgba(255, 255, 255, 0.1);
-  border: 1px solid var(--border-control);
-  border-radius: 20px;
-  transition: 0.2s;
+  background-color: var(--md-sys-color-surface-container-highest);
+  border: 1.5px solid var(--md-sys-color-outline);
+  border-radius: var(--md-shape-corner-full);
+  transition: all 0.22s ease;
 }
 
-.toggle-slider:before {
+.switch-track:before {
   position: absolute;
   content: "";
-  height: 12px;
-  width: 12px;
+  height: 18px;
+  width: 18px;
   left: 3px;
-  bottom: 3px;
-  background-color: var(--text-secondary);
+  bottom: 2.5px;
+  background-color: var(--md-sys-color-on-surface-variant);
   border-radius: 50%;
-  transition: 0.2s;
+  transition: all 0.22s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-input:checked + .toggle-slider {
-  background-color: var(--accent-color);
-  border-color: var(--accent-color);
+.flutter-switch input:checked + .switch-track {
+  background-color: var(--md-sys-color-primary-container);
+  border-color: var(--md-sys-color-primary);
 }
 
-input:checked + .toggle-slider:before {
-  transform: translateX(20px);
-  background-color: #000000;
+.flutter-switch input:checked + .switch-track:before {
+  transform: translateX(21px);
+  background-color: #ffffff;
 }
 
 /* ==========================================================================
-   4) Pure Wallpaper Thumbnail Cards & Ratio Modes (统一比例 vs 原始自适应比例)
+   8) Mihon Theme Palette Picker
    ========================================================================== */
-.gallery-grid {
+.theme-palette-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-  gap: 16px;
-  will-change: transform;
-  contain: content;
-}
-
-.pure-thumb-card {
-  position: relative;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--border-card);
-  border-radius: var(--radius-card);
-  overflow: hidden;
-  box-shadow: var(--shadow-card);
-  cursor: pointer;
-  backdrop-filter: blur(20px);
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
-              border-color 0.2s ease, 
-              box-shadow 0.2s ease;
-}
-
-/* 统一 16:10 卡片比例模式 (Uniform) */
-.gallery-grid.ratio-uniform .pure-thumb-card {
-  height: 148px;
-}
-
-.gallery-grid.ratio-uniform .pure-card-img {
-  object-fit: cover;
-}
-
-/* 原始图片比例适应模式 (Original) */
-.gallery-grid.ratio-original .pure-thumb-card {
-  height: auto;
-  min-height: 130px;
-}
-
-.gallery-grid.ratio-original .pure-card-img {
-  object-fit: contain;
-  background-color: rgba(0, 0, 0, 0.2);
-}
-
-/* 骨架屏加载微动画 (Skeleton Shimmer) */
-.pure-thumb-card.skeleton {
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.03) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 75%);
-  background-size: 200% 100%;
-  animation: skeletonShimmer 1.5s infinite ease-in-out;
-}
-
-@keyframes skeletonShimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-.pure-thumb-card:hover {
-  transform: translateY(-3px) scale(1.02);
-  border-color: var(--accent-color);
-  box-shadow: var(--shadow-flyout);
-}
-
-/* 纯壁纸大图 */
-.pure-card-img {
+  grid-template-columns: repeat(auto-fill, minmax(116px, 1fr));
+  gap: 10px;
   width: 100%;
-  height: 100%;
-  display: block;
-  opacity: 0;
-  transition: opacity 0.3s ease-in, transform 0.35s ease;
 }
 
-.pure-card-img.loaded {
-  opacity: 1;
-}
-
-.pure-thumb-card:hover .pure-card-img {
-  transform: scale(1.04);
-}
-
-/* Empty State */
-.empty-state {
+.theme-palette-chip {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
-  text-align: center;
-  background: var(--bg-card);
-  border: 1px solid var(--border-card);
-  border-radius: var(--radius-card);
-  backdrop-filter: blur(20px);
+  gap: 8px;
+  padding: 10px 8px;
+  border-radius: var(--md-shape-corner-lg);
+  background: var(--md-sys-color-surface-container-high);
+  border: 1.5px solid var(--md-sys-color-outline);
+  cursor: pointer;
+  transition: all var(--md-sys-motion-duration-short) ease;
+  position: relative;
 }
 
-.empty-icon { font-size: 42px; margin-bottom: 12px; }
-.empty-title { font-size: 16px; font-weight: 600; }
-.empty-desc { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+.theme-palette-chip:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+}
+
+.theme-palette-chip.active {
+  border-color: var(--md-sys-color-primary);
+  background: var(--md-sys-color-surface-container-highest);
+  box-shadow: 0 0 12px var(--md-sys-color-outline-focus);
+}
+
+.palette-preview-circles {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.palette-circle-primary {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.palette-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+}
+
+.palette-check-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--md-sys-color-primary);
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.palette-check-badge svg {
+  width: 10px;
+  height: 10px;
+  stroke: #0f1117;
+}
+
+.theme-palette-chip.active .palette-check-badge {
+  display: flex;
+}
 
 /* ==========================================================================
-   5) WinUI 3 Wallpaper Details ContentDialog
+   9) Settings Tiles & Groups
    ========================================================================== */
-.winui-modal-backdrop {
+.settings-section-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 820px;
+}
+
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-group-title {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: var(--md-sys-color-primary);
+  padding-left: 4px;
+}
+
+.settings-card {
+  background: var(--md-sys-color-surface-container-low);
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: var(--md-shape-corner-lg);
+  overflow: hidden;
+  box-shadow: var(--md-sys-elevation-1);
+}
+
+.settings-tile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  gap: 14px;
+}
+
+.settings-tile:last-child {
+  border-bottom: none;
+}
+
+.settings-tile-leading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+}
+
+.settings-icon-box {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--md-shape-corner-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.settings-icon-box.purple { background: rgba(139, 92, 246, 0.18); color: #a78bfa; }
+.settings-icon-box.blue { background: rgba(56, 189, 248, 0.18); color: #38bdf8; }
+.settings-icon-box.green { background: rgba(52, 211, 153, 0.18); color: #34d399; }
+.settings-icon-box.amber { background: rgba(251, 191, 36, 0.18); color: #fbbf24; }
+
+.settings-icon-box svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+}
+
+.settings-tile-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings-tile-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+}
+
+.settings-tile-desc {
+  font-size: 14px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.settings-tile-action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ==========================================================================
+   10) Details Modal Dialog (优化精致信息排版)
+   ========================================================================== */
+.m3-dialog-backdrop {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(16px);
-  z-index: 9999;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--md-sys-motion-duration-medium) ease;
+}
+
+.m3-dialog-backdrop.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.m3-dialog-surface {
+  width: 580px;
+  max-width: 92vw;
+  max-height: 88vh;
+  background: var(--md-sys-color-surface-container);
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: var(--md-shape-corner-2xl);
+  box-shadow: var(--md-sys-elevation-4);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: scale(0.94) translateY(16px);
+  transition: transform var(--md-sys-motion-duration-medium) ease;
+}
+
+.m3-dialog-backdrop.active .m3-dialog-surface {
+  transform: scale(1) translateY(0);
+}
+
+.m3-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--md-sys-color-outline);
+}
+
+.m3-dialog-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--md-sys-color-on-surface);
+}
+
+.m3-dialog-close-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--md-shape-corner-full);
+  border: none;
+  background: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface-variant);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all var(--md-sys-motion-duration-short) ease;
+}
+
+.m3-dialog-close-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--md-sys-color-on-surface);
+}
+
+.m3-dialog-body {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+}
+
+.dialog-preview-box {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 290px;
+  border-radius: var(--md-shape-corner-lg);
+  overflow: hidden;
+  background: var(--md-sys-color-surface-container-highest);
+  border: 1px solid var(--md-sys-color-outline);
+  position: relative;
+  cursor: pointer;
+  box-shadow: var(--md-sys-elevation-2);
+}
+
+.dialog-preview-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.dialog-preview-box:hover img {
+  transform: scale(1.02);
+}
+
+.dialog-preview-hint {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(10px);
+  color: #ffffff;
+  padding: 4px 10px;
+  border-radius: var(--md-shape-corner-full);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.dialog-preview-box:hover .dialog-preview-hint {
+  opacity: 1;
+}
+
+.dialog-meta-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.detail-info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--md-sys-color-surface-container-high);
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: var(--md-shape-corner-lg);
+  transition: all 0.2s ease;
+}
+
+.detail-info-row:hover {
+  background: var(--md-sys-color-surface-container-highest);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.detail-row-leading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.detail-icon-box {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--md-shape-corner-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.detail-icon-box.blue { background: rgba(56, 189, 248, 0.16); color: #38bdf8; }
+.detail-icon-box.purple { background: rgba(139, 92, 246, 0.16); color: #a78bfa; }
+
+.detail-icon-box svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+}
+
+.detail-row-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+}
+
+.detail-row-trailing {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.detail-resolution-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: var(--md-shape-corner-full);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--md-sys-color-outline);
+  color: var(--md-sys-color-primary);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.m3-dialog-footer {
+  padding: 14px 22px;
+  background: var(--md-sys-color-surface-container-low);
+  border-top: 1px solid var(--md-sys-color-outline);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* ==========================================================================
+   11) Fullscreen Lightbox & Interactive Photo Viewer (占全屏可放大缩小)
+   ========================================================================== */
+.fullscreen-lightbox-backdrop {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.94);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  z-index: 10000;
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.25s ease;
+  overflow: hidden;
 }
 
-.winui-modal-backdrop.active {
+.fullscreen-lightbox-backdrop.active {
   opacity: 1;
   pointer-events: auto;
 }
 
-.winui-modal-dialog {
-  width: 580px;
-  max-width: 90vw;
-  background: rgba(36, 36, 36, 0.92);
-  border: 1px solid var(--border-card-hover);
-  border-radius: var(--radius-dialog);
-  box-shadow: var(--shadow-flyout);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  transform: scale(0.95) translateY(10px);
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.winui-modal-backdrop.active .winui-modal-dialog {
-  transform: scale(1) translateY(0);
-}
-
-.modal-header {
-  height: 48px;
-  padding: 0 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--border-card);
-}
-
-.modal-title {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.modal-close-btn {
-  background: transparent;
-  border: none;
-  color: var(--text-secondary);
-  font-size: 16px;
-  cursor: pointer;
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-control);
+.lightbox-viewport {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.modal-close-btn:hover {
-  background: var(--bg-control-hover);
-  color: #fff;
-}
-
-.modal-body {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  max-height: 70vh;
-  overflow-y: auto;
-}
-
-.modal-image-preview {
-  width: 100%;
-  height: 260px;
-  background: #111;
-  border-radius: var(--radius-card);
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  cursor: grab;
 }
 
-.modal-image-preview img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.lightbox-viewport.dragging {
+  cursor: grabbing;
 }
 
-.modal-wallpaper-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--border-card);
-  border-radius: var(--radius-card);
-  padding: 12px 16px;
+.lightbox-image {
+  max-width: 100vw;
+  max-height: 100vh;
+  object-fit: contain;
+  transform-origin: center center;
+  transition: transform 0.08s ease-out;
+  user-select: none;
+  pointer-events: none;
 }
 
-.meta-row {
-  display: flex;
-  font-size: 12px;
-}
-
-.meta-label {
-  color: var(--text-secondary);
-  width: 95px;
-  flex-shrink: 0;
-}
-
-.meta-val {
-  color: var(--text-primary);
-  font-weight: 500;
-  word-break: break-all;
-}
-
-.modal-footer {
-  height: 60px;
-  padding: 0 20px;
-  background: rgba(28, 28, 28, 0.6);
-  border-top: 1px solid var(--border-card);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-/* Settings Card List */
-.settings-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.winui-setting-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: var(--bg-card);
-  border: 1px solid var(--border-card);
-  border-radius: var(--radius-card);
+/* Lightbox Floating Toolbar */
+.lightbox-floating-toolbar {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(20, 24, 33, 0.85);
   backdrop-filter: blur(20px);
-  padding: 14px 20px;
-  gap: 16px;
-}
-
-.setting-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  flex: 1;
-  min-width: 0;
-}
-
-.setting-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-primary);
-  white-space: nowrap;
-}
-
-.setting-desc {
-  font-size: 11px;
-  color: var(--text-secondary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.setting-control {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-.unit-label { font-size: 12px; color: var(--text-secondary); }
-
-/* About Section Badges */
-.about-card {
-  margin-top: 12px;
-  background: rgba(255, 255, 255, 0.02);
-}
-
-.about-tech-stack {
-  display: flex;
-  gap: 8px;
-  margin-top: 10px;
-  flex-wrap: wrap;
-}
-
-.tech-badge {
-  font-size: 11px;
-  padding: 2px 8px;
-  background-color: rgba(96, 205, 255, 0.12);
-  border: 1px solid rgba(96, 205, 255, 0.25);
-  color: var(--accent-color);
-  border-radius: 12px;
-  white-space: nowrap;
-}
-
-.current-wp-banner {
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--md-shape-corner-full);
+  padding: 6px 14px;
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-top: 20px;
-  padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--border-card);
-  border-radius: var(--radius-card);
-  font-size: 12px;
-  color: var(--text-secondary);
-  word-break: break-all;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  z-index: 10002;
 }
 
-/* Status Bar */
-.winui-statusbar {
-  height: 28px;
-  background: rgba(26, 26, 26, 0.85);
-  backdrop-filter: blur(20px);
-  border-top: 1px solid var(--border-card);
+.lightbox-tool-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--md-shape-corner-full);
+  background: transparent;
+  border: none;
+  color: #ffffff;
   display: flex;
   align-items: center;
-  padding: 0 16px;
-  gap: 8px;
-  flex-shrink: 0;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.15s ease;
 }
 
-.status-indicator {
-  width: 6px;
-  height: 6px;
-  background-color: var(--accent-color);
+.lightbox-tool-btn svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+}
+
+.lightbox-tool-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.1);
+}
+
+.lightbox-tool-divider {
+  width: 1px;
+  height: 18px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.lightbox-zoom-badge {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--md-sys-color-primary);
+  min-width: 50px;
+  text-align: center;
+}
+
+.lightbox-close-btn {
+  position: fixed;
+  top: 24px;
+  right: 28px;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--md-shape-corner-full);
+  background: rgba(20, 24, 33, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10002;
+  transition: all 0.15s ease;
+}
+
+.lightbox-close-btn:hover {
+  background: #ef4444;
+  transform: scale(1.08);
+}
+
+/* ==========================================================================
+   12) SnackBar Notification
+   ========================================================================== */
+.flutter-snackbar-container {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  opacity: 0;
+  background: var(--md-sys-color-surface-container-highest);
+  border: 1px solid var(--md-sys-color-outline);
+  padding: 10px 20px;
+  border-radius: var(--md-shape-corner-full);
+  box-shadow: var(--md-sys-elevation-4);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 10005;
+  pointer-events: none;
+  transition: all var(--md-sys-motion-duration-medium) ease;
+}
+
+.flutter-snackbar-container.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.snackbar-icon-box {
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
+  background: var(--md-sys-color-primary-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
 
-.status-msg {
-  font-size: 11px;
-  color: var(--text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.snackbar-icon-box svg {
+  width: 12px;
+  height: 12px;
+  stroke: #ffffff;
+}
+
+.snackbar-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #ffffff;
 }

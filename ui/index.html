@@ -6,306 +6,753 @@
   <title>Wallpaper</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
-<body class="winui-theme-dark">
-  <!-- WinUI 3 原生 Fluent 标题栏 (支持 Mica 拖拽区与窗口控制) -->
-  <div class="fluent-titlebar">
-    <div class="titlebar-drag-region" data-tauri-drag-region>
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:14px;height:14px;flex-shrink:0;">
-        <rect x="2" y="4" width="20" height="16" rx="2" fill="#60cdff" fill-opacity="0.2" stroke="#60cdff" stroke-width="1.5"/>
-        <circle cx="8" cy="9.5" r="1.8" fill="#60cdff"/>
-        <path d="M2 17 L7 12 L11 15 L15 10 L22 17" stroke="#60cdff" stroke-width="1.5" stroke-linejoin="round" fill="none"/>
-      </svg>
-      <span class="titlebar-title">Wallpaper</span>
-    </div>
-    <div class="titlebar-actions" data-tauri-drag-region="false">
-      <button class="titlebar-btn" id="btn-minimize" title="最小化">&#xE921;</button>
-      <button class="titlebar-btn" id="btn-maximize" title="最大化">&#xE922;</button>
-      <button class="titlebar-btn close" id="btn-close" title="关闭">&#xE8BB;</button>
-    </div>
-  </div>
+<body class="theme-violet">
+  <div class="flutter-scaffold">
 
-  <div class="app-container">
-
-    <!-- WinUI 3 NavigationRail SideNav -->
-    <aside class="winui-nav">
-      <div class="nav-header">
-        <div class="app-logo">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="24" height="24">
-            <rect x="2" y="4" width="20" height="16" rx="2" fill="#60cdff" fill-opacity="0.15" stroke="#60cdff" stroke-width="1.5"/>
-            <circle cx="8" cy="9.5" r="1.8" fill="#60cdff"/>
-            <path d="M2 17 L7 12 L11 15 L15 10 L22 17" stroke="#60cdff" stroke-width="1.5" stroke-linejoin="round" fill="none"/>
-          </svg>
-        </div>
-        <div class="app-title-group">
-          <span class="app-title">Wallpaper</span>
+    <!-- 1) Flutter / M3 Window Header Titlebar -->
+    <header class="flutter-titlebar">
+      <div class="titlebar-drag-region" data-tauri-drag-region>
+        <div class="titlebar-brand">
+          <div class="titlebar-logo">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5zm2 0v14h12V5H6zm3 4a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm-1 8 3.5-4.5 2.5 3 3.5-4.5 2.5 6H7z"/>
+            </svg>
+          </div>
+          <span class="titlebar-title">Wallpaper</span>
         </div>
       </div>
-
-      <nav class="nav-menu">
-        <button class="nav-item active" data-tab="gallery">
-          <span class="nav-indicator"></span>
-          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="7" height="7" rx="1"/>
-            <rect x="14" y="3" width="7" height="7" rx="1"/>
-            <rect x="14" y="14" width="7" height="7" rx="1"/>
-            <rect x="3" y="14" width="7" height="7" rx="1"/>
-          </svg>
-          <span class="nav-label">本地壁纸库</span>
+      <div class="titlebar-actions" data-tauri-drag-region="false">
+        <button class="titlebar-btn" id="btn-minimize" title="最小化">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
-
-        <button class="nav-item" data-tab="explore">
-          <span class="nav-indicator"></span>
-          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-          </svg>
-          <span class="nav-label">发现新壁纸</span>
+        <button class="titlebar-btn" id="btn-maximize" title="最大化">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
         </button>
-
-        <button class="nav-item" data-tab="settings">
-          <span class="nav-indicator"></span>
-          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="3"/>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-          </svg>
-          <span class="nav-label">软件设置</span>
+        <button class="titlebar-btn close" id="btn-close" title="关闭">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></svg>
         </button>
-      </nav>
-    </aside>
+      </div>
+    </header>
 
-    <!-- Main Content Stage -->
-    <main class="winui-main" id="winui-main-scroll">
+    <!-- 2) App Body: Navigation Rail + Main View -->
+    <div class="app-body">
 
-      <!-- Gallery Page -->
-      <section id="tab-gallery" class="tab-page active">
-        <header class="page-header">
-          <div>
-            <h1 class="page-title">本地壁纸库</h1>
-            <p class="page-desc" id="gallery-count-text">共已缓存 0 张高分辨率壁纸，随时设为桌面</p>
+      <!-- Flutter Navigation Rail -->
+      <aside class="flutter-nav-rail">
+        <div class="nav-rail-top">
+          <!-- Mini Profile Card -->
+          <div class="nav-profile-card">
+            <div class="nav-profile-avatar">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+              </svg>
+            </div>
+            <div class="nav-profile-info">
+              <span class="nav-profile-name">Wallpaper Hub</span>
+            </div>
           </div>
-          <button class="winui-btn" id="btn-refresh-gallery">
-            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-            刷新列表
+
+          <!-- Navigation Items -->
+          <nav class="nav-menu">
+            <button class="nav-item active" data-tab="gallery">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+                <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+                <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+                <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+              </svg>
+              <span>本地壁纸</span>
+            </button>
+
+            <button class="nav-item" data-tab="explore">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+              </svg>
+              <span>发现壁纸</span>
+            </button>
+
+            <button class="nav-item" data-tab="settings">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+              </svg>
+              <span>设置</span>
+            </button>
+          </nav>
+        </div>
+
+        <!-- Nav Rail Bottom -->
+        <div class="nav-rail-bottom">
+          <button class="btn-quick-random" id="btn-quick-random">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+              <polyline points="16 3 21 3 21 8"/>
+              <line x1="4" y1="20" x2="21" y2="3"/>
+              <polyline points="21 16 21 21 16 21"/>
+              <line x1="15" y1="15" x2="21" y2="21"/>
+              <line x1="4" y1="4" x2="9" y2="9"/>
+            </svg>
+            <span>随机换一张</span>
           </button>
-        </header>
-
-        <!-- 纯壁纸缩略图画廊卡片网格 -->
-        <div class="gallery-grid pure-thumb-grid ratio-uniform" id="gallery-grid">
-          <!-- Local Gallery Cards generated dynamically -->
         </div>
+      </aside>
 
-        <div class="empty-state" id="gallery-empty-state" style="display: none;">
-          <div class="empty-icon"></div>
-          <h2 class="empty-title">尚无本地缓存壁纸</h2>
-          <p class="empty-desc">切换至“发现新壁纸”，一键挑选或随机抓取在线美图！</p>
-        </div>
-      </section>
+      <!-- Main Stage Content Area -->
+      <main class="flutter-main" id="flutter-main-scroll">
 
-      <!-- Explore Page (在线壁纸列表 & 分页 / 无限滚动) -->
-      <section id="tab-explore" class="tab-page">
-        <header class="page-header">
-          <div>
-            <h1 class="page-title">在线壁纸图源</h1>
-            <p class="page-desc">遵循官方规范接口拉取 Bing 每日壁纸、Unsplash 官方 API、Picsum 4K 摄影大图与 Wallhaven 壁纸墙</p>
-          </div>
-        </header>
-
-        <!-- 工具栏与图源切换 -->
-        <div class="explore-filter-bar">
-          <div class="filter-group">
-            <label for="select-source">官方图源：</label>
-            <select class="winui-select" id="select-source">
-              <option value="picsum" selected>Picsum 4K 摄影大图 (Official)</option>
-              <option value="bing">Bing 官方每日壁纸 (Microsoft)</option>
-              <option value="unsplash">Unsplash 官方 API (Unsplash)</option>
-              <option value="wallhaven">Wallhaven 壁纸社区 (Wallhaven)</option>
-            </select>
-          </div>
-
-          <div class="filter-group" id="group-search">
-            <input type="text" class="winui-input" id="input-online-query" placeholder="搜索关键词 (默认为空，推荐热图)..." style="width: 240px;" />
-            <button class="winui-btn" id="btn-search-online">搜索</button>
-          </div>
-        </div>
-
-        <!-- 纯壁纸缩略图在线网格 -->
-        <div class="gallery-grid pure-thumb-grid ratio-uniform" id="online-grid">
-          <!-- Generated dynamically -->
-        </div>
-
-        <!-- WinUI 3 分页条 / 无限加载提示 -->
-        <div class="pagination-bar" id="pagination-bar">
-          <button class="winui-btn" id="btn-prev-page" disabled>◀ 上一页</button>
-          <span class="page-info" id="page-info">第 1 页</span>
-          <button class="winui-btn" id="btn-next-page">下一页 ▶</button>
-        </div>
-        <div class="infinite-loader" id="infinite-loader" style="display: none;">
-          <span>滚动加载更多精彩壁纸中...</span>
-        </div>
-      </section>
-
-      <!-- Settings Page -->
-      <section id="tab-settings" class="tab-page">
-        <header class="page-header">
-          <div>
-            <h1 class="page-title">软件设置</h1>
-            <p class="page-desc">管理加载模式、卡片展视比例、API 密钥、保存路径与自动化行为</p>
-          </div>
-        </header>
-
-        <div class="settings-list">
-          <div class="winui-setting-card">
-            <div class="setting-info">
-              <span class="setting-title">在线壁纸加载模式</span>
-              <span class="setting-desc">选择【分页加载】(按钮切页) 或【无限滚动】(下拉自动加载更多)</span>
+        <!-- ================= PAGE 1: 本地壁纸 ================= -->
+        <section id="tab-gallery" class="tab-page active">
+          <header class="page-header">
+            <div class="page-title-wrap">
+              <h1 class="page-title">
+                本地壁纸
+                <span class="page-badge" id="gallery-count-badge">0 张</span>
+              </h1>
             </div>
-            <div class="setting-control">
-              <select class="winui-select" id="select-config-loadmode">
-                <option value="pagination" selected>分页加载 (上一页/下一页)</option>
-                <option value="infinite">无限滚动 (下拉自动加载更多)</option>
-              </select>
+            <div style="display: flex; gap: 8px;">
+              <button class="m3-btn m3-btn-tonal" id="btn-open-cache-folder">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                <span>打开目录</span>
+              </button>
+              <button class="m3-btn m3-btn-primary" id="btn-refresh-gallery">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                <span>刷新</span>
+              </button>
             </div>
+          </header>
+
+          <!-- Pure Image Grid for Local Wallpapers -->
+          <div class="gallery-grid ratio-uniform" id="gallery-grid">
+            <!-- Dynamically populated -->
           </div>
 
-          <div class="winui-setting-card">
-            <div class="setting-info">
-              <span class="setting-title">壁纸卡片展示比例</span>
-              <span class="setting-desc">选择【统一 16:10 卡片比例】或【根据图片原始比例适应显示】</span>
+          <!-- Empty State -->
+          <div class="flutter-empty-state" id="gallery-empty-state" style="display: none;">
+            <div class="empty-state-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
             </div>
-            <div class="setting-control">
-              <select class="winui-select" id="select-config-cardratio">
-                <option value="uniform" selected>统一卡片比例 (16:10 整齐裁切)</option>
-                <option value="original">原始图片比例 (完整适应显示)</option>
-              </select>
-            </div>
+            <h2 class="empty-title">本地暂无壁纸</h2>
+            <button class="m3-btn m3-btn-primary" id="btn-goto-explore" style="margin-top: 6px;">
+              <span>发现壁纸</span>
+            </button>
           </div>
+        </section>
 
-          <div class="winui-setting-card">
-            <div class="setting-info">
-              <span class="setting-title">默认搜索关键词</span>
-              <span class="setting-desc">留空表示无分类限制推荐全量热图；也可填写如 nature, landscape</span>
-            </div>
-            <div class="setting-control">
-              <input type="text" class="winui-input" id="input-config-query" placeholder="默认为空..." style="width: 220px;" />
-            </div>
-          </div>
+        <!-- ================= PAGE 2: 发现壁纸 (各网站专属官方 SVG 标志) ================= -->
+        <section id="tab-explore" class="tab-page">
+          <!-- Explore Control Surface (Sticky Header + Contextual Controls) -->
+          <div class="explore-control-surface sticky" id="explore-sticky-header">
+            <div class="explore-header-top-row">
+              <!-- Segmented Filter Chips with Official Brand Logos -->
+              <div class="segmented-group" id="segmented-source-group">
+                <!-- 1) Pexels 官方 Logo -->
+                <button class="segmented-btn active" data-source="pexels">
+                  <img class="source-brand-icon" src="assets/icons/pexels.png" alt="Pexels" />
+                  <span>Pexels</span>
+                </button>
 
-          <div class="winui-setting-card">
-            <div class="setting-info">
-              <span class="setting-title">Unsplash Access Key (可选)</span>
-              <span class="setting-desc">官方 Unsplash Developer Access Key（填入可提升配额限额）</span>
-            </div>
-            <div class="setting-control">
-              <input type="text" class="winui-input" id="input-config-unsplash-key" placeholder="Client-ID ..." style="width: 220px;" />
-            </div>
-          </div>
+                <!-- 2) Bing 官方 Logo -->
+                <button class="segmented-btn" data-source="bing">
+                  <img class="source-brand-icon" src="assets/icons/bing.png" alt="Bing" />
+                  <span>Bing 每日</span>
+                </button>
 
-          <!-- 自定义选择路径控制卡片 -->
-          <div class="winui-setting-card">
-            <div class="setting-info">
-              <span class="setting-title">本地保存路径</span>
-              <span class="setting-desc" id="label-cache-dir">cache/wallpapers</span>
-            </div>
-            <div class="setting-control">
-              <button class="winui-btn" id="btn-browse-dir">选择文件夹...</button>
-            </div>
-          </div>
+                <!-- 3) Unsplash 官方 Logo -->
+                <button class="segmented-btn" data-source="unsplash">
+                  <img class="source-brand-icon" src="assets/icons/unsplash.png" alt="Unsplash" />
+                  <span>Unsplash</span>
+                </button>
 
-          <div class="winui-setting-card">
-            <div class="setting-info">
-              <span class="setting-title">自动轮换更新间隔</span>
-              <span class="setting-desc">后台自动下载与更换桌面壁纸的时间周期（分钟）</span>
-            </div>
-            <div class="setting-control">
-              <input type="number" class="winui-input" id="input-config-interval" min="5" max="1440" value="60" style="width: 90px;" />
-              <span class="unit-label">分钟</span>
-            </div>
-          </div>
-
-          <div class="winui-setting-card">
-            <div class="setting-info">
-              <span class="setting-title">开启后台自动定时轮换</span>
-              <span class="setting-desc">在应用后台静默运行时按间隔时间点更换最新壁纸</span>
-            </div>
-            <div class="setting-control">
-              <label class="winui-toggle">
-                <input type="checkbox" id="check-config-autoupdate" />
-                <span class="toggle-slider"></span>
-              </label>
-            </div>
-          </div>
-
-          <div class="winui-setting-card">
-            <div class="setting-info">
-              <span class="setting-title">开机自动启动</span>
-              <span class="setting-desc">系统启动时自动运行应用程序并最小化到托盘</span>
-            </div>
-            <div class="setting-control">
-              <label class="winui-toggle">
-                <input type="checkbox" id="check-auto-launch" />
-                <span class="toggle-slider"></span>
-              </label>
-            </div>
-          </div>
-
-          <!-- 关于应用 (About Section) -->
-          <div class="winui-setting-card about-card">
-            <div class="setting-info">
-              <span class="setting-title">关于 Wallpaper</span>
-              <span class="setting-desc">基于 Tauri v2 + Rust 构建的原生 Windows 11 WinUI 3 极速壁纸切换客户端</span>
-              <div class="about-tech-stack">
-                <span class="tech-badge">Rust 1.96</span>
-                <span class="tech-badge">Tauri 2.0</span>
-                <span class="tech-badge">WinUI 3 Fluent Spec</span>
-                <span class="tech-badge">Mica & Acrylic</span>
-                <span class="tech-badge">v1.0.0</span>
+                <!-- 4) Wallhaven 官方 Logo -->
+                <button class="segmented-btn" data-source="wallhaven">
+                  <img class="source-brand-icon" src="assets/icons/wallhaven.png" alt="Wallhaven" />
+                  <span>Wallhaven</span>
+                </button>
               </div>
             </div>
+
+            <!-- Contextual Search & Filter Surface for each source (严格与官网对齐) -->
+            <div class="explore-contextual-bar" id="explore-contextual-bar">
+              
+              <!-- 1. Pexels 官网选项: 官方搜索框 + 热门精选分类 -->
+              <div class="contextual-panel active" id="panel-source-pexels">
+                <div class="modern-search-box">
+                  <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  <input type="text" class="modern-search-input" id="input-pexels-query" placeholder="搜索 Pexels 全球顶尖 4K 摄影壁纸 (如 nature, ocean)..." />
+                  <button class="search-clear-btn" id="btn-pexels-clear" title="清空">×</button>
+                  <button class="modern-search-btn" id="btn-pexels-search">搜索</button>
+                </div>
+                <div class="contextual-chips" id="pexels-tag-chips">
+                  <button class="context-chip active" data-tag="curated">✨ 精选推荐</button>
+                  <button class="context-chip" data-tag="nature">🌿 自然风光</button>
+                  <button class="context-chip" data-tag="city">🏙️ 城市建筑</button>
+                  <button class="context-chip" data-tag="ocean">🌊 海洋沙滩</button>
+                  <button class="context-chip" data-tag="dark">🌑 暗黑极简</button>
+                  <button class="context-chip" data-tag="aerial">🚁 航拍摄影</button>
+                  <button class="context-chip" data-tag="night">✨ 璀璨夜景</button>
+                </div>
+              </div>
+
+              <!-- 2. Microsoft Bing 官网选项: 全球每日地区市场 -->
+              <div class="contextual-panel" id="panel-source-bing">
+                <span class="contextual-label">每日地区:</span>
+                <div class="contextual-chips" id="bing-market-chips">
+                  <button class="context-chip active" data-market="zh-CN">🇨🇳 中国</button>
+                  <button class="context-chip" data-market="en-US">🇺🇸 美国/全球</button>
+                  <button class="context-chip" data-market="ja-JP">🇯🇵 日本</button>
+                  <button class="context-chip" data-market="en-GB">🇬🇧 英国</button>
+                  <button class="context-chip" data-market="de-DE">🇩🇪 德国</button>
+                  <button class="context-chip" data-market="fr-FR">🇫🇷 法国</button>
+                </div>
+              </div>
+
+              <!-- 3. Unsplash 官网选项: 官方搜索框 + 顶级 Editorial Topics -->
+              <div class="contextual-panel" id="panel-source-unsplash">
+                <div class="modern-search-box">
+                  <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  <input type="text" class="modern-search-input" id="input-unsplash-query" placeholder="搜索 Unsplash 摄影大图 (支持中英文)..." />
+                  <button class="search-clear-btn" id="btn-unsplash-clear" title="清空">×</button>
+                  <button class="modern-search-btn" id="btn-unsplash-search">搜索</button>
+                </div>
+                <div class="contextual-chips" id="unsplash-tag-chips">
+                  <button class="context-chip active" data-tag="wallpaper">✨ 编辑推荐</button>
+                  <button class="context-chip" data-tag="nature">🌿 自然风光</button>
+                  <button class="context-chip" data-tag="3d-renders">🧊 3D 渲染</button>
+                  <button class="context-chip" data-tag="architecture">🏛️ 建筑空间</button>
+                  <button class="context-chip" data-tag="space">🚀 宇宙星空</button>
+                  <button class="context-chip" data-tag="street-photography">🏙️ 街头纪实</button>
+                  <button class="context-chip" data-tag="textures-patterns">🧩 纹理材质</button>
+                  <button class="context-chip" data-tag="animals">🐾 灵动动物</button>
+                </div>
+              </div>
+
+              <!-- 4. Wallhaven 官网选项: 官方搜索框 + 官方分类 + 排序榜单 + 画幅比例 -->
+              <div class="contextual-panel" id="panel-source-wallhaven">
+                <div class="modern-search-box">
+                  <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  <input type="text" class="modern-search-input" id="input-wallhaven-query" placeholder="搜索 Wallhaven 社区壁纸..." />
+                  <button class="search-clear-btn" id="btn-wallhaven-clear" title="清空">×</button>
+                  <button class="modern-search-btn" id="btn-wallhaven-search">搜索</button>
+                </div>
+                <div class="wallhaven-filter-row">
+                  <div class="contextual-chips" id="wallhaven-category-chips">
+                    <span class="contextual-label">分类:</span>
+                    <button class="context-chip active" data-cat="110">全部 (110)</button>
+                    <button class="context-chip" data-cat="100">常规 General</button>
+                    <button class="context-chip" data-cat="010">动漫 Anime</button>
+                    <button class="context-chip" data-cat="001">人物 People</button>
+                  </div>
+                  <div class="contextual-chips" id="wallhaven-sorting-chips">
+                    <span class="contextual-label">排序:</span>
+                    <button class="context-chip active" data-sort="views">🔥 最热 Views</button>
+                    <button class="context-chip" data-sort="toplist">⭐ 精选 Toplist</button>
+                    <button class="context-chip" data-sort="date_added">⏱ 最新 Latest</button>
+                    <button class="context-chip" data-sort="random">🎲 随机 Random</button>
+                  </div>
+                  <div class="contextual-chips" id="wallhaven-ratio-chips">
+                    <span class="contextual-label">画幅:</span>
+                    <button class="context-chip active" data-ratio="16x9,16x10">16:9 横屏</button>
+                    <button class="context-chip" data-ratio="21x9,32x9">21:9 超宽</button>
+                    <button class="context-chip" data-ratio="">全部比例</button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Pure Image Online Grid -->
+          <div class="gallery-grid ratio-uniform" id="online-grid">
+            <!-- Dynamically populated -->
+          </div>
+
+          <!-- M3 Pagination Pill Bar -->
+          <div class="m3-pagination-container" id="pagination-bar">
+            <div class="m3-pagination-pill">
+              <button class="m3-btn m3-btn-tonal" id="btn-prev-page" style="padding: 4px 10px; font-size: 14px;" disabled>
+                <span>◀ 上一页</span>
+              </button>
+              <span class="pagination-page-label" id="page-info">第 1 页</span>
+              <button class="m3-btn m3-btn-tonal" id="btn-next-page" style="padding: 4px 10px; font-size: 14px;">
+                <span>下一页 ▶</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Infinite Loader -->
+          <div class="infinite-loader-box" id="infinite-loader" style="display: none;">
+            <div class="m3-spinner"></div>
+            <span>加载更多壁纸中...</span>
+          </div>
+        </section>
+
+        <!-- ================= PAGE 3: 设置 ================= -->
+        <section id="tab-settings" class="tab-page">
+          <header class="page-header">
+            <div class="page-title-wrap">
+              <h1 class="page-title">设置</h1>
+            </div>
+          </header>
+
+          <div class="settings-section-list">
+
+            <!-- 主题配色 -->
+            <div class="settings-group">
+              <span class="settings-group-title">主题配色 (Material You)</span>
+              <div class="settings-card" style="padding: 14px;">
+                <div class="theme-palette-grid" id="theme-palette-grid">
+                  <div class="theme-palette-chip active" data-theme="violet">
+                    <div class="palette-preview-circles">
+                      <div class="palette-circle-primary" style="background: linear-gradient(135deg, #8b5cf6, #6366f1);"></div>
+                    </div>
+                    <span class="palette-name">薰衣草紫</span>
+                    <div class="palette-check-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  </div>
+
+                  <div class="theme-palette-chip" data-theme="blue">
+                    <div class="palette-preview-circles">
+                      <div class="palette-circle-primary" style="background: linear-gradient(135deg, #0284c7, #38bdf8);"></div>
+                    </div>
+                    <span class="palette-name">天青海蓝</span>
+                    <div class="palette-check-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  </div>
+
+                  <div class="theme-palette-chip" data-theme="teal">
+                    <div class="palette-preview-circles">
+                      <div class="palette-circle-primary" style="background: linear-gradient(135deg, #0d9488, #2dd4bf);"></div>
+                    </div>
+                    <span class="palette-name">松石薄荷</span>
+                    <div class="palette-check-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  </div>
+
+                  <div class="theme-palette-chip" data-theme="pink">
+                    <div class="palette-preview-circles">
+                      <div class="palette-circle-primary" style="background: linear-gradient(135deg, #db2777, #f472b6);"></div>
+                    </div>
+                    <span class="palette-name">樱花绯粉</span>
+                    <div class="palette-check-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  </div>
+
+                  <div class="theme-palette-chip" data-theme="amber">
+                    <div class="palette-preview-circles">
+                      <div class="palette-circle-primary" style="background: linear-gradient(135deg, #d97706, #fbbf24);"></div>
+                    </div>
+                    <span class="palette-name">暮光金橙</span>
+                    <div class="palette-check-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  </div>
+
+                  <div class="theme-palette-chip" data-theme="green">
+                    <div class="palette-preview-circles">
+                      <div class="palette-circle-primary" style="background: linear-gradient(135deg, #059669, #34d399);"></div>
+                    </div>
+                    <span class="palette-name">森林翡翠</span>
+                    <div class="palette-check-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  </div>
+
+                  <div class="theme-palette-chip" data-theme="crimson">
+                    <div class="palette-preview-circles">
+                      <div class="palette-circle-primary" style="background: linear-gradient(135deg, #dc2626, #f87171);"></div>
+                    </div>
+                    <span class="palette-name">热烈烈焰</span>
+                    <div class="palette-check-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  </div>
+                </div>
+
+                <div class="settings-tile" style="margin-top: 10px; padding: 10px 0 0 0; border-top: 1px solid var(--md-sys-color-outline-variant);">
+                  <div class="settings-tile-leading">
+                    <div class="settings-icon-box purple">
+                      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    </div>
+                    <div class="settings-tile-content">
+                      <span class="settings-tile-title">纯黑 AMOLED 模式</span>
+                    </div>
+                  </div>
+                  <div class="settings-tile-action">
+                    <label class="flutter-switch">
+                      <input type="checkbox" id="check-amoled-mode" />
+                      <span class="switch-track"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 界面字体风格 (涵盖多种圆润与现代字体) -->
+            <div class="settings-group">
+              <span class="settings-group-title">界面字体风格 (Typography)</span>
+              <div class="settings-card" style="padding: 14px;">
+                <div class="font-preset-grid" id="font-preset-grid">
+                  
+                  <!-- 1. 鸿蒙舒适圆体 -->
+                  <div class="font-preset-chip active" data-font="rounded" style="font-family: 'HarmonyOS Sans SC', 'Nunito', 'Microsoft YaHei UI', sans-serif;">
+                    <div class="font-preset-header">
+                      <span class="font-preset-title">🌸 鸿蒙舒适圆体</span>
+                      <span class="font-preset-tag">推荐·圆润</span>
+                    </div>
+                    <div class="font-preset-preview">永恒之美 4K Rounded</div>
+                    <span class="font-preset-desc">柔和饱满、圆润护眼、现代质感极佳</span>
+                    <div class="font-check-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  </div>
+
+                  <!-- 2. 软萌可爱幼圆 -->
+                  <div class="font-preset-chip" data-font="youyuan" style="font-family: 'YouYuan', '幼圆', 'Quicksand', sans-serif;">
+                    <div class="font-preset-header">
+                      <span class="font-preset-title">🍬 软萌可爱幼圆</span>
+                      <span class="font-preset-tag">极致圆润</span>
+                    </div>
+                    <div class="font-preset-preview">灵动探索 4K YouYuan</div>
+                    <span class="font-preset-desc">极致弧度圆角、活泼软萌、亲和力强</span>
+                    <div class="font-check-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  </div>
+
+                  <!-- 3. 现代极简屏显 (微软 UI) -->
+                  <div class="font-preset-chip" data-font="fluent" style="font-family: 'Segoe UI', 'Microsoft YaHei UI', sans-serif;">
+                    <div class="font-preset-header">
+                      <span class="font-preset-title">✨ 现代极简屏显</span>
+                      <span class="font-preset-tag">WinUI 原生</span>
+                    </div>
+                    <div class="font-preset-preview">沉浸视界 4K Segoe UI</div>
+                    <span class="font-preset-desc">Windows 11 原生微软 UI、清晰利落</span>
+                    <div class="font-check-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  </div>
+
+                  <!-- 4. 霞鹜悠然文楷 -->
+                  <div class="font-preset-chip" data-font="wenkai" style="font-family: 'LXGW WenKai', 'STKaiti', 'KaiTi', serif;">
+                    <div class="font-preset-header">
+                      <span class="font-preset-title">🌿 霞鹜悠然文楷</span>
+                      <span class="font-preset-tag">诗意人文</span>
+                    </div>
+                    <div class="font-preset-preview">清风明月 4K WenKai</div>
+                    <span class="font-preset-desc">温润手书楷体、书卷诗意、典雅悠然</span>
+                    <div class="font-check-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  </div>
+
+                  <!-- 5. 小米几何质感 -->
+                  <div class="font-preset-chip" data-font="misans" style="font-family: 'MiSans', 'Noto Sans SC', sans-serif;">
+                    <div class="font-preset-header">
+                      <span class="font-preset-title">💎 小米几何质感</span>
+                      <span class="font-preset-tag">现代几何</span>
+                    </div>
+                    <div class="font-preset-preview">科技灵感 4K MiSans</div>
+                    <span class="font-preset-desc">现代几何圆转、科技感与平衡美学</span>
+                    <div class="font-check-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            <!-- 浏览偏好 -->
+            <div class="settings-group">
+              <span class="settings-group-title">浏览偏好</span>
+              <div class="settings-card">
+                <div class="settings-tile">
+                  <div class="settings-tile-leading">
+                    <div class="settings-icon-box purple">
+                      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    </div>
+                    <div class="settings-tile-content">
+                      <span class="settings-tile-title">浏览模式</span>
+                    </div>
+                  </div>
+                  <div class="settings-tile-action">
+                    <select class="m3-select" id="select-config-loadmode">
+                      <option value="pagination" selected>分页加载</option>
+                      <option value="infinite">无限滚动</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="settings-tile">
+                  <div class="settings-tile-leading">
+                    <div class="settings-icon-box blue">
+                      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    </div>
+                    <div class="settings-tile-content">
+                      <span class="settings-tile-title">卡片比例</span>
+                    </div>
+                  </div>
+                  <div class="settings-tile-action">
+                    <select class="m3-select" id="select-config-cardratio">
+                      <option value="uniform" selected>统一比例 (16:10)</option>
+                      <option value="original">原始比例</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 搜索与 API -->
+            <div class="settings-group">
+              <span class="settings-group-title">搜索与 API</span>
+              <div class="settings-card">
+                <div class="settings-tile">
+                  <div class="settings-tile-leading">
+                    <div class="settings-icon-box green">
+                      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    </div>
+                    <div class="settings-tile-content">
+                      <span class="settings-tile-title">默认搜索词</span>
+                    </div>
+                  </div>
+                  <div class="settings-tile-action">
+                    <input type="text" class="m3-input" id="input-config-query" placeholder="默认为空..." style="width: 160px;" />
+                  </div>
+                </div>
+
+                <div class="settings-tile">
+                  <div class="settings-tile-leading">
+                    <div class="settings-icon-box amber">
+                      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    </div>
+                    <div class="settings-tile-content">
+                      <span class="settings-tile-title">Unsplash Access Key</span>
+                    </div>
+                  </div>
+                  <div class="settings-tile-action">
+                    <input type="text" class="m3-input" id="input-config-unsplash-key" placeholder="填入以启用搜索..." style="width: 160px;" />
+                  </div>
+                </div>
+
+                <div class="settings-tile">
+                  <div class="settings-tile-leading">
+                    <div class="settings-icon-box blue">
+                      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 2l-2 2m-6.5 6.5l3.5 3.5M4 19l4-4m0 0l2 2 4-4-2-2-4 4zm0 0L4 21"/></svg>
+                    </div>
+                    <div class="settings-tile-content">
+                      <span class="settings-tile-title">Pexels API Key</span>
+                      <span class="settings-tile-desc">默认内置 8 重高可用池，亦可填入专属 Key</span>
+                    </div>
+                  </div>
+                  <div class="settings-tile-action">
+                    <input type="text" class="m3-input" id="input-config-pexels-key" placeholder="内置免填/可选..." style="width: 160px;" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 存储与自动化 -->
+            <div class="settings-group">
+              <span class="settings-group-title">存储与自动化</span>
+              <div class="settings-card">
+                <!-- 随机壁纸图源范围配置 (网格胶囊芯片，零遮挡、零覆盖) -->
+                <div class="settings-tile" style="flex-direction: column; align-items: stretch; gap: 12px;">
+                  <div class="settings-tile-leading" style="width: 100%;">
+                    <div class="settings-icon-box purple">
+                      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+                    </div>
+                    <div class="settings-tile-content">
+                      <span class="settings-tile-title">随机壁纸图源范围</span>
+                      <span class="settings-tile-desc">选择点击“随机换一张”时允许抽取的壁纸来源</span>
+                    </div>
+                  </div>
+
+                  <!-- 胶囊网格选择区 -->
+                  <div class="source-chip-grid" id="random-source-chip-grid">
+                    <div class="source-chip-item active" data-source="all">
+                      <span style="font-size: 16px;">🎲</span>
+                      <span>全部图源 (混合)</span>
+                      <div class="source-check-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                    </div>
+
+                    <div class="source-chip-item" data-source="local">
+                      <span style="font-size: 16px;">📁</span>
+                      <span>本地图库</span>
+                      <div class="source-check-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                    </div>
+
+                    <div class="source-chip-item" data-source="pexels">
+                      <img class="source-brand-icon" src="assets/icons/pexels.png" alt="Pexels" />
+                      <span>Pexels</span>
+                      <div class="source-check-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                    </div>
+
+                    <div class="source-chip-item" data-source="bing">
+                      <img class="source-brand-icon" src="assets/icons/bing.png" alt="Bing" />
+                      <span>Bing 每日</span>
+                      <div class="source-check-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                    </div>
+
+                    <div class="source-chip-item" data-source="unsplash">
+                      <img class="source-brand-icon" src="assets/icons/unsplash.png" alt="Unsplash" />
+                      <span>Unsplash</span>
+                      <div class="source-check-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                    </div>
+
+                    <div class="source-chip-item" data-source="wallhaven">
+                      <img class="source-brand-icon" src="assets/icons/wallhaven.png" alt="Wallhaven" />
+                      <span>Wallhaven</span>
+                      <div class="source-check-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="settings-tile">
+                  <div class="settings-tile-leading">
+                    <div class="settings-icon-box blue">
+                      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                    </div>
+                    <div class="settings-tile-content">
+                      <span class="settings-tile-title">本地保存目录</span>
+                      <span class="settings-tile-desc" id="label-cache-dir">cache/wallpapers</span>
+                    </div>
+                  </div>
+                  <div class="settings-tile-action" style="display: flex; gap: 8px;">
+                    <button class="m3-btn m3-btn-tonal" id="btn-open-dir-settings">
+                      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                      <span>打开</span>
+                    </button>
+                    <button class="m3-btn m3-btn-tonal" id="btn-browse-dir">更改</button>
+                  </div>
+                </div>
+
+                <div class="settings-tile">
+                  <div class="settings-tile-leading">
+                    <div class="settings-icon-box purple">
+                      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    </div>
+                    <div class="settings-tile-content">
+                      <span class="settings-tile-title">自动更换壁纸</span>
+                    </div>
+                  </div>
+                  <div class="settings-tile-action">
+                    <input type="number" class="m3-input" id="input-config-interval" min="5" max="1440" value="60" style="width: 60px; text-align: center;" />
+                    <span style="font-size: 14px; color: var(--md-sys-color-on-surface-variant);">分钟</span>
+                    <label class="flutter-switch" style="margin-left: 6px;">
+                      <input type="checkbox" id="check-config-autoupdate" />
+                      <span class="switch-track"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="settings-tile">
+                  <div class="settings-tile-leading">
+                    <div class="settings-icon-box green">
+                      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+                    </div>
+                    <div class="settings-tile-content">
+                      <span class="settings-tile-title">开机自启</span>
+                    </div>
+                  </div>
+                  <div class="settings-tile-action">
+                    <label class="flutter-switch">
+                      <input type="checkbox" id="check-auto-launch" />
+                      <span class="switch-track"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+      </main>
+    </div>
+
+  </div>
+
+  <!-- 3) Details Dialog (现代精致卡片排版，点击链接打开默认浏览器) -->
+  <div class="m3-dialog-backdrop" id="detail-modal">
+    <div class="m3-dialog-surface">
+      <div class="m3-dialog-header">
+        <h3 class="m3-dialog-title">壁纸详情</h3>
+        <button class="m3-dialog-close-btn" id="btn-close-modal" title="关闭">✕</button>
+      </div>
+
+      <div class="m3-dialog-body">
+        <div class="dialog-preview-box" id="dialog-preview-box" title="点击全屏查看并放大缩小">
+          <img id="modal-wallpaper-img" src="" alt="Wallpaper Preview" />
+          <div class="dialog-preview-hint">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            <span>全屏查看</span>
           </div>
         </div>
 
-        <div class="current-wp-banner" id="current-wp-banner">
-          <span class="banner-icon"></span>
-          <span class="banner-text" id="current-wp-text">当前 Windows 桌面壁纸: 未知</span>
+        <div class="dialog-meta-list">
+          <!-- 1. 壁纸分辨率条目 (自上而下) -->
+          <div class="detail-info-row">
+            <div class="detail-row-leading">
+              <div class="detail-icon-box blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              </div>
+              <span class="detail-row-title">壁纸分辨率</span>
+            </div>
+            <div class="detail-row-trailing">
+              <span class="detail-resolution-badge" id="modal-meta-resolution">-</span>
+            </div>
+          </div>
+
+          <!-- 2. 源地址链接条目 (只显示一个打开按钮) -->
+          <div class="detail-info-row">
+            <div class="detail-row-leading">
+              <div class="detail-icon-box purple">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              </div>
+              <span class="detail-row-title">源地址链接</span>
+            </div>
+            <div class="detail-row-trailing">
+              <button class="m3-btn m3-btn-tonal" id="btn-open-browser" style="padding: 4px 16px; font-size: 13px;">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                <span>打开</span>
+              </button>
+            </div>
+          </div>
         </div>
-      </section>
-
-    </main>
-  </div>
-
-  <!-- WinUI 3 壁纸详情大图弹窗 (Wallpaper Details ContentDialog) -->
-  <div class="winui-modal-backdrop" id="detail-modal">
-    <div class="winui-modal-dialog">
-      <div class="modal-header">
-        <h3 class="modal-title" id="modal-wallpaper-title">壁纸详情</h3>
-        <button class="modal-close-btn" id="btn-close-modal">✕</button>
       </div>
 
-      <div class="modal-body">
-        <div class="modal-image-preview">
-          <img id="modal-wallpaper-img" src="" alt="Wallpaper Preview" />
-        </div>
-        <div class="modal-wallpaper-meta">
-          <div class="meta-row"><span class="meta-label">壁纸名称：</span><span class="meta-val" id="modal-meta-title">-</span></div>
-          <div class="meta-row"><span class="meta-label">创作者/分类：</span><span class="meta-val" id="modal-meta-author">-</span></div>
-          <div class="meta-row"><span class="meta-label">图源来源：</span><span class="meta-val" id="modal-meta-source">-</span></div>
-          <div class="meta-row" id="modal-meta-date-row"><span class="meta-label">下载时间：</span><span class="meta-val" id="modal-meta-date">-</span></div>
-        </div>
-      </div>
-
-      <div class="modal-footer">
-        <button class="winui-btn winui-btn-danger" id="modal-btn-delete" style="display: none;">删除壁纸</button>
+      <div class="m3-dialog-footer">
+        <button class="m3-btn m3-btn-danger" id="modal-btn-delete" style="display: none;">删除壁纸</button>
         <div style="flex: 1;"></div>
-        <button class="winui-btn" id="modal-btn-download">下载保存到本地</button>
-        <button class="winui-btn winui-btn-primary" id="modal-btn-apply">设为桌面壁纸</button>
+        <button class="m3-btn m3-btn-tonal" id="modal-btn-download">保存到本地</button>
+        <button class="m3-btn m3-btn-primary" id="modal-btn-apply">设为桌面壁纸</button>
       </div>
     </div>
   </div>
 
-  <!-- WinUI 3 Fluent Bottom Status Bar -->
-  <footer class="winui-statusbar">
-    <div class="status-indicator"></div>
-    <span class="status-msg" id="status-msg">应用就绪</span>
-  </footer>
+  <!-- 4) Fullscreen Lightbox & Interactive Photo Viewer (占全屏可放大缩小、拖拽) -->
+  <div class="fullscreen-lightbox-backdrop" id="fullscreen-lightbox">
+    <!-- Floating Toolbar -->
+    <div class="lightbox-floating-toolbar">
+      <button class="lightbox-tool-btn" id="lb-btn-zoom-out" title="缩小 (滚轮向后)">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+      </button>
+      <span class="lightbox-zoom-badge" id="lb-zoom-level">100%</span>
+      <button class="lightbox-tool-btn" id="lb-btn-zoom-in" title="放大 (滚轮向前)">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+      </button>
+      <div class="lightbox-tool-divider"></div>
+      <button class="lightbox-tool-btn" id="lb-btn-reset" title="还原自适应 (双击图片)">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+      </button>
+      <div class="lightbox-tool-divider"></div>
+      <button class="lightbox-tool-btn" id="lb-btn-apply" title="一键设为桌面壁纸">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+      </button>
+    </div>
+
+    <!-- Close Button -->
+    <button class="lightbox-close-btn" id="lb-btn-close" title="退出全屏 (Esc)">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+
+    <!-- Interactive Canvas / Viewport -->
+    <div class="lightbox-viewport" id="lb-viewport">
+      <img class="lightbox-image" id="lb-image" src="" alt="Fullscreen Wallpaper" />
+    </div>
+  </div>
+
+  <!-- 5) Flutter SnackBar -->
+  <div class="flutter-snackbar-container" id="flutter-snackbar">
+    <div class="snackbar-icon-box" id="snackbar-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <span class="snackbar-text" id="snackbar-text">操作已完成</span>
+  </div>
 
   <script src="app.js"></script>
 </body>

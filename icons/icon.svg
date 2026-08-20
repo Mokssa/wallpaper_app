@@ -1,1 +1,102 @@
-<?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg t="1785390323329" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6638" width="256" height="256" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M420.384 64.672H974.4c24.288 0 46.176 21.952 46.176 49.44v733.152c0 27.456-19.424 49.44-46.176 49.44H46.176C21.856 896.672 0 874.72 0 847.264V114.112c0-27.456 19.424-49.44 46.176-49.44h374.208z" fill="#FFFFFF" p-id="6639"></path><path d="M974.4 81.312H46.176C21.856 81.312 0 103.296 0 130.752v733.152c0 27.456 19.424 49.44 46.176 49.44h930.688c24.288 0 46.176-21.952 46.176-49.44V130.752c-2.464-27.456-21.888-49.44-48.64-49.44" fill="#74B3F8" p-id="6640"></path><path d="M1020.48 890.592c0 13.632-15.392 22.72-35.904 22.72H35.904c-20.512 0-35.904-11.36-35.904-22.72v-88.608s117.952-177.216 205.12-172.672c41.024 2.272 184.608 93.152 287.168 93.152s148.704-193.152 287.168-193.152c74.368 0 243.584 118.144 243.584 118.144v243.136h-2.56z" fill="#BBDFFF" p-id="6641"></path><path d="M279.296 479.04c-33.152 0-60.288-12.096-81.408-33.312-21.088-21.184-33.152-51.456-30.144-78.688 0-60.544 51.264-112 111.552-112 33.152 0 60.288 12.096 81.408 33.312 21.088 21.184 33.152 51.456 30.144 78.688 0 63.584-51.264 112-111.552 112" fill="#FFFFFF" p-id="6642"></path></svg>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Background Squircle Gradient -->
+    <linearGradient id="bgGradient" x1="64" y1="64" x2="448" y2="448" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1e1b4b" />
+      <stop offset="40%" stop-color="#2e1065" />
+      <stop offset="75%" stop-color="#1e3a8a" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+
+    <!-- Outer Glass Border Gradient -->
+    <linearGradient id="glassBorder" x1="64" y1="64" x2="448" y2="448" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.6" />
+      <stop offset="30%" stop-color="#38bdf8" stop-opacity="0.4" />
+      <stop offset="70%" stop-color="#c084fc" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.15" />
+    </linearGradient>
+
+    <!-- Sun Radial Gradient -->
+    <radialGradient id="sunGradient" cx="256" cy="180" r="50" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ffedd5" />
+      <stop offset="35%" stop-color="#fb923c" />
+      <stop offset="75%" stop-color="#f43f5e" />
+      <stop offset="100%" stop-color="#e11d48" stop-opacity="0.8" />
+    </radialGradient>
+
+    <!-- Sun Outer Glow -->
+    <radialGradient id="sunGlow" cx="256" cy="180" r="110" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fb923c" stop-opacity="0.4" />
+      <stop offset="50%" stop-color="#c084fc" stop-opacity="0.15" />
+      <stop offset="100%" stop-color="#38bdf8" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Aurora Glow Top -->
+    <linearGradient id="auroraTop" x1="120" y1="100" x2="392" y2="280" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#2dd4bf" stop-opacity="0.4" />
+      <stop offset="50%" stop-color="#38bdf8" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="#818cf8" stop-opacity="0.1" />
+    </linearGradient>
+
+    <!-- Mountain Layer 1 (Back Deep Mountain) -->
+    <linearGradient id="mtnBack" x1="100" y1="220" x2="412" y2="400" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#6366f1" stop-opacity="0.5" />
+      <stop offset="50%" stop-color="#4338ca" stop-opacity="0.6" />
+      <stop offset="100%" stop-color="#1e1b4b" stop-opacity="0.8" />
+    </linearGradient>
+
+    <!-- Mountain Layer 2 (Middle Mountain) -->
+    <linearGradient id="mtnMid" x1="64" y1="280" x2="448" y2="448" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.65" />
+      <stop offset="45%" stop-color="#818cf8" stop-opacity="0.75" />
+      <stop offset="100%" stop-color="#312e81" stop-opacity="0.9" />
+    </linearGradient>
+
+    <!-- Mountain Layer 3 (Front Translucent Ridge) -->
+    <linearGradient id="mtnFront" x1="64" y1="340" x2="448" y2="448" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#2dd4bf" stop-opacity="0.7" />
+      <stop offset="50%" stop-color="#0284c7" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#1e1b4b" stop-opacity="0.95" />
+    </linearGradient>
+
+    <!-- Clip Path for Squircle -->
+    <clipPath id="squircleClip">
+      <rect x="52" y="52" width="408" height="408" rx="92" />
+    </clipPath>
+  </defs>
+
+  <!-- Base Squircle Shadow -->
+  <rect x="54" y="58" width="404" height="404" rx="90" fill="#000000" fill-opacity="0.35" filter="blur(12px)" />
+
+  <!-- Main Squircle Body with Clip -->
+  <g clip-path="url(#squircleClip)">
+    <!-- Base Gradient -->
+    <rect x="52" y="52" width="408" height="408" fill="url(#bgGradient)" />
+
+    <!-- Aurora Atmosphere Shimmer -->
+    <ellipse cx="256" cy="180" rx="190" ry="130" fill="url(#auroraTop)" />
+
+    <!-- Sun Glow & Sun -->
+    <circle cx="256" cy="180" r="110" fill="url(#sunGlow)" />
+    <circle cx="256" cy="180" r="46" fill="url(#sunGradient)" />
+
+    <!-- Back Mountain Range -->
+    <path d="M52 350 C120 270, 180 240, 240 290 C300 340, 360 250, 460 300 L460 460 L52 460 Z" fill="url(#mtnBack)" />
+
+    <!-- Middle Mountain Waves -->
+    <path d="M52 380 C110 320, 170 310, 230 350 C290 390, 350 300, 460 360 L460 460 L52 460 Z" fill="url(#mtnMid)" />
+    <!-- Ridge Highlight 1 -->
+    <path d="M52 380 C110 320, 170 310, 230 350 C290 390, 350 300, 460 360" stroke="#bae6fd" stroke-width="2.5" stroke-opacity="0.7" fill="none" />
+
+    <!-- Front Frosted Ridge -->
+    <path d="M52 420 C140 370, 220 400, 300 360 C370 325, 415 350, 460 400 L460 460 L52 460 Z" fill="url(#mtnFront)" />
+    <!-- Ridge Highlight 2 -->
+    <path d="M52 420 C140 370, 220 400, 300 360 C370 325, 415 350, 460 400" stroke="#99f6e4" stroke-width="3" stroke-opacity="0.8" fill="none" />
+
+    <!-- Frosted Glass Bottom Overlay -->
+    <rect x="52" y="380" width="408" height="80" fill="url(#bgGradient)" fill-opacity="0.35" />
+  </g>
+
+  <!-- Glass Border Stroke -->
+  <rect x="52" y="52" width="408" height="408" rx="92" stroke="url(#glassBorder)" stroke-width="3" fill="none" />
+</svg>

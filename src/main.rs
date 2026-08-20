@@ -16,7 +16,7 @@ use tauri::{Manager, menu::{Menu, MenuItem}, tray::{TrayIconBuilder, TrayIconEve
 use auto_launch::AutoLaunch;
 
 #[cfg(target_os = "windows")]
-use window_vibrancy::{apply_acrylic, apply_mica};
+use window_vibrancy::apply_mica;
 
 #[tauri::command]
 fn get_config() -> AppConfig {
@@ -66,15 +66,34 @@ fn get_cached_wallpapers() -> Vec<WallpaperItem> {
     let config = AppConfig::load();
     let cache_dir = Path::new(&config.cache_dir);
     let mut wallpapers = Vec::new();
+    let mut tracked_files = std::collections::HashSet::new();
 
     if cache_dir.exists() {
+        let meta_dir = cache_dir.join("metadata");
+        let _ = fs::create_dir_all(&meta_dir);
+
+        // 1. 自动将根目录下遗留的历史 json 文件移入 metadata 子目录，还用户一个纯净的图片文件夹
         if let Ok(entries) = fs::read_dir(cache_dir) {
+            for entry in entries.flatten() {
+                let path = entry.path();
+                if path.is_file() && path.extension().and_then(|s| s.to_str()) == Some("json") {
+                    if let Some(filename) = path.file_name() {
+                        let target_json = meta_dir.join(filename);
+                        let _ = fs::rename(&path, target_json);
+                    }
+                }
+            }
+        }
+
+        // 2. 读取 metadata 子目录下的所有元数据 json
+        if let Ok(entries) = fs::read_dir(&meta_dir) {
             for entry in entries.flatten() {
                 let path = entry.path();
                 if path.extension().and_then(|s| s.to_str()) == Some("json") {
                     if let Ok(content) = fs::read_to_string(&path) {
                         if let Ok(item) = serde_json::from_str::<WallpaperItem>(&content) {
                             if item.file_path.exists() {
+                                tracked_files.insert(item.file_path.clone());
                                 wallpapers.push(item);
                             }
                         }
@@ -82,7 +101,36 @@ fn get_cached_wallpapers() -> Vec<WallpaperItem> {
                 }
             }
         }
+
+        // 3. 扫描根目录下的所有真实图片文件（兼容用户自己拷入的壁纸）
+        if let Ok(entries) = fs::read_dir(cache_dir) {
+            for entry in entries.flatten() {
+                let path = entry.path();
+                if path.is_file() && !tracked_files.contains(&path) {
+                    if let Some(ext) = path.extension().and_then(|s| s.to_str()) {
+                        let ext_lower = ext.to_lowercase();
+                        if ext_lower == "jpg" || ext_lower == "jpeg" || ext_lower == "png" || ext_lower == "webp" || ext_lower == "bmp" {
+                            let file_stem = path.file_stem().and_then(|s| s.to_str()).unwrap_or("本地壁纸");
+                            let modified_time = entry.metadata().ok()
+                                .and_then(|m| m.modified().ok())
+                                .map(|t| chrono::DateTime::<chrono::Local>::from(t).format("%Y-%m-%d %H:%M:%S").to_string())
+                                .unwrap_or_else(|| chrono::Local::now().format("%Y-%m-%d %H:%M:%S").to_string());
+                            
+                            wallpapers.push(WallpaperItem {
+                                id: file_stem.to_string(),
+                                title: file_stem.to_string(),
+                                author: "本地导入".to_string(),
+                                file_path: path.clone(),
+                                url: path.to_string_lossy().to_string(),
+                                download_date: modified_time,
+                            });
+                        }
+                    }
+                }
+            }
+        }
     }
+
     wallpapers.sort_by(|a, b| b.download_date.cmp(&a.download_date));
     wallpapers
 }
@@ -90,9 +138,16 @@ fn get_cached_wallpapers() -> Vec<WallpaperItem> {
 #[tauri::command]
 async fn fetch_online_wallpapers(source: String, query: String, page: usize, limit: usize) -> Result<Vec<OnlineWallpaper>, String> {
     let config = AppConfig::load();
-    WallpaperDownloader::fetch_online_list(&source, &query, page, limit, &config.unsplash_access_key)
-        .await
-        .map_err(|e| e.to_string())
+    WallpaperDownloader::fetch_online_list(
+        &source,
+        &query,
+        page,
+        limit,
+        &config.unsplash_access_key,
+        &config.pexels_api_key,
+    )
+    .await
+    .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -123,6 +178,17 @@ fn delete_wallpaper(file_path: String) -> Result<(), String> {
     if path.exists() {
         let _ = fs::remove_file(path);
     }
+    
+    // 删除 metadata 子目录下的对应 json
+    if let Some(parent) = path.parent() {
+        if let Some(stem) = path.file_stem() {
+            let meta_json = parent.join("metadata").join(format!("{}.json", stem.to_string_lossy()));
+            if meta_json.exists() {
+                let _ = fs::remove_file(meta_json);
+            }
+        }
+    }
+
     let json_path = path.with_extension("json");
     if json_path.exists() {
         let _ = fs::remove_file(json_path);
@@ -184,16 +250,52 @@ fn set_auto_launch_enabled(enabled: bool) -> Result<(), String> {
     }
 }
 
+#[tauri::command]
+fn open_in_browser(url: String) -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    {
+        use std::os::windows::process::CommandExt;
+        let _ = std::process::Command::new("cmd")
+            .args(["/c", "start", "", &url])
+            .creation_flags(0x08000000) // CREATE_NO_WINDOW
+            .spawn()
+            .map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
+#[tauri::command]
+fn open_cache_folder() -> Result<(), String> {
+    let config = AppConfig::load();
+    let path = PathBuf::from(&config.cache_dir);
+    if !path.exists() {
+        let _ = fs::create_dir_all(&path);
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        use std::os::windows::process::CommandExt;
+        let _ = std::process::Command::new("explorer")
+            .arg(path.to_string_lossy().to_string())
+            .creation_flags(0x08000000)
+            .spawn()
+            .map_err(|e| format!("打开文件夹失败: {}", e))?;
+    }
+    Ok(())
+}
+
 fn main() {
     tauri::Builder::default()
         .setup(|app| {
-            let window = app.get_webview_window("main").unwrap();
-
-            #[cfg(target_os = "windows")]
-            {
-                if let Err(_) = apply_mica(&window, Some(true)) {
-                    let _ = apply_acrylic(&window, Some((24, 24, 24, 180)));
+            if let Some(window) = app.get_webview_window("main") {
+                #[cfg(target_os = "windows")]
+                {
+                    let _ = apply_mica(&window, Some(true));
                 }
+                let _ = window.show();
+                let _ = window.unminimize();
+                let _ = window.set_focus();
+                let _ = window.center();
             }
 
             // 创建系统托盘菜单
@@ -234,6 +336,7 @@ fn main() {
             get_config,
             save_config,
             select_cache_dir,
+            open_cache_folder,
             read_file_data_url,
             fetch_remote_image_base64,
             get_cached_wallpapers,
@@ -247,7 +350,8 @@ fn main() {
             window_close,
             show_main_window,
             get_auto_launch_enabled,
-            set_auto_launch_enabled
+            set_auto_launch_enabled,
+            open_in_browser
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

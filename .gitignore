@@ -25,3 +25,4 @@ Thumbs.db
 # Added by cargo
 
 /target
+cache/

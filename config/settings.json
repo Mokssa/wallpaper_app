@@ -1,11 +1,12 @@
 {
   "query": "",
-  "cache_dir": "cache/wallpapers",
+  "cache_dir": "C:\\Users\\cst\\Documents\\wallpaper_app",
   "auto_update_interval_minutes": 60,
   "auto_update_enabled": false,
   "batch_count": 6,
   "wallpaper_style": "fill",
-  "unsplash_access_key": "",
+  "unsplash_access_key": "zyDRm2QFCbXRacVeUMjBZah9XAf4JIxUEifgqMkeEAY",
   "load_mode": "infinite",
-  "card_ratio": "original"
+  "card_ratio": "original",
+  "font_family": "rounded"
 }
