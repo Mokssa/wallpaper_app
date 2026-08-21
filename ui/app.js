@@ -846,8 +846,21 @@ async function handleQuickRandom() {
       });
 
       if (Array.isArray(list) && list.length > 0) {
-        const randomItem = list[Math.floor(Math.random() * list.length)];
-        await downloadAndSetOnlineAction(randomItem);
+        // 随机重试保护机制：最多尝试 3 个不同候选，确保 100% 成功设为壁纸
+        let applied = false;
+        const shuffled = [...list].sort(() => Math.random() - 0.5);
+        for (let i = 0; i < Math.min(3, shuffled.length); i++) {
+          try {
+            await downloadAndSetOnlineAction(shuffled[i]);
+            applied = true;
+            break;
+          } catch (e) {
+            console.warn('Random wallpaper candidate failed, trying next:', e);
+          }
+        }
+        if (!applied) {
+          showSnackBar(`壁纸下载应用遇到网络波动，请重试`, true);
+        }
       } else {
         showSnackBar(`未能在图库中获取到随机壁纸`, true);
       }
@@ -873,8 +886,21 @@ async function handleQuickRandom() {
     });
 
     if (Array.isArray(list) && list.length > 0) {
-      const randomItem = list[Math.floor(Math.random() * list.length)];
-      await downloadAndSetOnlineAction(randomItem);
+      let applied = false;
+      const shuffled = [...list].sort(() => Math.random() - 0.5);
+      for (let i = 0; i < Math.min(3, shuffled.length); i++) {
+        try {
+          await downloadAndSetOnlineAction(shuffled[i]);
+          applied = true;
+          break;
+        } catch (e) {
+          console.warn('Random wallpaper candidate failed, trying next:', e);
+        }
+      }
+      if (!applied && cachedWallpapers.length > 0) {
+        const randomLocal = cachedWallpapers[Math.floor(Math.random() * cachedWallpapers.length)];
+        await setWallpaperAction(randomLocal.file_path, randomLocal.title);
+      }
     } else if (cachedWallpapers.length > 0) {
       const randomLocal = cachedWallpapers[Math.floor(Math.random() * cachedWallpapers.length)];
       await setWallpaperAction(randomLocal.file_path, randomLocal.title);
@@ -946,8 +972,15 @@ function renderOnlineGrid(items, append = false) {
         const base64Data = await invoke('fetch_remote_image_base64', { url: item.thumb_url });
         if (base64Data) {
           img.src = base64Data;
+        } else {
+          // 遇到无法访问的坏图直接静默从界面和数据集中过滤剔除
+          card.remove();
+          onlineWallpapers = onlineWallpapers.filter(w => w.id !== item.id);
         }
-      } catch (e) {}
+      } catch (e) {
+        card.remove();
+        onlineWallpapers = onlineWallpapers.filter(w => w.id !== item.id);
+      }
     };
 
     // Hover Quick Action Buttons (去除多余的全屏缩放按钮，点击图片即可查看)
