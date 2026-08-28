@@ -6,7 +6,8 @@
   "batch_count": 6,
   "wallpaper_style": "fill",
   "unsplash_access_key": "zyDRm2QFCbXRacVeUMjBZah9XAf4JIxUEifgqMkeEAY",
+  "pexels_api_key": "",
   "load_mode": "infinite",
-  "card_ratio": "original",
+  "card_ratio": "uniform",
   "font_family": "rounded"
 }

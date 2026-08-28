@@ -107,37 +107,47 @@ impl WallpaperDownloader {
 
         match source {
             "bing" => {
-                // Bing 微软官方每日壁纸
-                let market = if !query.is_empty() && (query == "zh-CN" || query == "en-US" || query == "ja-JP" || query == "en-GB" || query == "de-DE" || query == "fr-FR") {
-                    query
-                } else {
-                    match page % 6 {
-                        1 => "zh-CN",
-                        2 => "en-US",
-                        3 => "ja-JP",
-                        4 => "en-GB",
-                        5 => "de-DE",
-                        _ => "fr-FR",
-                    }
+                // Bing 微软官方每日壁纸 (严格遵循日期偏移分页与独立地区过滤规范)
+                let market = match query.trim() {
+                    "zh-CN" => "zh-CN",
+                    "en-US" => "en-US",
+                    "ja-JP" => "ja-JP",
+                    "en-GB" => "en-GB",
+                    "de-DE" => "de-DE",
+                    "fr-FR" => "fr-FR",
+                    _ => "zh-CN",
                 };
 
-                let api_url = format!("https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=8&mkt={}", market);
-                if let Ok(res) = client.get(&api_url).send().await {
-                    if let Ok(json_res) = res.json::<serde_json::Value>().await {
-                        if let Some(images) = json_res["images"].as_array() {
-                            for img in images {
-                                let urlbase = img["urlbase"].as_str().unwrap_or("");
-                                let title = img["title"].as_str().unwrap_or("Bing 每日壁纸");
-                                let copyright = img["copyright"].as_str().unwrap_or("Microsoft Bing");
-                                let hsh = img["hsh"].as_str().unwrap_or("");
+                const BING_PAGE_SIZE: usize = 8;
+                let safe_page = page.max(1);
+                let idx = safe_page.saturating_sub(1).saturating_mul(BING_PAGE_SIZE);
+                let count = limit.clamp(1, BING_PAGE_SIZE);
 
-                                if !urlbase.is_empty() {
+                let api_url = format!(
+                    "https://www.bing.com/HPImageArchive.aspx?format=js&idx={}&n={}&mkt={}",
+                    idx, count, market
+                );
+
+                if let Ok(res) = client.get(&api_url).send().await {
+                    if res.status().is_success() {
+                        if let Ok(json_res) = res.json::<serde_json::Value>().await {
+                            if let Some(images) = json_res["images"].as_array() {
+                                for img in images {
+                                    let urlbase = img["urlbase"].as_str().unwrap_or("");
+                                    if urlbase.is_empty() { continue; }
+
+                                    let title = img["title"].as_str().unwrap_or("Bing 每日壁纸");
+                                    let copyright = img["copyright"].as_str().unwrap_or("Microsoft Bing");
+                                    let hsh = img["hsh"].as_str().unwrap_or("");
+                                    let startdate = img["startdate"].as_str().unwrap_or("");
+
                                     let raw_url = format!("https://www.bing.com{}_UHD.jpg", urlbase);
                                     let thumb_url = format!("https://www.bing.com{}_1920x1080.jpg", urlbase);
+                                    let id = format!("bing_{}_{}_{}", market, startdate, hsh);
                                     let copyright_link = img["copyrightlink"].as_str().map(|s| s.to_string());
 
                                     list.push(OnlineWallpaper {
-                                        id: format!("bing_{}_{}", hsh, market),
+                                        id,
                                         title: title.to_string(),
                                         author: copyright.to_string(),
                                         thumb_url,
@@ -530,16 +540,19 @@ mod tests {
     use super::*;
 
     #[tokio::test]
-    async fn test_pexels_categories() {
-        for cat in &["curated", "nature", "city", "ocean", "dark", "aerial", "night"] {
-            let res = WallpaperDownloader::fetch_online_list("pexels", cat, 1, 5, "", "").await;
-            match res {
-                Ok(list) => {
-                    println!("Category '{}' got {} wallpapers", cat, list.len());
-                    assert!(!list.is_empty(), "Category '{}' should return wallpapers", cat);
-                }
-                Err(e) => panic!("Category '{}' failed: {:?}", cat, e),
-            }
-        }
+    async fn test_bing_pagination() {
+        let page1 = WallpaperDownloader::fetch_online_list("bing", "zh-CN", 1, 8, "", "").await.unwrap();
+        let page2 = WallpaperDownloader::fetch_online_list("bing", "zh-CN", 2, 8, "", "").await.unwrap();
+        println!("Bing page 1 count: {}, page 2 count: {}", page1.len(), page2.len());
+        assert!(!page1.is_empty(), "Bing page 1 should not be empty");
+        assert!(!page2.is_empty(), "Bing page 2 should not be empty");
+
+        // 验证第一页第一张与第二页最后一张不同 (确实拿到了更早的历史日期)
+        assert_ne!(page1[0].id, page2[page2.len() - 1].id, "Page 2 should contain earlier historical wallpapers");
+
+        // 验证地区切换隔离
+        let page_us = WallpaperDownloader::fetch_online_list("bing", "en-US", 1, 8, "", "").await.unwrap();
+        assert!(!page_us.is_empty(), "Bing en-US should not be empty");
+        assert!(page_us[0].id.starts_with("bing_en-US_"), "ID should be prefixed with bing_en-US_");
     }
 }

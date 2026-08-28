@@ -1125,6 +1125,10 @@ async function loadOnlineWallpapers(append = false) {
     const safeList = Array.isArray(list) ? list : [];
     hasMoreOnline = safeList.length > 0;
     
+    if (currentSource === 'bing') {
+      console.log(`[Bing] market=${currentBingMarket}, page=${onlinePage}, returned=${safeList.length}`);
+    }
+
     if (btnNextPage) {
       btnNextPage.disabled = !hasMoreOnline;
     }
