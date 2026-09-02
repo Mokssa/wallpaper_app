@@ -190,26 +190,13 @@
                   <button class="modern-search-btn" id="btn-pexels-search">搜索</button>
                 </div>
                 <div class="contextual-chips" id="pexels-tag-chips">
-                  <button class="context-chip active" data-tag="curated">✨ 精选推荐</button>
-                  <button class="context-chip" data-tag="nature">🌿 自然风光</button>
-                  <button class="context-chip" data-tag="city">🏙️ 城市建筑</button>
-                  <button class="context-chip" data-tag="ocean">🌊 海洋沙滩</button>
-                  <button class="context-chip" data-tag="dark">🌑 暗黑极简</button>
-                  <button class="context-chip" data-tag="aerial">🚁 航拍摄影</button>
-                  <button class="context-chip" data-tag="night">✨ 璀璨夜景</button>
-                </div>
-              </div>
-
-              <!-- 2. Microsoft Bing 官网选项: 全球每日地区市场 -->
-              <div class="contextual-panel" id="panel-source-bing">
-                <span class="contextual-label">每日地区:</span>
-                <div class="contextual-chips" id="bing-market-chips">
-                  <button class="context-chip active" data-market="zh-CN">🇨🇳 中国</button>
-                  <button class="context-chip" data-market="en-US">🇺🇸 美国/全球</button>
-                  <button class="context-chip" data-market="ja-JP">🇯🇵 日本</button>
-                  <button class="context-chip" data-market="en-GB">🇬🇧 英国</button>
-                  <button class="context-chip" data-market="de-DE">🇩🇪 德国</button>
-                  <button class="context-chip" data-market="fr-FR">🇫🇷 法国</button>
+                  <button class="context-chip active" data-tag="curated">精选推荐</button>
+                  <button class="context-chip" data-tag="nature">自然风光</button>
+                  <button class="context-chip" data-tag="city">城市建筑</button>
+                  <button class="context-chip" data-tag="ocean">海洋沙滩</button>
+                  <button class="context-chip" data-tag="dark">暗黑极简</button>
+                  <button class="context-chip" data-tag="aerial">航拍摄影</button>
+                  <button class="context-chip" data-tag="night">璀璨夜景</button>
                 </div>
               </div>
 
@@ -222,18 +209,18 @@
                   <button class="modern-search-btn" id="btn-unsplash-search">搜索</button>
                 </div>
                 <div class="contextual-chips" id="unsplash-tag-chips">
-                  <button class="context-chip active" data-tag="wallpaper">✨ 编辑推荐</button>
-                  <button class="context-chip" data-tag="nature">🌿 自然风光</button>
-                  <button class="context-chip" data-tag="3d-renders">🧊 3D 渲染</button>
-                  <button class="context-chip" data-tag="architecture">🏛️ 建筑空间</button>
-                  <button class="context-chip" data-tag="space">🚀 宇宙星空</button>
-                  <button class="context-chip" data-tag="street-photography">🏙️ 街头纪实</button>
-                  <button class="context-chip" data-tag="textures-patterns">🧩 纹理材质</button>
-                  <button class="context-chip" data-tag="animals">🐾 灵动动物</button>
+                  <button class="context-chip active" data-tag="wallpaper">编辑推荐</button>
+                  <button class="context-chip" data-tag="nature">自然风光</button>
+                  <button class="context-chip" data-tag="3d-renders">3D 渲染</button>
+                  <button class="context-chip" data-tag="architecture">建筑空间</button>
+                  <button class="context-chip" data-tag="space">宇宙星空</button>
+                  <button class="context-chip" data-tag="street-photography">街头纪实</button>
+                  <button class="context-chip" data-tag="textures-patterns">纹理材质</button>
+                  <button class="context-chip" data-tag="animals">灵动动物</button>
                 </div>
               </div>
 
-              <!-- 4. Wallhaven 官网选项: 官方搜索框 + 官方分类 + 排序榜单 + 画幅比例 -->
+              <!-- 4. Wallhaven 官网选项: 官方搜索框 + 官方分类 + 排序榜单 + 时间范围 + 画幅比例 -->
               <div class="contextual-panel" id="panel-source-wallhaven">
                 <div class="modern-search-box">
                   <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -249,12 +236,32 @@
                     <button class="context-chip" data-cat="010">动漫 Anime</button>
                     <button class="context-chip" data-cat="001">人物 People</button>
                   </div>
-                  <div class="contextual-chips" id="wallhaven-sorting-chips">
-                    <span class="contextual-label">排序:</span>
-                    <button class="context-chip active" data-sort="views">🔥 最热 Views</button>
-                    <button class="context-chip" data-sort="toplist">⭐ 精选 Toplist</button>
-                    <button class="context-chip" data-sort="date_added">⏱ 最新 Latest</button>
-                    <button class="context-chip" data-sort="random">🎲 随机 Random</button>
+                  <div class="wallhaven-sort-time-row">
+                    <div class="contextual-chips" id="wallhaven-sorting-chips">
+                      <span class="contextual-label">排序:</span>
+                      <button class="context-chip active" data-sort="views">浏览最多</button>
+                      <button class="context-chip" data-sort="toplist">综合热门</button>
+                      <button class="context-chip" data-sort="date_added">最新</button>
+                      <button class="context-chip" data-sort="random">随机</button>
+                    </div>
+                    <div class="wallhaven-timerange-dropdown" id="wallhaven-timerange-dropdown">
+                      <button class="timerange-trigger-btn" id="wallhaven-timerange-btn" type="button" aria-haspopup="true" aria-expanded="false">
+                        <span class="timerange-label-text" id="wallhaven-timerange-label">时间：近 1 月</span>
+                        <svg class="dropdown-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                      </button>
+                      <div class="timerange-menu" id="wallhaven-timerange-menu">
+                        <div class="timerange-menu-item" data-range="1d">今天</div>
+                        <div class="timerange-menu-item" data-range="3d">近 3 天</div>
+                        <div class="timerange-menu-item" data-range="1w">近 1 周</div>
+                        <div class="timerange-menu-item active" data-range="1M">
+                          <span>近 1 月</span>
+                          <svg class="menu-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                        </div>
+                        <div class="timerange-menu-item" data-range="3M">近 3 月</div>
+                        <div class="timerange-menu-item" data-range="6M">近 6 月</div>
+                        <div class="timerange-menu-item" data-range="1y">近 1 年</div>
+                      </div>
+                    </div>
                   </div>
                   <div class="contextual-chips" id="wallhaven-ratio-chips">
                     <span class="contextual-label">画幅:</span>
@@ -371,6 +378,90 @@
                     <span class="palette-name">落日余晖</span>
                     <div class="palette-check-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
                   </div>
+
+                  <div class="theme-palette-chip" data-theme="cyber" tabindex="0" role="button" aria-label="赛博霓虹">
+                    <div class="palette-preview-circles">
+                      <div class="palette-circle-primary" style="background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #d946ef 100%);"></div>
+                    </div>
+                    <span class="palette-name">赛博霓虹</span>
+                    <div class="palette-check-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  </div>
+
+                  <div class="theme-palette-chip" data-theme="glacier" tabindex="0" role="button" aria-label="极地冰川">
+                    <div class="palette-preview-circles">
+                      <div class="palette-circle-primary" style="background: linear-gradient(135deg, #bae6fd 0%, #7dd3fc 50%, #38bdf8 100%);"></div>
+                    </div>
+                    <span class="palette-name">极地冰川</span>
+                    <div class="palette-check-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  </div>
+
+                  <div class="theme-palette-chip" data-theme="matcha" tabindex="0" role="button" aria-label="清雅抹茶">
+                    <div class="palette-preview-circles">
+                      <div class="palette-circle-primary" style="background: linear-gradient(135deg, #bef264 0%, #a3e635 50%, #65a30d 100%);"></div>
+                    </div>
+                    <span class="palette-name">清雅抹茶</span>
+                    <div class="palette-check-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  </div>
+
+                  <div class="theme-palette-chip" data-theme="mocha" tabindex="0" role="button" aria-label="浓郁摩卡">
+                    <div class="palette-preview-circles">
+                      <div class="palette-circle-primary" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #78350f 100%);"></div>
+                    </div>
+                    <span class="palette-name">浓郁摩卡</span>
+                    <div class="palette-check-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  </div>
+
+                  <div class="theme-palette-chip" data-theme="navy" tabindex="0" role="button" aria-label="深海谧夜">
+                    <div class="palette-preview-circles">
+                      <div class="palette-circle-primary" style="background: linear-gradient(135deg, #93c5fd 0%, #60a5fa 50%, #2563eb 100%);"></div>
+                    </div>
+                    <span class="palette-name">深海谧夜</span>
+                    <div class="palette-check-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  </div>
+
+                  <div class="theme-palette-chip" data-theme="rose" tabindex="0" role="button" aria-label="奢雅玫瑰">
+                    <div class="palette-preview-circles">
+                      <div class="palette-circle-primary" style="background: linear-gradient(135deg, #fda4af 0%, #fb7185 50%, #e11d48 100%);"></div>
+                    </div>
+                    <span class="palette-name">奢雅玫瑰</span>
+                    <div class="palette-check-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  </div>
+
+                  <div class="theme-palette-chip" data-theme="slate" tabindex="0" role="button" aria-label="极简钛灰">
+                    <div class="palette-preview-circles">
+                      <div class="palette-circle-primary" style="background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 50%, #64748b 100%);"></div>
+                    </div>
+                    <span class="palette-name">极简钛灰</span>
+                    <div class="palette-check-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  </div>
+
+                  <div class="theme-palette-chip" data-theme="custom" id="chip-custom-theme" tabindex="0" role="button" aria-label="自定义取色">
+                    <div class="palette-preview-circles">
+                      <div class="palette-circle-primary" id="custom-palette-preview" style="background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);"></div>
+                    </div>
+                    <span class="palette-name">自定义取色</span>
+                    <div class="palette-check-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  </div>
+                </div>
+
+                <!-- 自定义取色板控制器 -->
+                <div class="settings-tile" id="custom-theme-tile" style="margin-top: 10px; padding: 10px 0 0 0; border-top: 1px solid var(--md-sys-color-outline-variant);">
+                  <div class="settings-tile-leading">
+                    <div class="settings-icon-box" style="background: rgba(139, 92, 246, 0.15); color: var(--md-sys-color-primary);">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/></svg>
+                    </div>
+                    <div class="settings-tile-content">
+                      <span class="settings-tile-title">自定义取色板</span>
+                      <span class="settings-tile-subtitle" id="custom-theme-hex-display">点击调色盘选择任意主色调并自适应全套质感主题</span>
+                    </div>
+                  </div>
+                  <div class="settings-tile-action" style="display: flex; align-items: center; gap: 10px;">
+                    <span class="custom-color-code" id="custom-color-code">#8B5CF6</span>
+                    <label class="custom-color-picker-label" for="input-custom-theme-color" title="打开颜色选择器">
+                      <input type="color" id="input-custom-theme-color" class="custom-color-input" value="#8b5cf6">
+                      <span class="custom-color-indicator" id="custom-color-indicator" style="background: #8b5cf6;"></span>
+                    </label>
+                  </div>
                 </div>
 
                 <div class="settings-tile" style="margin-top: 10px; padding: 10px 0 0 0; border-top: 1px solid var(--md-sys-color-outline-variant);">
@@ -401,7 +492,7 @@
                   <!-- 1. 鸿蒙舒适圆体 -->
                   <div class="font-preset-chip active" data-font="rounded" style="font-family: 'HarmonyOS Sans SC', 'Nunito', 'Microsoft YaHei UI', sans-serif;">
                     <div class="font-preset-header">
-                      <span class="font-preset-title">🌸 鸿蒙舒适圆体</span>
+                      <span class="font-preset-title">鸿蒙舒适圆体</span>
                       <span class="font-preset-tag">推荐·圆润</span>
                     </div>
                     <div class="font-preset-preview">永恒之美 4K Rounded</div>
@@ -411,7 +502,7 @@
                   <!-- 2. 软萌可爱幼圆 -->
                   <div class="font-preset-chip" data-font="youyuan" style="font-family: 'YouYuan', '幼圆', 'Quicksand', sans-serif;">
                     <div class="font-preset-header">
-                      <span class="font-preset-title">🍬 软萌可爱幼圆</span>
+                      <span class="font-preset-title">软萌可爱幼圆</span>
                       <span class="font-preset-tag">极致圆润</span>
                     </div>
                     <div class="font-preset-preview">灵动探索 4K YouYuan</div>
@@ -421,7 +512,7 @@
                   <!-- 3. 现代极简屏显 (微软 UI) -->
                   <div class="font-preset-chip" data-font="fluent" style="font-family: 'Segoe UI', 'Microsoft YaHei UI', sans-serif;">
                     <div class="font-preset-header">
-                      <span class="font-preset-title">✨ 现代极简屏显</span>
+                      <span class="font-preset-title">现代极简屏显</span>
                       <span class="font-preset-tag">WinUI 原生</span>
                     </div>
                     <div class="font-preset-preview">沉浸视界 4K Segoe UI</div>
@@ -431,7 +522,7 @@
                   <!-- 4. 霞鹜悠然文楷 -->
                   <div class="font-preset-chip" data-font="wenkai" style="font-family: 'LXGW WenKai', 'STKaiti', 'KaiTi', serif;">
                     <div class="font-preset-header">
-                      <span class="font-preset-title">🌿 霞鹜悠然文楷</span>
+                      <span class="font-preset-title">霞鹜悠然文楷</span>
                       <span class="font-preset-tag">诗意人文</span>
                     </div>
                     <div class="font-preset-preview">清风明月 4K WenKai</div>
@@ -441,7 +532,7 @@
                   <!-- 5. 小米几何质感 -->
                   <div class="font-preset-chip" data-font="misans" style="font-family: 'MiSans', 'Noto Sans SC', sans-serif;">
                     <div class="font-preset-header">
-                      <span class="font-preset-title">💎 小米几何质感</span>
+                      <span class="font-preset-title">小米几何质感</span>
                       <span class="font-preset-tag">现代几何</span>
                     </div>
                     <div class="font-preset-preview">科技灵感 4K MiSans</div>
@@ -560,13 +651,17 @@
                   <!-- 胶囊网格选择区 -->
                   <div class="source-chip-grid" id="random-source-chip-grid">
                     <div class="source-chip-item active" data-source="all">
-                      <span style="font-size: 16px;">🎲</span>
+                      <div class="source-custom-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+                      </div>
                       <span>全部图源 (混合)</span>
                       <div class="source-check-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
                     </div>
 
                     <div class="source-chip-item" data-source="local">
-                      <span style="font-size: 16px;">📁</span>
+                      <div class="source-custom-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                      </div>
                       <span>本地图库</span>
                       <div class="source-check-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
                     </div>
@@ -707,25 +802,6 @@
                 <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                 <span>打开</span>
               </button>
-            </div>
-          </div>
-
-          <!-- 3. M3 调色盘预览 (Color Swatches) -->
-          <div class="detail-info-row" id="detail-palette-row">
-            <div class="detail-row-leading">
-              <div class="detail-icon-box emerald">
-                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a7 7 0 0 0-7 7c0 3 2 5 2 7a3 3 0 0 0 3 3h4a3 3 0 0 0 3-3c0-2 2-4 2-7a7 7 0 0 0-7-7z"/></svg>
-              </div>
-              <span class="detail-row-title">主题色系</span>
-            </div>
-            <div class="detail-row-trailing">
-              <div class="detail-swatch-group" id="modal-swatch-group">
-                <span class="swatch-pill" style="background: var(--md-sys-color-primary);" title="Primary"></span>
-                <span class="swatch-pill" style="background: var(--md-sys-color-secondary);" title="Secondary"></span>
-                <span class="swatch-pill" style="background: var(--md-sys-color-tertiary, #38bdf8);" title="Tertiary"></span>
-                <span class="swatch-pill" style="background: var(--md-sys-color-primary-container);" title="Container"></span>
-                <span class="swatch-pill" style="background: var(--md-sys-color-surface-container-highest);" title="Surface"></span>
-              </div>
             </div>
           </div>
         </div>

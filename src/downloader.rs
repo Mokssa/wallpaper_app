@@ -120,6 +120,13 @@ impl WallpaperDownloader {
 
                 const BING_PAGE_SIZE: usize = 8;
                 let safe_page = page.max(1);
+
+                // Bing 微软官方每日壁纸归档最大只保留 15~16 天（即最多 2 页）
+                // 超过第 2 页直接返回空列表，避免无限重复返回历史重复壁纸
+                if safe_page > 2 {
+                    return Ok(list);
+                }
+
                 let idx = safe_page.saturating_sub(1).saturating_mul(BING_PAGE_SIZE);
                 let count = limit.clamp(1, BING_PAGE_SIZE);
 
@@ -223,10 +230,12 @@ impl WallpaperDownloader {
                 let cat_param = parts.next().unwrap_or("111");
                 let sort_param = parts.next().unwrap_or("views");
                 let ratio_param = parts.next().unwrap_or("16x9,16x10");
+                let range_param = parts.next().unwrap_or("1M");
+                let seed_param = parts.next().unwrap_or("");
 
                 let safe_q = if q_param.is_empty() { "" } else { q_param };
 
-                let api_url = format!(
+                let mut api_url = format!(
                     "https://wallhaven.cc/api/v1/search?q={}&categories={}&purity=100&sorting={}&ratios={}&page={}",
                     urlencoding::encode(safe_q),
                     cat_param,
@@ -234,6 +243,14 @@ impl WallpaperDownloader {
                     ratio_param,
                     page
                 );
+
+                if (sort_param == "toplist" || sort_param == "views") && !range_param.is_empty() {
+                    api_url.push_str(&format!("&topRange={}", range_param));
+                }
+
+                if sort_param == "random" && !seed_param.is_empty() {
+                    api_url.push_str(&format!("&seed={}", seed_param));
+                }
 
                 if let Ok(res) = client.get(&api_url).send().await {
                     if let Ok(json_res) = res.json::<serde_json::Value>().await {
@@ -356,8 +373,20 @@ impl WallpaperDownloader {
                             ("1624496", "jpeg", "Johannes Plenio", "璀璨银河与星空穹顶"),
                             ("1450353", "jpeg", "Oliver Sjöström", "热带海岛清澈渐变玻璃海"),
                             ("1287145", "jpeg", "Eberhard Grossgasteiger", "阿尔卑斯山脉雪峰暮色"),
-                            ("33388308", "png", "Rafael Minguet Delgado", "湖泊倒影与森林山峦"),
-                            ("2129796", "png", "Roberto Vivancos", "东京雨夜街头赛博霓虹"),
+                            ("3225517", "jpeg", "Michael Block", "壮丽峡湾瀑布奔流"),
+                            ("572897", "jpeg", "Eberhard Grossgasteiger", "落基山脉倒映如镜"),
+                            ("3408744", "jpeg", "Stein Egil Liland", "北欧峡湾与金色日落"),
+                            ("1671325", "jpeg", "Eberhard Grossgasteiger", "高山针叶林与缭绕晨雾"),
+                            ("417074", "jpeg", "James Wheeler", "壮丽湖泊与秋季彩林"),
+                            ("1421903", "jpeg", "James Wheeler", "高山深潭与秋意红叶"),
+                            ("326055", "jpeg", "Pixabay", "金色麦田与澄澈蓝天"),
+                            ("414171", "jpeg", "Pixabay", "静谧高山湖泊倒映"),
+                            ("531756", "jpeg", "Pixabay", "晨光普照青翠山谷"),
+                            ("624015", "jpeg", "Frans Van Heerden", "壮美山川瀑布全景"),
+                            ("709552", "jpeg", "Ian Turnell", "湍急河流与秋林古石"),
+                            ("775201", "jpeg", "Kaique Rocha", "险峻山峰与云雾缭绕"),
+                            ("814499", "jpeg", "Martin Damboldt", "湖光山色日暮余晖"),
+                            ("1054218", "jpeg", "Mali Maeder", "静谧林海与雪山遥望"),
                         ]),
                         ("nature", &[
                             ("13248795", "jpeg", "Büşra Ş", "日落晚霞与静谧河流"),
@@ -371,7 +400,19 @@ impl WallpaperDownloader {
                             ("3408744", "jpeg", "Stein Egil Liland", "北欧峡湾与金色日落"),
                             ("1671325", "jpeg", "Eberhard Grossgasteiger", "高山针叶林与缭绕晨雾"),
                             ("417074", "jpeg", "James Wheeler", "壮丽湖泊与秋季彩林"),
-                            ("33388308", "png", "Rafael Minguet Delgado", "湖泊倒影与森林山峦"),
+                            ("1421903", "jpeg", "James Wheeler", "高山深潭与秋意红叶"),
+                            ("326055", "jpeg", "Pixabay", "金色麦田与澄澈蓝天"),
+                            ("414171", "jpeg", "Pixabay", "静谧高山湖泊倒映"),
+                            ("531756", "jpeg", "Pixabay", "晨光普照青翠山谷"),
+                            ("624015", "jpeg", "Frans Van Heerden", "壮美山川瀑布全景"),
+                            ("709552", "jpeg", "Ian Turnell", "湍急河流与秋林古石"),
+                            ("775201", "jpeg", "Kaique Rocha", "险峻山峰与云雾缭绕"),
+                            ("814499", "jpeg", "Martin Damboldt", "湖光山色日暮余晖"),
+                            ("1054218", "jpeg", "Mali Maeder", "静谧林海与雪山遥望"),
+                            ("1103970", "jpeg", "Johannes Plenio", "梦幻极光与冷杉树冠"),
+                            ("1183099", "jpeg", "Simon Berger", "冰岛苔原与苍凉奇境"),
+                            ("1366919", "jpeg", "Eberhard Grossgasteiger", "深邃雪山与浮云漫卷"),
+                            ("2387873", "jpeg", "Johannes Plenio", "高山旷野与漫天星辰"),
                         ]),
                         ("city", &[
                             ("169647", "jpeg", "Peng Liu", "现代都市摩天大楼天际线"),
@@ -385,7 +426,19 @@ impl WallpaperDownloader {
                             ("1538177", "jpeg", "Dmitry Zvolskiy", "欧洲古典建筑街区晨光"),
                             ("2614818", "jpeg", "Aleksandar Pasaric", "重庆洪崖洞梦幻夜景"),
                             ("2506923", "jpeg", "Aleksandar Pasaric", "雾都天际线与灯火辉煌"),
-                            ("2129796", "png", "Roberto Vivancos", "东京雨夜街头赛博霓虹"),
+                            ("1738986", "jpeg", "Aleksandar Pasaric", "夜幕下的都市璀璨街景"),
+                            ("2246476", "jpeg", "Aleksandar Pasaric", "光影交织的摩天建筑群"),
+                            ("1486785", "jpeg", "Aleksandar Pasaric", "迷离雨夜都市反光"),
+                            ("1643383", "jpeg", "Aleksandar Pasaric", "梦幻粉紫都市夜空"),
+                            ("2341830", "jpeg", "Aleksandar Pasaric", "未来感都市高架立体交通"),
+                            ("2412606", "jpeg", "Aleksandar Pasaric", "极简都市天际线倒影"),
+                            ("313782", "jpeg", "Pixabay", "欧洲运河水滨古典建筑"),
+                            ("290386", "jpeg", "Pixabay", "曼哈顿都市全景"),
+                            ("374710", "jpeg", "Aleksandar Pasaric", "霓虹斑斓的窄巷深处"),
+                            ("1400249", "jpeg", "Aleksandar Pasaric", "繁华商务区夜景"),
+                            ("2168974", "jpeg", "Aleksandar Pasaric", "日暮下的桥梁与车流"),
+                            ("2422588", "jpeg", "Aleksandar Pasaric", "雨夜霓虹漫反射街道"),
+                            ("1005644", "jpeg", "Tom Fisk", "高空鸟瞰夜幕道路网络"),
                         ]),
                         ("ocean", &[
                             ("9653855", "jpeg", "Atahan Demir", "细腻沙滩金色浪花"),
@@ -398,6 +451,12 @@ impl WallpaperDownloader {
                             ("1680140", "jpeg", "Jess Loiterton", "航拍海浪拍打白沙滩"),
                             ("1174732", "jpeg", "Valentin Antonini", "地中海悬崖与碧蓝海水"),
                             ("1705254", "jpeg", "Asad Photo Maldives", "马尔代夫水上屋海景"),
+                            ("1430677", "jpeg", "Frank Cone", "层叠浪花轻抚沙滩"),
+                            ("1835718", "jpeg", "Tom Fisk", "航拍碧蓝海水与白色细沙"),
+                            ("248797", "jpeg", "Pixabay", "热带日落与宁静海洋"),
+                            ("1295036", "jpeg", "George Desipris", "海龟在清澈海水中漫游"),
+                            ("1488315", "jpeg", "Oliver Sjöström", "清晨的第一缕海浪阳光"),
+                            ("237272", "jpeg", "Pixabay", "椰林树影与碧海晴空"),
                         ]),
                         ("dark", &[
                             ("38672000", "jpeg", "Pexels Featured", "极简黄昏飞鸟剪影"),
@@ -407,6 +466,11 @@ impl WallpaperDownloader {
                             ("1274260", "jpeg", "Markus Spiske", "暗色极简微光粒子"),
                             ("247431", "jpeg", "Pixabay", "深邃宇宙银河星系"),
                             ("1005644", "jpeg", "Tom Fisk", "暗黑夜景公路微光"),
+                            ("1421903", "jpeg", "James Wheeler", "静谧暗影水面倒映"),
+                            ("167699", "jpeg", "Pixabay", "暗夜森林与微光剪影"),
+                            ("1624438", "jpeg", "Johannes Plenio", "极简暗色地平线"),
+                            ("1434608", "jpeg", "Stephan Seeber", "暮光余韵与剪影山峦"),
+                            ("1252869", "jpeg", "Simon Berger", "夜幕下的纯净深蓝"),
                         ]),
                         ("aerial", &[
                             ("1486974", "jpeg", "Tom Fisk", "鸟瞰热带雨林蜿蜒河流"),
@@ -417,6 +481,10 @@ impl WallpaperDownloader {
                             ("1659438", "jpeg", "Tom Fisk", "鸟瞰冰岛黑色沙滩河流"),
                             ("2440021", "jpeg", "Nextvoyage", "航拍繁华都市多层立交"),
                             ("1591373", "jpeg", "Pok Rie", "航拍翠绿梯田与村落"),
+                            ("1835718", "jpeg", "Tom Fisk", "航拍碧海浅滩与渐变蓝"),
+                            ("1005644", "jpeg", "Tom Fisk", "航拍夜色下的立交高架"),
+                            ("3052361", "jpeg", "Aleksandar Pasaric", "航拍现代都市夜景"),
+                            ("1174732", "jpeg", "Valentin Antonini", "鸟瞰地中海蔚蓝海湾"),
                         ]),
                         ("night", &[
                             ("1624496", "jpeg", "Johannes Plenio", "璀璨银河与星空穹顶"),
@@ -427,6 +495,10 @@ impl WallpaperDownloader {
                             ("1933316", "jpeg", "Eberhard Grossgasteiger", "高山星空与流星划过"),
                             ("1624438", "jpeg", "Johannes Plenio", "梦幻星空与倒影之水"),
                             ("1434608", "jpeg", "Stephan Seeber", "暮光星辰与高山轮廓"),
+                            ("1738986", "jpeg", "Aleksandar Pasaric", "夜幕下的都市璀璨街景"),
+                            ("2614818", "jpeg", "Aleksandar Pasaric", "重庆洪崖洞梦幻夜景"),
+                            ("1103970", "jpeg", "Johannes Plenio", "梦幻极光与冷杉树冠"),
+                            ("2246476", "jpeg", "Aleksandar Pasaric", "光影交织的都市夜景"),
                         ]),
                     ];
 
@@ -436,12 +508,14 @@ impl WallpaperDownloader {
                         .map(|(_, items)| *items)
                         .unwrap_or(pexels_catalog[0].1);
 
-                    let offset = ((safe_page - 1) * safe_limit) % items_for_cat.len();
-                    let count = safe_limit.min(items_for_cat.len());
+                    let start_idx = (safe_page - 1) * safe_limit;
+                    if start_idx >= items_for_cat.len() {
+                        return Ok(list);
+                    }
+                    let end_idx = (start_idx + safe_limit).min(items_for_cat.len());
 
-                    for i in 0..count {
-                        let idx = (offset + i) % items_for_cat.len();
-                        let (pid, ext, author, title) = items_for_cat[idx];
+                    for i in start_idx..end_idx {
+                        let (pid, ext, author, title) = items_for_cat[i];
 
                         let thumb_url = format!("https://images.pexels.com/photos/{}/pexels-photo-{}.{}?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940", pid, pid, ext);
                         let raw_url = format!("https://images.pexels.com/photos/{}/pexels-photo-{}.{}", pid, pid, ext);

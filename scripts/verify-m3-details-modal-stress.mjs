@@ -180,7 +180,7 @@ async function runEmpiricalStressHarness() {
   window.openWallpaperDetails(localItem, 'local', localItem.file_path);
   const resBadge = document.getElementById('modal-meta-resolution');
   assert(resBadge !== null, 'Resolution badge element exists');
-  assert(resBadge.textContent === '检测原图分辨率...', 'Initial resolution badge text is detection prompt');
+  assert(resBadge.textContent === '3840 × 2160' || resBadge.classList.contains('skeleton'), 'Initial resolution badge displays known resolution or skeleton placeholder');
   assert(resBadge.classList.contains('detail-resolution-badge'), 'Has .detail-resolution-badge class');
 
   // Simulate remote image error and fallback
@@ -216,20 +216,11 @@ async function runEmpiricalStressHarness() {
   assert(localBrowserCmds.length === 0, 'open_in_browser blocked for local path');
 
   console.log('--------------------------------------------------------------------------------');
-  console.log('Test 5: M3 Color Swatches & CSS Tokens Geometry');
+  console.log('Test 5: Details Modal Metadata Cleanliness');
   console.log('--------------------------------------------------------------------------------');
 
   const swatchGroup = document.getElementById('modal-swatch-group');
-  assert(swatchGroup !== null, 'Color swatch group exists');
-  const pills = swatchGroup.querySelectorAll('.swatch-pill');
-  assert(pills.length === 5, 'Exactly 5 color swatch pills rendered');
-
-  const pillStyles = Array.from(pills).map(p => p.getAttribute('style'));
-  assert(pillStyles.some(s => s.includes('--md-sys-color-primary')), 'Primary token swatch present');
-  assert(pillStyles.some(s => s.includes('--md-sys-color-secondary')), 'Secondary token swatch present');
-  assert(pillStyles.some(s => s.includes('--md-sys-color-tertiary')), 'Tertiary token swatch present');
-  assert(pillStyles.some(s => s.includes('--md-sys-color-primary-container')), 'Primary container token swatch present');
-  assert(pillStyles.some(s => s.includes('--md-sys-color-surface-container-highest')), 'Surface container token swatch present');
+  assert(swatchGroup === null, 'Color swatch group cleanly removed from details modal');
 
   console.log('--------------------------------------------------------------------------------');
   console.log('Test 6: Backdrop vs Surface Bubbling Insulation & Keyboard Escape Hierarchy');
