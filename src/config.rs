@@ -93,3 +93,82 @@ impl AppConfig {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_default_config_invariants() {
+        let config = AppConfig::default();
+        assert_eq!(config.query, "");
+        assert_eq!(config.auto_update_interval_minutes, 60);
+        assert_eq!(config.auto_update_enabled, false);
+        assert_eq!(config.batch_count, 6);
+        assert_eq!(config.wallpaper_style, "fill");
+        assert_eq!(config.load_mode, "pagination");
+        assert_eq!(config.card_ratio, "uniform");
+        assert_eq!(config.font_family, "rounded");
+    }
+
+    #[test]
+    fn test_corrupted_json_recovery_fallback() {
+        let malformed_json = "{ \"query\": \"broken\", \"auto_update_interval_minutes\": ";
+        let parsed = serde_json::from_str::<AppConfig>(malformed_json);
+        assert!(parsed.is_err(), "Malformed JSON should return Deserialization Error");
+
+        let non_json = "NOT_A_JSON_FILE_CONTENT_RAW_BINARY_DATA";
+        let parsed_non_json = serde_json::from_str::<AppConfig>(non_json);
+        assert!(parsed_non_json.is_err(), "Arbitrary text should return Deserialization Error");
+    }
+
+    #[test]
+    fn test_partial_config_backward_compatibility() {
+        // Missing font_family and pexels_api_key should receive default values
+        let partial_json = r#"{
+            "query": "minimalist",
+            "cache_dir": "D:/Wallpapers",
+            "auto_update_interval_minutes": 120,
+            "auto_update_enabled": true,
+            "batch_count": 8,
+            "wallpaper_style": "fit",
+            "unsplash_access_key": "custom-key",
+            "load_mode": "infinite",
+            "card_ratio": "original"
+        }"#;
+
+        let config: AppConfig = serde_json::from_str(partial_json).expect("Should deserialize partial config with defaults");
+        assert_eq!(config.query, "minimalist");
+        assert_eq!(config.font_family, "rounded", "Missing font_family should default to rounded");
+        assert_eq!(config.pexels_api_key, "", "Missing pexels_api_key should default to empty string");
+    }
+
+    #[test]
+    fn test_legacy_query_and_cache_migration_logic() {
+        let legacy_json = r#"{
+            "query": "nature,wallpaper,architecture",
+            "cache_dir": "cache/wallpapers",
+            "auto_update_interval_minutes": 60,
+            "auto_update_enabled": false,
+            "batch_count": 6,
+            "wallpaper_style": "fill",
+            "unsplash_access_key": "",
+            "pexels_api_key": "",
+            "load_mode": "pagination",
+            "card_ratio": "uniform",
+            "font_family": "rounded"
+        }"#;
+
+        let mut config: AppConfig = serde_json::from_str(legacy_json).expect("Should parse legacy json");
+        if config.query == "nature,wallpaper,architecture" || config.query == "nature,wallpaper" {
+            config.query = "".to_string();
+        }
+        if config.cache_dir == "cache/wallpapers" || config.cache_dir.is_empty() {
+            config.cache_dir = default_cache_dir();
+        }
+
+        assert_eq!(config.query, "", "Legacy query should be cleared to empty");
+        assert_ne!(config.cache_dir, "cache/wallpapers", "Legacy cache_dir should be upgraded");
+    }
+}
+

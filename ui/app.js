@@ -140,16 +140,48 @@ const flutterSnackbar = document.getElementById('flutter-snackbar');
 const snackbarText = document.getElementById('snackbar-text');
 
 // ==========================================================================
-// 1) Mihon Material You Dynamic Theme Engine
+// 1) Material Design 3 (M3) Dynamic Theme Engine
 // ==========================================================================
+
+const ALL_KNOWN_THEMES = [
+  'indigo', 'ocean', 'emerald', 'sunset', 'crimson', 'lavender', 'amber',
+  'violet', 'blue', 'teal', 'pink', 'green'
+];
+
+const THEME_CANONICAL_MAP = {
+  'indigo': 'indigo',
+  'ocean': 'ocean',
+  'emerald': 'emerald',
+  'sunset': 'sunset',
+  'crimson': 'crimson',
+  'lavender': 'lavender',
+  'amber': 'amber',
+  // Backward-compatible alias mappings:
+  'violet': 'indigo',
+  'blue': 'ocean',
+  'teal': 'ocean',
+  'green': 'emerald',
+  'pink': 'lavender'
+};
+
+const CANONICAL_DEFAULT_CHIP = {
+  'indigo': 'violet',
+  'ocean': 'blue',
+  'emerald': 'green',
+  'sunset': 'sunset',
+  'crimson': 'crimson',
+  'lavender': 'pink',
+  'amber': 'amber'
+};
+
 function updateSourceIconsForTheme(themeName, isAmoled) {
   const pexelsIcons = document.querySelectorAll('img[src*="pexels"]');
   let pexelsSrc = 'assets/icons/pexels.png';
 
-  // 针对与 Pexels 青绿原色相近的主题（青色 Teal、绿色 Green），自动选用高对比度白色/深色版图标
-  if (themeName === 'teal' || themeName === 'green') {
+  // 针对与 Pexels 青绿原色相近的主题（青色 Teal/Ocean、绿色 Green/Emerald），自动选用高对比度白色/深色版图标
+  if (themeName === 'teal' || themeName === 'emerald' || themeName === 'green' || themeName === 'ocean' || themeName === 'blue') {
     pexelsSrc = 'assets/icons/pexels_light.png';
-  } else if (themeName === 'amber') {
+  } else if (themeName === 'amber' || themeName === 'sunset') {
     pexelsSrc = 'assets/icons/pexels_dark.png';
   } else {
     pexelsSrc = 'assets/icons/pexels.png';
@@ -161,52 +193,82 @@ function updateSourceIconsForTheme(themeName, isAmoled) {
 }
 
 function applyTheme(themeName, isAmoled = false) {
-  const validThemes = ['violet', 'blue', 'teal', 'pink', 'amber', 'green', 'crimson'];
-  const theme = validThemes.includes(themeName) ? themeName : 'violet';
+  const cleanTheme = (typeof themeName === 'string' ? themeName.trim().toLowerCase() : '') || 'indigo';
+  const rawTheme = /^[a-z0-9_-]+$/.test(cleanTheme) ? cleanTheme : 'indigo';
+  const canonical = THEME_CANONICAL_MAP[rawTheme] || rawTheme;
 
-  validThemes.forEach(t => document.body.classList.remove(`theme-${t}`));
-  document.body.classList.add(`theme-${theme}`);
+  // 1. Cleanly remove all known theme classes
+  ALL_KNOWN_THEMES.forEach(t => document.body.classList.remove(`theme-${t}`));
+
+  // 2. Add raw theme class and canonical class (if different)
+  document.body.classList.add(`theme-${rawTheme}`);
+  if (canonical !== rawTheme) {
+    document.body.classList.add(`theme-${canonical}`);
+  }
   document.body.classList.toggle('theme-amoled', !!isAmoled);
 
+  // 3. Update active state on theme chips
+  const themePaletteChips = document.querySelectorAll('.theme-palette-chip');
+  const hasExactChip = document.querySelector(`.theme-palette-chip[data-theme="${rawTheme}"]`);
+  const defaultFallbackChip = CANONICAL_DEFAULT_CHIP[canonical] || canonical;
   themePaletteChips.forEach(chip => {
-    if (chip.getAttribute('data-theme') === theme) {
-      chip.classList.add('active');
-    } else {
-      chip.classList.remove('active');
-    }
+    const chipTheme = (chip.getAttribute('data-theme') || '').toLowerCase();
+    const isActive = hasExactChip ? (chipTheme === rawTheme) : (chipTheme === defaultFallbackChip);
+    chip.classList.toggle('active', isActive);
   });
 
+  const checkAmoledMode = document.getElementById('check-amoled-mode');
   if (checkAmoledMode) {
     checkAmoledMode.checked = !!isAmoled;
   }
 
-  updateSourceIconsForTheme(theme, isAmoled);
+  // 4. Update contrast-adaptive brand icons
+  updateSourceIconsForTheme(rawTheme, isAmoled);
 
-  appConfig.theme_color = theme;
+  // 5. Update local state & fast localStorage cache
+  appConfig.theme_color = rawTheme;
   appConfig.amoled_mode = !!isAmoled;
   try {
-    localStorage.setItem('wp_theme_color', theme);
+    localStorage.setItem('wp_theme_color', rawTheme);
     localStorage.setItem('wp_amoled_mode', isAmoled ? '1' : '0');
   } catch (e) {}
 }
 
 function setupThemeSystem() {
-  const savedTheme = localStorage.getItem('wp_theme_color') || 'violet';
-  const savedAmoled = localStorage.getItem('wp_amoled_mode') === '1';
+  const savedTheme = localStorage.getItem('wp_theme_color') || appConfig.theme_color || 'indigo';
+  const savedAmoled = localStorage.getItem('wp_amoled_mode') === '1' || !!appConfig.amoled_mode;
   applyTheme(savedTheme, savedAmoled);
 
+  const themePaletteChips = document.querySelectorAll('.theme-palette-chip');
+  const checkAmoledMode = document.getElementById('check-amoled-mode');
+
   themePaletteChips.forEach(chip => {
-    chip.addEventListener('click', () => {
-      const selectedTheme = chip.getAttribute('data-theme') || 'violet';
-      applyTheme(selectedTheme, checkAmoledMode ? checkAmoledMode.checked : false);
+    if (!chip.hasAttribute('tabindex')) {
+      chip.setAttribute('tabindex', '0');
+    }
+    if (!chip.hasAttribute('role')) {
+      chip.setAttribute('role', 'button');
+    }
+    const selectThemeHandler = () => {
+      const selectedTheme = chip.getAttribute('data-theme') || 'indigo';
+      const isAmoled = checkAmoledMode ? checkAmoledMode.checked : false;
+      applyTheme(selectedTheme, isAmoled);
       saveConfig();
-      showSnackBar(`已切换至 ${chip.querySelector('.palette-name')?.textContent || selectedTheme} 主题`);
+      const themeLabel = chip.querySelector('.palette-name')?.textContent || selectedTheme;
+      showSnackBar(`已切换至 ${themeLabel} 主题`);
+    };
+    chip.addEventListener('click', selectThemeHandler);
+    chip.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        selectThemeHandler();
+      }
     });
   });
 
   if (checkAmoledMode) {
     checkAmoledMode.addEventListener('change', () => {
-      applyTheme(appConfig.theme_color, checkAmoledMode.checked);
+      applyTheme(appConfig.theme_color || 'indigo', checkAmoledMode.checked);
       saveConfig();
       showSnackBar(`AMOLED 纯黑模式已${checkAmoledMode.checked ? '开启' : '关闭'}`);
     });
@@ -216,11 +278,13 @@ function setupThemeSystem() {
 // ==========================================================================
 // 1.1) Typography & Font Customization Engine (圆润/幼圆/现代/文楷/小米几何)
 // ==========================================================================
-function applyFontFamily(fontName) {
-  const validFonts = ['rounded', 'youyuan', 'fluent', 'wenkai', 'misans'];
-  const font = validFonts.includes(fontName) ? fontName : 'rounded';
 
-  validFonts.forEach(f => document.body.classList.remove(`font-${f}`));
+const ALL_VALID_FONTS = ['rounded', 'youyuan', 'fluent', 'wenkai', 'misans'];
+
+function applyFontFamily(fontName) {
+  const font = ALL_VALID_FONTS.includes(fontName) ? fontName : 'rounded';
+
+  ALL_VALID_FONTS.forEach(f => document.body.classList.remove(`font-${f}`));
   document.body.classList.add(`font-${font}`);
 
   const fontPresetChips = document.querySelectorAll('.font-preset-chip');
@@ -244,12 +308,25 @@ function setupFontSystem() {
 
   const fontPresetChips = document.querySelectorAll('.font-preset-chip');
   fontPresetChips.forEach(chip => {
-    chip.addEventListener('click', () => {
+    if (!chip.hasAttribute('tabindex')) {
+      chip.setAttribute('tabindex', '0');
+    }
+    if (!chip.hasAttribute('role')) {
+      chip.setAttribute('role', 'button');
+    }
+    const selectFontHandler = () => {
       const selectedFont = chip.getAttribute('data-font') || 'rounded';
       applyFontFamily(selectedFont);
       saveConfig();
       const fontTitle = chip.querySelector('.font-preset-title')?.textContent || selectedFont;
       showSnackBar(`界面字体已切换至 ${fontTitle}`);
+    };
+    chip.addEventListener('click', selectFontHandler);
+    chip.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        selectFontHandler();
+      }
     });
   });
 }
@@ -361,7 +438,7 @@ function openWallpaperDetails(item, type = 'online', imgSrc = '') {
   }
 
   // 源地址链接 (真实原图下载直链)
-  const sourceUrl = rawUrl || sourceUrl || '';
+  const sourceUrl = rawUrl || '';
   if (modalMetaLinkText) {
     modalMetaLinkText.textContent = sourceUrl || '本地文件';
     modalMetaLinkText.title = sourceUrl;
@@ -541,12 +618,54 @@ function setupLightboxInteractions() {
 
   if (lbBtnClose) lbBtnClose.addEventListener('click', closeLightbox);
 
-  // Esc 键退出全屏
+  // 全局键盘快捷键 (Lightbox 与 Modal)
   window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      if (fullscreenLightbox.classList.contains('active')) {
-        closeLightbox();
-      } else if (detailModal.classList.contains('active')) {
+    // 若当前焦点在输入框/选择框，不触发快捷键
+    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) {
+      return;
+    }
+
+    if (fullscreenLightbox && fullscreenLightbox.classList.contains('active')) {
+      switch (e.key) {
+        case 'Escape':
+          closeLightbox();
+          break;
+        case '+':
+        case '=':
+          lbZoom = Math.min(lbZoom * 1.25, 6.0);
+          updateLightboxTransform();
+          break;
+        case '-':
+        case '_':
+          lbZoom = Math.max(lbZoom * 0.8, 0.4);
+          if (lbZoom <= 1.0) { lbPosX = 0; lbPosY = 0; }
+          updateLightboxTransform();
+          break;
+        case '0':
+          lbZoom = 1.0;
+          lbPosX = 0;
+          lbPosY = 0;
+          updateLightboxTransform();
+          break;
+        case 'ArrowLeft':
+          lbPosX += 40;
+          updateLightboxTransform();
+          break;
+        case 'ArrowRight':
+          lbPosX -= 40;
+          updateLightboxTransform();
+          break;
+        case 'ArrowUp':
+          lbPosY += 40;
+          updateLightboxTransform();
+          break;
+        case 'ArrowDown':
+          lbPosY -= 40;
+          updateLightboxTransform();
+          break;
+      }
+    } else if (detailModal && detailModal.classList.contains('active')) {
+      if (e.key === 'Escape') {
         closeWallpaperDetails();
       }
     }
@@ -609,6 +728,10 @@ function updateConfigUI() {
   if (inputConfigInterval) inputConfigInterval.value = appConfig.auto_update_interval_minutes || 60;
   if (checkConfigAutoupdate) checkConfigAutoupdate.checked = !!appConfig.auto_update_enabled;
 
+  // Seamlessly synchronize Theme and Font from backend AppConfig
+  if (appConfig.theme_color) {
+    applyTheme(appConfig.theme_color, !!appConfig.amoled_mode);
+  }
   if (appConfig.font_family) {
     applyFontFamily(appConfig.font_family);
   }
@@ -659,6 +782,8 @@ async function saveConfig() {
     appConfig.query = inputConfigQuery ? inputConfigQuery.value.trim() : "";
     appConfig.load_mode = selectConfigLoadmode ? selectConfigLoadmode.value : "pagination";
     appConfig.card_ratio = selectConfigCardratio ? selectConfigCardratio.value : "uniform";
+    appConfig.theme_color = appConfig.theme_color || "indigo";
+    appConfig.amoled_mode = !!appConfig.amoled_mode;
     appConfig.font_family = appConfig.font_family || "rounded";
     appConfig.unsplash_access_key = inputConfigUnsplashKey ? inputConfigUnsplashKey.value.trim() : (appConfig.unsplash_access_key || "");
     appConfig.pexels_api_key = inputConfigPexelsKey ? inputConfigPexelsKey.value.trim() : (appConfig.pexels_api_key || "");
@@ -1022,7 +1147,7 @@ function renderOnlineGrid(items, append = false) {
 
 let currentBingMarket = 'zh-CN';
 let currentUnsplashTag = 'wallpaper';
-let currentWallhavenCat = '110';
+let currentWallhavenCat = '111';
 let currentWallhavenSort = 'views';
 let currentWallhavenRatio = '16x9,16x10';
 
@@ -1388,7 +1513,7 @@ function setupContextualSourceControls() {
     chip.addEventListener('click', () => {
       wallhavenCatChips.forEach(c => c.classList.remove('active'));
       chip.classList.add('active');
-      currentWallhavenCat = chip.getAttribute('data-cat') || '110';
+      currentWallhavenCat = chip.getAttribute('data-cat') || '111';
       onlinePage = 1;
       loadOnlineWallpapers(false);
     });
@@ -1532,9 +1657,135 @@ function setupContextualSourceControls() {
   }
 }
 
+// ==========================================================================
+// Material Design 3 (M3) Zero-Dependency Ripple Engine
+// Global event-delegation architecture with leak-free auto-cleanup.
+// ==========================================================================
+function initM3RippleEngine() {
+  if (window.__M3_RIPPLE_INITIALIZED__) {
+    return;
+  }
+  window.__M3_RIPPLE_INITIALIZED__ = true;
+
+  const RIPPLE_SELECTOR = [
+    '.md-btn', '.md-btn-filled', '.md-btn-tonal', '.md-btn-outlined', '.md-btn-text', '.md-btn-danger',
+    '.m3-btn', '.m3-btn-primary', '.m3-btn-tonal', '.m3-btn-outlined', '.m3-btn-text', '.m3-btn-danger',
+    '.segmented-btn',
+    '.filter-chip', '.context-chip', '.pexels-chip', '.theme-palette-chip', '.font-preset-chip',
+    '.btn-quick-random',
+    '.m3-action-icon-btn', '.md-icon-btn', '.lightbox-tool-btn', '.modern-search-btn',
+    '.titlebar-btn',
+    '.md-ripple-surface'
+  ].join(', ');
+
+  function spawnRipple(target, clientX, clientY) {
+    if (!target || target.disabled || target.getAttribute('aria-disabled') === 'true' || target.classList.contains('disabled')) {
+      return;
+    }
+
+    const rect = target.getBoundingClientRect ? target.getBoundingClientRect() : { left: 0, top: 0, right: 0, bottom: 0, width: 0, height: 0 };
+    const width = rect.width || target.offsetWidth || 100;
+    const height = rect.height || target.offsetHeight || 40;
+
+    let x, y;
+    if (clientX === undefined || clientY === undefined || clientX < (rect.left || 0) || clientX > ((rect.right || (rect.left || 0) + width)) || clientY < (rect.top || 0) || clientY > ((rect.bottom || (rect.top || 0) + height))) {
+      x = width / 2;
+      y = height / 2;
+    } else {
+      x = clientX - (rect.left || 0);
+      y = clientY - (rect.top || 0);
+    }
+
+    const dX = Math.max(x, width - x);
+    const dY = Math.max(y, height - y);
+    const radius = Math.hypot(dX, dY);
+    const diameter = radius * 2;
+
+    const compPos = window.getComputedStyle ? window.getComputedStyle(target).position : target.style.position;
+    if (compPos === 'static') {
+      target.style.position = 'relative';
+    }
+
+    const ripple = document.createElement('span');
+    ripple.className = 'm3-ripple-wave md-ripple-wave';
+    ripple.style.width = `${diameter}px`;
+    ripple.style.height = `${diameter}px`;
+    ripple.style.left = `${x - radius}px`;
+    ripple.style.top = `${y - radius}px`;
+
+    target.appendChild(ripple);
+
+    let isFadingOut = false;
+    const fadeOutRipple = () => {
+      if (isFadingOut) return;
+      isFadingOut = true;
+      ripple.classList.add('m3-ripple-fade-out');
+      ripple.classList.add('md-ripple-fade-out');
+
+      const removeRipple = () => {
+        if (ripple.parentNode) {
+          ripple.parentNode.removeChild(ripple);
+        }
+      };
+
+      ripple.addEventListener('transitionend', removeRipple, { once: true });
+      setTimeout(removeRipple, 300);
+    };
+
+    const onPointerRelease = () => {
+      fadeOutRipple();
+      window.removeEventListener('pointerup', onPointerRelease);
+      window.removeEventListener('mouseup', onPointerRelease);
+      window.removeEventListener('pointercancel', onPointerRelease);
+      target.removeEventListener('pointerleave', onPointerRelease);
+    };
+
+    window.addEventListener('pointerup', onPointerRelease, { once: true });
+    window.addEventListener('mouseup', onPointerRelease, { once: true });
+    window.addEventListener('pointercancel', onPointerRelease, { once: true });
+    target.addEventListener('pointerleave', onPointerRelease, { once: true });
+
+    setTimeout(() => {
+      if (!isFadingOut) fadeOutRipple();
+    }, 600);
+  }
+
+  // 1. Pointerdown & mousedown delegation with debounce guard for touch/pointer/mouse
+  let lastSpawnTime = 0;
+  let lastSpawnTarget = null;
+  const handlePointerDown = (e) => {
+    if (e.button !== 0 && e.button !== undefined) return;
+    const target = e.target && e.target.closest ? e.target.closest(RIPPLE_SELECTOR) : null;
+    if (target) {
+      const now = Date.now();
+      if (target === lastSpawnTarget && now - lastSpawnTime < 80) {
+        return;
+      }
+      lastSpawnTime = now;
+      lastSpawnTarget = target;
+      spawnRipple(target, e.clientX, e.clientY);
+    }
+  };
+
+  document.addEventListener('pointerdown', handlePointerDown, { passive: true });
+  document.addEventListener('mousedown', handlePointerDown, { passive: true });
+
+  // 2. Keyboard accessibility trigger (Enter / Space on focused interactive element)
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const activeEl = document.activeElement;
+    if (activeEl && activeEl.matches && activeEl.matches(RIPPLE_SELECTOR)) {
+      const tag = activeEl.tagName ? activeEl.tagName.toLowerCase() : '';
+      if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+      spawnRipple(activeEl);
+    }
+  });
+}
+
 // Initialization
 document.addEventListener('DOMContentLoaded', async () => {
   setupEvents();
+  initM3RippleEngine();
   await loadConfig();
   await loadWallpapers();
   await loadOnlineWallpapers(false);

@@ -1,0 +1,17 @@
+{
+  "name": "wallpaper-app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:tokens": "node scripts/verify-tokens.mjs",
+    "test:all": "node scripts/verify-tokens.mjs && vitest run"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "^10.4.0",
+    "jsdom": "^26.0.0",
+    "vitest": "^3.0.7"
+  }
+}

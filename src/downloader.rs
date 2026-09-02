@@ -220,7 +220,7 @@ impl WallpaperDownloader {
                 // Wallhaven 官方动漫、二次元与高分辨率壁纸 API
                 let mut parts = query.split('|');
                 let q_param = parts.next().unwrap_or("");
-                let cat_param = parts.next().unwrap_or("110");
+                let cat_param = parts.next().unwrap_or("111");
                 let sort_param = parts.next().unwrap_or("views");
                 let ratio_param = parts.next().unwrap_or("16x9,16x10");
 

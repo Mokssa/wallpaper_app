@@ -10,7 +10,7 @@
   <div class="flutter-scaffold">
 
     <!-- 1) Flutter / M3 Window Header Titlebar -->
-    <header class="flutter-titlebar">
+    <header class="flutter-titlebar" id="app-titlebar">
       <div class="titlebar-drag-region" data-tauri-drag-region>
         <div class="titlebar-brand">
           <div class="titlebar-logo">
@@ -22,13 +22,13 @@
         </div>
       </div>
       <div class="titlebar-actions" data-tauri-drag-region="false">
-        <button class="titlebar-btn" id="btn-minimize" title="最小化">
+        <button class="titlebar-btn" id="btn-minimize" title="最小化" aria-label="最小化">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
-        <button class="titlebar-btn" id="btn-maximize" title="最大化">
+        <button class="titlebar-btn" id="btn-maximize" title="最大化" aria-label="最大化">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
         </button>
-        <button class="titlebar-btn close" id="btn-close" title="关闭">
+        <button class="titlebar-btn close" id="btn-close" title="关闭" aria-label="关闭">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></svg>
         </button>
       </div>
@@ -38,7 +38,7 @@
     <div class="app-body">
 
       <!-- Flutter Navigation Rail -->
-      <aside class="flutter-nav-rail">
+      <aside class="flutter-nav-rail" aria-label="Main Navigation">
         <div class="nav-rail-top">
           <!-- Mini Profile Card -->
           <div class="nav-profile-card">
@@ -53,38 +53,41 @@
           </div>
 
           <!-- Navigation Items -->
-          <nav class="nav-menu">
-            <button class="nav-item active" data-tab="gallery">
+          <nav class="nav-menu" role="navigation" aria-label="Destinations">
+            <button class="nav-item nav-rail-item active" id="nav-tab-gallery" data-tab="gallery" aria-label="本地壁纸">
+              <span class="indicator-pill" aria-hidden="true"></span>
               <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
                 <rect x="3" y="3" width="7" height="7" rx="1.5"/>
                 <rect x="14" y="3" width="7" height="7" rx="1.5"/>
                 <rect x="14" y="14" width="7" height="7" rx="1.5"/>
                 <rect x="3" y="14" width="7" height="7" rx="1.5"/>
               </svg>
-              <span>本地壁纸</span>
+              <span class="nav-item-label">本地壁纸</span>
             </button>
 
-            <button class="nav-item" data-tab="explore">
+            <button class="nav-item nav-rail-item" id="nav-tab-explore" data-tab="explore" aria-label="发现壁纸">
+              <span class="indicator-pill" aria-hidden="true"></span>
               <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
                 <circle cx="12" cy="12" r="10"/>
                 <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
               </svg>
-              <span>发现壁纸</span>
+              <span class="nav-item-label">发现壁纸</span>
             </button>
 
-            <button class="nav-item" data-tab="settings">
+            <button class="nav-item nav-rail-item" id="nav-tab-settings" data-tab="settings" aria-label="设置">
+              <span class="indicator-pill" aria-hidden="true"></span>
               <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
                 <circle cx="12" cy="12" r="3"/>
                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
               </svg>
-              <span>设置</span>
+              <span class="nav-item-label">设置</span>
             </button>
           </nav>
         </div>
 
         <!-- Nav Rail Bottom -->
         <div class="nav-rail-bottom">
-          <button class="btn-quick-random" id="btn-quick-random">
+          <button class="btn-quick-random" id="btn-quick-random" title="随机更换一张壁纸">
             <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
               <polyline points="16 3 21 3 21 8"/>
               <line x1="4" y1="20" x2="21" y2="3"/>
@@ -241,7 +244,7 @@
                 <div class="wallhaven-filter-row">
                   <div class="contextual-chips" id="wallhaven-category-chips">
                     <span class="contextual-label">分类:</span>
-                    <button class="context-chip active" data-cat="110">全部 (110)</button>
+                    <button class="context-chip active" data-cat="111">全部</button>
                     <button class="context-chip" data-cat="100">常规 General</button>
                     <button class="context-chip" data-cat="010">动漫 Anime</button>
                     <button class="context-chip" data-cat="001">人物 People</button>
@@ -305,59 +308,67 @@
               <span class="settings-group-title">主题配色 (Material You)</span>
               <div class="settings-card" style="padding: 14px;">
                 <div class="theme-palette-grid" id="theme-palette-grid">
-                  <div class="theme-palette-chip active" data-theme="violet">
+                  <div class="theme-palette-chip active" data-theme="violet" tabindex="0" role="button" aria-label="薰衣草紫">
                     <div class="palette-preview-circles">
-                      <div class="palette-circle-primary" style="background: linear-gradient(135deg, #8b5cf6, #6366f1);"></div>
+                      <div class="palette-circle-primary" style="background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #38bdf8 100%);"></div>
                     </div>
                     <span class="palette-name">薰衣草紫</span>
                     <div class="palette-check-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
                   </div>
 
-                  <div class="theme-palette-chip" data-theme="blue">
+                  <div class="theme-palette-chip" data-theme="blue" tabindex="0" role="button" aria-label="天青海蓝">
                     <div class="palette-preview-circles">
-                      <div class="palette-circle-primary" style="background: linear-gradient(135deg, #0284c7, #38bdf8);"></div>
+                      <div class="palette-circle-primary" style="background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 50%, #38bdf8 100%);"></div>
                     </div>
                     <span class="palette-name">天青海蓝</span>
                     <div class="palette-check-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
                   </div>
 
-                  <div class="theme-palette-chip" data-theme="teal">
+                  <div class="theme-palette-chip" data-theme="teal" tabindex="0" role="button" aria-label="松石薄荷">
                     <div class="palette-preview-circles">
-                      <div class="palette-circle-primary" style="background: linear-gradient(135deg, #0d9488, #2dd4bf);"></div>
+                      <div class="palette-circle-primary" style="background: linear-gradient(135deg, #0d9488 0%, #14b8a6 50%, #2dd4bf 100%);"></div>
                     </div>
                     <span class="palette-name">松石薄荷</span>
                     <div class="palette-check-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
                   </div>
 
-                  <div class="theme-palette-chip" data-theme="pink">
+                  <div class="theme-palette-chip" data-theme="pink" tabindex="0" role="button" aria-label="樱花绯粉">
                     <div class="palette-preview-circles">
-                      <div class="palette-circle-primary" style="background: linear-gradient(135deg, #db2777, #f472b6);"></div>
+                      <div class="palette-circle-primary" style="background: linear-gradient(135deg, #db2777 0%, #ec4899 50%, #f472b6 100%);"></div>
                     </div>
                     <span class="palette-name">樱花绯粉</span>
                     <div class="palette-check-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
                   </div>
 
-                  <div class="theme-palette-chip" data-theme="amber">
+                  <div class="theme-palette-chip" data-theme="amber" tabindex="0" role="button" aria-label="暮光金橙">
                     <div class="palette-preview-circles">
-                      <div class="palette-circle-primary" style="background: linear-gradient(135deg, #d97706, #fbbf24);"></div>
+                      <div class="palette-circle-primary" style="background: linear-gradient(135deg, #d97706 0%, #f59e0b 50%, #fbbf24 100%);"></div>
                     </div>
                     <span class="palette-name">暮光金橙</span>
                     <div class="palette-check-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
                   </div>
 
-                  <div class="theme-palette-chip" data-theme="green">
+                  <div class="theme-palette-chip" data-theme="green" tabindex="0" role="button" aria-label="森林翡翠">
                     <div class="palette-preview-circles">
-                      <div class="palette-circle-primary" style="background: linear-gradient(135deg, #059669, #34d399);"></div>
+                      <div class="palette-circle-primary" style="background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);"></div>
                     </div>
                     <span class="palette-name">森林翡翠</span>
                     <div class="palette-check-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
                   </div>
 
-                  <div class="theme-palette-chip" data-theme="crimson">
+                  <div class="theme-palette-chip" data-theme="crimson" tabindex="0" role="button" aria-label="热烈烈焰">
                     <div class="palette-preview-circles">
-                      <div class="palette-circle-primary" style="background: linear-gradient(135deg, #dc2626, #f87171);"></div>
+                      <div class="palette-circle-primary" style="background: linear-gradient(135deg, #dc2626 0%, #ef4444 50%, #f87171 100%);"></div>
                     </div>
                     <span class="palette-name">热烈烈焰</span>
+                    <div class="palette-check-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  </div>
+
+                  <div class="theme-palette-chip" data-theme="sunset" tabindex="0" role="button" aria-label="落日余晖">
+                    <div class="palette-preview-circles">
+                      <div class="palette-circle-primary" style="background: linear-gradient(135deg, #ea580c 0%, #f97316 50%, #fb923c 100%);"></div>
+                    </div>
+                    <span class="palette-name">落日余晖</span>
                     <div class="palette-check-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
                   </div>
                 </div>
@@ -395,7 +406,6 @@
                     </div>
                     <div class="font-preset-preview">永恒之美 4K Rounded</div>
                     <span class="font-preset-desc">柔和饱满、圆润护眼、现代质感极佳</span>
-                    <div class="font-check-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
                   </div>
 
                   <!-- 2. 软萌可爱幼圆 -->
@@ -406,7 +416,6 @@
                     </div>
                     <div class="font-preset-preview">灵动探索 4K YouYuan</div>
                     <span class="font-preset-desc">极致弧度圆角、活泼软萌、亲和力强</span>
-                    <div class="font-check-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
                   </div>
 
                   <!-- 3. 现代极简屏显 (微软 UI) -->
@@ -417,7 +426,6 @@
                     </div>
                     <div class="font-preset-preview">沉浸视界 4K Segoe UI</div>
                     <span class="font-preset-desc">Windows 11 原生微软 UI、清晰利落</span>
-                    <div class="font-check-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
                   </div>
 
                   <!-- 4. 霞鹜悠然文楷 -->
@@ -428,7 +436,6 @@
                     </div>
                     <div class="font-preset-preview">清风明月 4K WenKai</div>
                     <span class="font-preset-desc">温润手书楷体、书卷诗意、典雅悠然</span>
-                    <div class="font-check-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
                   </div>
 
                   <!-- 5. 小米几何质感 -->
@@ -439,7 +446,6 @@
                     </div>
                     <div class="font-preset-preview">科技灵感 4K MiSans</div>
                     <span class="font-preset-desc">现代几何圆转、科技感与平衡美学</span>
-                    <div class="font-check-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
                   </div>
 
                 </div>
@@ -656,7 +662,7 @@
 
   </div>
 
-  <!-- 3) Details Dialog (现代精致卡片排版，点击链接打开默认浏览器) -->
+  <!-- 3) Details Dialog (M3 28px Corner, Surface Container High, Color Palette Swatches) -->
   <div class="m3-dialog-backdrop" id="detail-modal">
     <div class="m3-dialog-surface">
       <div class="m3-dialog-header">
@@ -674,7 +680,7 @@
         </div>
 
         <div class="dialog-meta-list">
-          <!-- 1. 壁纸分辨率条目 (自上而下) -->
+          <!-- 1. 分辨率 -->
           <div class="detail-info-row">
             <div class="detail-row-leading">
               <div class="detail-icon-box blue">
@@ -687,29 +693,58 @@
             </div>
           </div>
 
-          <!-- 2. 源地址链接条目 (只显示一个打开按钮) -->
+          <!-- 2. 源地址链接 -->
           <div class="detail-info-row">
             <div class="detail-row-leading">
               <div class="detail-icon-box purple">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
               </div>
               <span class="detail-row-title">源地址链接</span>
+              <span id="modal-meta-link-text" style="display: none;"></span>
             </div>
             <div class="detail-row-trailing">
-              <button class="m3-btn m3-btn-tonal" id="btn-open-browser" style="padding: 4px 16px; font-size: 13px;">
+              <button class="m3-btn m3-btn-tonal md-btn-tonal" id="btn-open-browser" style="padding: 4px 16px; font-size: 13px;">
                 <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                 <span>打开</span>
               </button>
+            </div>
+          </div>
+
+          <!-- 3. M3 调色盘预览 (Color Swatches) -->
+          <div class="detail-info-row" id="detail-palette-row">
+            <div class="detail-row-leading">
+              <div class="detail-icon-box emerald">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a7 7 0 0 0-7 7c0 3 2 5 2 7a3 3 0 0 0 3 3h4a3 3 0 0 0 3-3c0-2 2-4 2-7a7 7 0 0 0-7-7z"/></svg>
+              </div>
+              <span class="detail-row-title">主题色系</span>
+            </div>
+            <div class="detail-row-trailing">
+              <div class="detail-swatch-group" id="modal-swatch-group">
+                <span class="swatch-pill" style="background: var(--md-sys-color-primary);" title="Primary"></span>
+                <span class="swatch-pill" style="background: var(--md-sys-color-secondary);" title="Secondary"></span>
+                <span class="swatch-pill" style="background: var(--md-sys-color-tertiary, #38bdf8);" title="Tertiary"></span>
+                <span class="swatch-pill" style="background: var(--md-sys-color-primary-container);" title="Container"></span>
+                <span class="swatch-pill" style="background: var(--md-sys-color-surface-container-highest);" title="Surface"></span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       <div class="m3-dialog-footer">
-        <button class="m3-btn m3-btn-danger" id="modal-btn-delete" style="display: none;">删除壁纸</button>
+        <button class="m3-btn m3-btn-danger md-btn-danger" id="modal-btn-delete" style="display: none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          <span>删除壁纸</span>
+        </button>
         <div style="flex: 1;"></div>
-        <button class="m3-btn m3-btn-tonal" id="modal-btn-download">保存到本地</button>
-        <button class="m3-btn m3-btn-primary" id="modal-btn-apply">设为桌面壁纸</button>
+        <button class="m3-btn m3-btn-tonal md-btn-tonal" id="modal-btn-download">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>保存到本地</span>
+        </button>
+        <button class="m3-btn m3-btn-primary md-btn-filled" id="modal-btn-apply">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>设为桌面壁纸</span>
+        </button>
       </div>
     </div>
   </div>
