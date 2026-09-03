@@ -9,5 +9,6 @@
   "pexels_api_key": "",
   "load_mode": "infinite",
   "card_ratio": "uniform",
-  "font_family": "rounded"
+  "font_family": "misans",
+  "language": "zh-CN"
 }

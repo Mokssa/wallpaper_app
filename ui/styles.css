@@ -8,6 +8,7 @@
 :root {
   /* 默认字体：鸿蒙舒适圆润 + Nunito / 微软雅黑 UI */
   --font-family: "HarmonyOS Sans SC", "HarmonyOS Sans", "PingFang SC", "Nunito", "Microsoft YaHei UI", -apple-system, sans-serif;
+  --nav-rail-width: 210px;
 
   /* ==========================================================================
      M3 Color System Tokens (Indigo Default / Master Theme)
@@ -802,13 +803,7 @@ body.font-fluent {
   letter-spacing: 0px;
 }
 
-/* 预设 4: 霞鹜悠然文楷 (Literary WenKai) - 诗意典雅、温润手书 */
-body.font-wenkai {
-  --font-family: "LXGW WenKai", "霞鹜文楷", "STKaiti", "KaiTi", "Georgia", serif;
-  letter-spacing: 0.3px;
-}
-
-/* 预设 5: 小米几何质感 (MiSans Modern) - 科技几何、现代圆角 */
+/* 预设 4: 小米几何质感 (MiSans Modern) - 科技几何、现代圆角 */
 body.font-misans {
   --font-family: "MiSans", "OPPOSans", "Source Han Sans SC", "Noto Sans SC", "Microsoft YaHei UI", sans-serif;
   letter-spacing: 0.15px;
@@ -1116,10 +1111,10 @@ body.theme-amoled .flutter-titlebar {
 }
 
 .flutter-nav-rail {
-  width: 210px;
-  min-width: 210px;
-  max-width: 210px;
-  flex: 0 0 210px;
+  width: var(--nav-rail-width, 210px);
+  min-width: var(--nav-rail-width, 210px);
+  max-width: var(--nav-rail-width, 210px);
+  flex: 0 0 var(--nav-rail-width, 210px);
   flex-shrink: 0;
   flex-grow: 0;
   background: var(--md-sys-color-surface-container-low);
@@ -1393,6 +1388,9 @@ body.theme-amoled .flutter-titlebar {
 
 /* Responsive / Compact Navigation Rail (80px mode) */
 @media (max-width: 860px) {
+  :root {
+    --nav-rail-width: 80px;
+  }
   .flutter-nav-rail {
     width: 80px;
     min-width: 80px;
@@ -1470,9 +1468,11 @@ body.theme-amoled .flutter-titlebar {
   height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 18px 24px 48px 24px;
+  padding: 18px 24px 8px 24px;
   position: relative;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 }
 
 .tab-page {
@@ -1483,6 +1483,14 @@ body.theme-amoled .flutter-titlebar {
   display: block;
   animation: m3TabFadeSlideIn 250ms var(--md-sys-motion-easing-standard, cubic-bezier(0.2, 0, 0, 1)) forwards;
   will-change: opacity, transform;
+}
+
+#tab-explore.active {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+  min-height: 100%;
+  box-sizing: border-box;
 }
 
 .page-header {
@@ -1969,6 +1977,11 @@ body.theme-amoled .flutter-titlebar {
   width: 100%;
 }
 
+#online-grid {
+  flex: 1 0 auto;
+  padding-bottom: 48px;
+}
+
 .gallery-grid.ratio-uniform .m3-wallpaper-card {
   aspect-ratio: 16 / 10;
 }
@@ -2122,18 +2135,128 @@ body.theme-amoled .flutter-titlebar {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
 }
 
+.m3-action-icon-btn.action-delete-history:hover,
+.md-icon-btn.action-delete-history:hover {
+  background: var(--md-sys-color-error, #ef4444);
+  color: #ffffff;
+  border-color: var(--md-sys-color-error, #ef4444);
+}
+
+/* ==========================================================================
+   5.1) Browsing History Card & Info Footer Styles
+   ========================================================================== */
+#history-grid .m3-wallpaper-card.history-card,
+.m3-wallpaper-card.history-card {
+  aspect-ratio: unset !important;
+  height: auto !important;
+  min-height: auto !important;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  background: var(--md-sys-color-surface-container);
+  overflow: hidden;
+}
+
+#history-grid .m3-wallpaper-card.history-card .m3-card-img-wrapper,
+.m3-wallpaper-card.history-card .m3-card-img-wrapper {
+  aspect-ratio: 16 / 10 !important;
+  width: 100%;
+  height: auto !important;
+  flex: 0 0 auto !important;
+  position: relative;
+}
+
+.history-card-info {
+  padding: 10px 14px 12px 14px;
+  background: var(--md-sys-color-surface-container);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.history-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 18px;
+}
+
+.history-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.history-source-tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--md-shape-corner-full);
+  line-height: 16px;
+  letter-spacing: 0.2px;
+  text-transform: capitalize;
+}
+
+.history-source-tag.source-bing {
+  background: rgba(14, 165, 233, 0.16);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+}
+
+.history-source-tag.source-pexels {
+  background: rgba(16, 185, 129, 0.16);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.35);
+}
+
+.history-source-tag.source-unsplash {
+  background: rgba(168, 85, 247, 0.16);
+  color: #c084fc;
+  border: 1px solid rgba(192, 132, 252, 0.35);
+}
+
+.history-source-tag.source-wallhaven {
+  background: rgba(245, 158, 11, 0.16);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.35);
+}
+
+.history-source-tag.source-local {
+  background: rgba(148, 163, 184, 0.16);
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.history-time-tag {
+  font-size: 11px;
+  color: var(--md-sys-color-on-surface-variant);
+  white-space: nowrap;
+  line-height: 16px;
+}
+
 /* Empty State */
-.flutter-empty-state {
+.flutter-empty-state,
+.empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 50px 20px;
+  padding: 60px 20px;
   text-align: center;
   gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.empty-state-icon {
+.empty-state-icon,
+.empty-icon-wrap {
   width: 56px;
   height: 56px;
   border-radius: var(--md-shape-corner-lg);
@@ -2142,9 +2265,11 @@ body.theme-amoled .flutter-titlebar {
   align-items: center;
   justify-content: center;
   border: 1px solid var(--md-sys-color-outline);
+  margin-bottom: 4px;
 }
 
-.empty-state-icon svg {
+.empty-state-icon svg,
+.empty-icon-wrap svg {
   width: 28px;
   height: 28px;
   stroke: var(--md-sys-color-primary);
@@ -2154,6 +2279,18 @@ body.theme-amoled .flutter-titlebar {
   font-size: 16px;
   font-weight: 600;
   color: var(--md-sys-color-on-surface);
+  text-align: center;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.empty-desc {
+  font-size: 14px;
+  color: var(--md-sys-color-on-surface-variant);
+  max-width: 440px;
+  line-height: 1.5;
+  text-align: center;
+  margin: 0;
 }
 
 /* ==========================================================================
@@ -2298,37 +2435,25 @@ body.theme-amoled .flutter-titlebar {
   transform: scale(0.98);
 }
 
+.m3-btn.danger-border,
+.md-btn.danger-border {
+  border-color: rgba(239, 68, 68, 0.35);
+  color: var(--md-sys-color-error, #ef4444);
+}
+
+.m3-btn.danger-border:hover,
+.md-btn.danger-border:hover {
+  background: var(--md-sys-color-error-container);
+  border-color: var(--md-sys-color-error, #ef4444);
+  color: var(--md-sys-color-error, #ef4444);
+}
+
 .m3-btn:disabled,
 .md-btn:disabled {
   opacity: 0.38;
   cursor: not-allowed;
   transform: none !important;
   pointer-events: none;
-}
-
-.m3-pagination-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 24px;
-}
-
-.m3-pagination-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--md-sys-color-surface-container-high);
-  border: 1px solid var(--md-sys-color-outline);
-  padding: 6px 14px;
-  border-radius: var(--md-shape-corner-full);
-}
-
-.pagination-page-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--md-sys-color-on-surface);
-  padding: 0 8px;
 }
 
 .infinite-loader-box {
@@ -3363,6 +3488,429 @@ body.theme-amoled .theme-palette-chip.active {
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
+}
+
+/* ==========================================================================
+   10.5) M3 Update Dialog Styles
+   ========================================================================== */
+.update-refresh-icon.spinning {
+  animation: update-spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes update-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.update-dialog-surface {
+  width: 520px;
+  max-width: 90vw;
+  padding: 0;
+  border-radius: var(--md-shape-corner-xl);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.update-dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.update-dialog-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--md-shape-corner-lg);
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.update-dialog-icon svg {
+  width: 24px;
+  height: 24px;
+  stroke: var(--md-sys-color-primary);
+}
+
+.update-dialog-title-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.update-dialog-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--md-sys-color-on-surface);
+}
+
+.update-dialog-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.update-badge {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: var(--md-shape-corner-full);
+}
+
+.update-badge.current {
+  background: var(--md-sys-color-surface-container-highest);
+  color: var(--md-sys-color-on-surface-variant);
+  border: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.update-arrow {
+  font-size: 13px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.update-badge.latest {
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-primary);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+.update-dialog-body {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.update-notes-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+}
+
+.update-notes-content {
+  background: var(--md-sys-color-surface-container);
+  border-radius: var(--md-shape-corner-md);
+  padding: 14px 16px;
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--md-sys-color-on-surface-variant);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.update-dialog-footer {
+  padding: 16px 24px;
+  background: var(--md-sys-color-surface-container-high);
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* ==========================================================================
+   Danger Button Style
+   ========================================================================== */
+.m3-btn-danger {
+  background: var(--md-sys-color-error, #ef4444) !important;
+  color: #ffffff !important;
+  border: none !important;
+  font-weight: 600;
+  transition: all var(--md-sys-motion-duration-short) ease;
+}
+
+.m3-btn-danger:hover:not(:disabled) {
+  filter: brightness(1.1);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+}
+
+.m3-btn-danger:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   Batch Management Toolbar & Card Selection
+   ========================================================================== */
+.gallery-batch-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  margin-bottom: 14px;
+  background: var(--md-sys-color-surface-container-high);
+  border-radius: var(--md-shape-corner-lg, 16px);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  box-shadow: var(--md-sys-elevation-1);
+  animation: fadeIn 0.2s ease forwards;
+}
+
+.batch-toolbar-left,
+.batch-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.batch-select-all-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 13.5px;
+  font-weight: 500;
+  user-select: none;
+  color: var(--md-sys-color-on-surface);
+}
+
+.batch-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--md-sys-color-primary);
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.batch-selected-badge {
+  font-size: 12.5px;
+  color: var(--md-sys-color-primary);
+  font-weight: 600;
+  padding: 3px 12px;
+  background: var(--md-sys-color-primary-container);
+  border-radius: 9999px;
+  border: 1px solid rgba(var(--primary-rgb, 139, 92, 246), 0.2);
+}
+
+.m3-card.batch-mode {
+  cursor: pointer;
+  user-select: none;
+}
+
+.m3-card.batch-selected {
+  outline: 2.5px solid var(--md-sys-color-primary);
+  outline-offset: -2.5px;
+  box-shadow: 0 0 0 4px rgba(var(--primary-rgb, 139, 92, 246), 0.25) !important;
+}
+
+.gallery-card-checkbox {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--md-sys-motion-duration-short) ease;
+}
+
+.gallery-card-checkbox svg {
+  width: 15px;
+  height: 15px;
+  stroke: #ffffff;
+  stroke-width: 3;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.15s cubic-bezier(0.05, 0.7, 0.1, 1.0);
+}
+
+.m3-card.batch-selected .gallery-card-checkbox {
+  background: var(--md-sys-color-primary);
+  border-color: var(--md-sys-color-primary);
+}
+
+.m3-card.batch-selected .gallery-card-checkbox svg {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ==========================================================================
+   About Page (关于)
+   ========================================================================== */
+.about-container {
+  max-width: 820px;
+  margin: 0 auto;
+  padding-bottom: 40px;
+}
+
+.about-hero-card {
+  background: var(--md-sys-color-surface-container);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-shape-corner-xl, 24px);
+  padding: 36px 32px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  box-shadow: var(--md-sys-elevation-1);
+}
+
+.about-hero-icon-box {
+  width: 68px;
+  height: 68px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, var(--md-sys-color-primary) 0%, var(--md-sys-color-secondary, #ec4899) 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--md-sys-elevation-2);
+}
+
+.about-hero-icon-box svg {
+  width: 36px;
+  height: 36px;
+}
+
+.about-hero-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--md-sys-color-on-surface);
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+.about-hero-badge-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.about-version-badge {
+  padding: 4px 12px;
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 9999px;
+  border: 1px solid rgba(var(--primary-rgb, 139, 92, 246), 0.25);
+}
+
+.about-tag-badge {
+  padding: 4px 10px;
+  background: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 9999px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.about-hero-desc {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--md-sys-color-on-surface-variant);
+  max-width: 540px;
+  margin: 0;
+}
+
+.about-update-action-row {
+  margin-top: 6px;
+}
+
+.settings-tile-link {
+  transition: background var(--md-sys-motion-duration-short) ease;
+}
+
+.settings-tile-link:hover {
+  background: var(--md-sys-color-surface-container-high);
+}
+
+/* ==========================================================================
+   Generic M3 Confirmation Dialog (二次确认弹窗)
+   ========================================================================== */
+.confirm-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.58);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10500;
+  animation: fadeIn var(--md-sys-motion-duration-short) ease forwards;
+}
+
+.confirm-dialog-surface {
+  width: 90%;
+  max-width: 440px;
+  background: var(--md-sys-color-surface-container-high);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 28px;
+  padding: 24px;
+  box-shadow: var(--md-sys-elevation-3);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: scaleIn 0.2s cubic-bezier(0.05, 0.7, 0.1, 1.0) forwards;
+}
+
+.confirm-dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.confirm-dialog-icon-box {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--md-sys-color-error, #ef4444);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.confirm-dialog-icon-box svg {
+  width: 22px;
+  height: 22px;
+}
+
+.confirm-dialog-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+  margin: 0;
+}
+
+.confirm-dialog-body {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--md-sys-color-on-surface-variant);
+  padding: 0 4px;
+}
+
+.confirm-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
 }
 
 /* ==========================================================================

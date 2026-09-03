@@ -62,7 +62,7 @@
                 <rect x="14" y="14" width="7" height="7" rx="1.5"/>
                 <rect x="3" y="14" width="7" height="7" rx="1.5"/>
               </svg>
-              <span class="nav-item-label">本地壁纸</span>
+              <span class="nav-item-label" data-i18n="nav_gallery">本地壁纸</span>
             </button>
 
             <button class="nav-item nav-rail-item" id="nav-tab-explore" data-tab="explore" aria-label="发现壁纸">
@@ -71,7 +71,16 @@
                 <circle cx="12" cy="12" r="10"/>
                 <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
               </svg>
-              <span class="nav-item-label">发现壁纸</span>
+              <span class="nav-item-label" data-i18n="nav_explore">发现壁纸</span>
+            </button>
+
+            <button class="nav-item nav-rail-item" id="nav-tab-history" data-tab="history" aria-label="浏览记录">
+              <span class="indicator-pill" aria-hidden="true"></span>
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+              <span class="nav-item-label" data-i18n="nav_history">浏览记录</span>
             </button>
 
             <button class="nav-item nav-rail-item" id="nav-tab-settings" data-tab="settings" aria-label="设置">
@@ -80,7 +89,17 @@
                 <circle cx="12" cy="12" r="3"/>
                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
               </svg>
-              <span class="nav-item-label">设置</span>
+              <span class="nav-item-label" data-i18n="nav_settings">设置</span>
+            </button>
+
+            <button class="nav-item nav-rail-item" id="nav-tab-about" data-tab="about" aria-label="关于">
+              <span class="indicator-pill" aria-hidden="true"></span>
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="16" x2="12" y2="12"/>
+                <line x1="12" y1="8" x2="12.01" y2="8"/>
+              </svg>
+              <span class="nav-item-label" data-i18n="nav_about">关于</span>
             </button>
           </nav>
         </div>
@@ -108,21 +127,45 @@
           <header class="page-header">
             <div class="page-title-wrap">
               <h1 class="page-title">
-                本地壁纸
+                <span data-i18n="gallery_title">本地壁纸</span>
                 <span class="page-badge" id="gallery-count-badge">0 张</span>
               </h1>
             </div>
-            <div style="display: flex; gap: 8px;">
+            <div class="gallery-header-actions" id="gallery-header-actions" style="display: flex; gap: 8px; align-items: center;">
+              <button class="m3-btn m3-btn-tonal" id="btn-gallery-batch-toggle">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                <span id="btn-gallery-batch-toggle-text" data-i18n="gallery_batch_btn">批量管理</span>
+              </button>
               <button class="m3-btn m3-btn-tonal" id="btn-open-cache-folder">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-                <span>打开目录</span>
+                <span data-i18n="settings_btn_open_folder">打开目录</span>
               </button>
               <button class="m3-btn m3-btn-primary" id="btn-refresh-gallery">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-                <span>刷新</span>
+                <span data-i18n="gallery_refresh">刷新</span>
               </button>
             </div>
           </header>
+
+          <!-- Batch Management Bar (Shown when batch mode is active) -->
+          <div class="gallery-batch-toolbar" id="gallery-batch-toolbar" style="display: none;">
+            <div class="batch-toolbar-left">
+              <label class="batch-select-all-label">
+                <input type="checkbox" id="check-batch-select-all" class="batch-checkbox" />
+                <span data-i18n="gallery_select_all">全选</span>
+              </label>
+              <span class="batch-selected-badge" id="batch-selected-badge">已选择 0 项</span>
+            </div>
+            <div class="batch-toolbar-right">
+              <button class="m3-btn m3-btn-danger" id="btn-batch-delete" disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                <span data-i18n="gallery_batch_delete">批量删除</span>
+              </button>
+              <button class="m3-btn m3-btn-tonal" id="btn-batch-exit">
+                <span data-i18n="gallery_batch_exit">退出管理</span>
+              </button>
+            </div>
+          </div>
 
           <!-- Pure Image Grid for Local Wallpapers -->
           <div class="gallery-grid ratio-uniform" id="gallery-grid">
@@ -280,23 +323,54 @@
             <!-- Dynamically populated -->
           </div>
 
-          <!-- M3 Pagination Pill Bar -->
-          <div class="m3-pagination-container" id="pagination-bar">
-            <div class="m3-pagination-pill">
-              <button class="m3-btn m3-btn-tonal" id="btn-prev-page" style="padding: 4px 10px; font-size: 14px;" disabled>
-                <span>◀ 上一页</span>
-              </button>
-              <span class="pagination-page-label" id="page-info">第 1 页</span>
-              <button class="m3-btn m3-btn-tonal" id="btn-next-page" style="padding: 4px 10px; font-size: 14px;">
-                <span>下一页 ▶</span>
-              </button>
-            </div>
-          </div>
-
           <!-- Infinite Loader -->
           <div class="infinite-loader-box" id="infinite-loader" style="display: none;">
             <div class="m3-spinner"></div>
             <span>加载更多壁纸中...</span>
+          </div>
+        </section>
+
+        <!-- ================= PAGE 3: 浏览记录 ================= -->
+        <section id="tab-history" class="tab-page">
+          <header class="page-header">
+            <div class="page-title-wrap">
+              <h1 class="page-title">
+                <span data-i18n="history_title">浏览记录</span>
+                <span class="page-badge" id="history-count-badge">0 张</span>
+              </h1>
+            </div>
+            <div class="history-header-actions" id="history-header-actions" style="display: flex; gap: 8px; align-items: center;">
+              <button class="m3-btn m3-btn-outlined danger-border" id="btn-clear-history">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="width: 15px; height: 15px;">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                </svg>
+                <span data-i18n="history_clear_btn">清空记录</span>
+              </button>
+            </div>
+          </header>
+
+          <!-- Empty State -->
+          <div class="flutter-empty-state empty-state" id="history-empty-state" style="display: none;">
+            <div class="empty-state-icon empty-icon-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+            </div>
+            <h2 class="empty-title" data-i18n="history_empty_title">暂无浏览记录</h2>
+            <p class="empty-desc" data-i18n="history_empty_desc">在「发现壁纸」或「我的壁纸」中点击任意图片，将自动收录至此。</p>
+            <button class="m3-btn m3-btn-primary" id="btn-history-goto-explore" style="margin-top: 6px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+              <span data-i18n="gallery_goto_explore">立即去发现</span>
+            </button>
+          </div>
+
+          <!-- History Wallpaper Grid -->
+          <div class="gallery-grid ratio-uniform" id="history-grid">
+            <!-- Dynamically rendered -->
           </div>
         </section>
 
@@ -445,7 +519,7 @@
                 </div>
 
                 <!-- 自定义取色板控制器 -->
-                <div class="settings-tile" id="custom-theme-tile" style="margin-top: 10px; padding: 10px 0 0 0; border-top: 1px solid var(--md-sys-color-outline-variant);">
+                <div class="settings-tile" id="custom-theme-tile" style="margin-top: 12px; padding: 12px 0; border-top: 1px solid var(--md-sys-color-outline-variant); border-bottom: 1px solid var(--md-sys-color-outline-variant);">
                   <div class="settings-tile-leading">
                     <div class="settings-icon-box" style="background: rgba(139, 92, 246, 0.15); color: var(--md-sys-color-primary);">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/></svg>
@@ -464,7 +538,7 @@
                   </div>
                 </div>
 
-                <div class="settings-tile" style="margin-top: 10px; padding: 10px 0 0 0; border-top: 1px solid var(--md-sys-color-outline-variant);">
+                <div class="settings-tile" style="padding: 12px 0 0 0; border-top: none; border-bottom: none;">
                   <div class="settings-tile-leading">
                     <div class="settings-icon-box purple">
                       <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -519,17 +593,7 @@
                     <span class="font-preset-desc">Windows 11 原生微软 UI、清晰利落</span>
                   </div>
 
-                  <!-- 4. 霞鹜悠然文楷 -->
-                  <div class="font-preset-chip" data-font="wenkai" style="font-family: 'LXGW WenKai', 'STKaiti', 'KaiTi', serif;">
-                    <div class="font-preset-header">
-                      <span class="font-preset-title">霞鹜悠然文楷</span>
-                      <span class="font-preset-tag">诗意人文</span>
-                    </div>
-                    <div class="font-preset-preview">清风明月 4K WenKai</div>
-                    <span class="font-preset-desc">温润手书楷体、书卷诗意、典雅悠然</span>
-                  </div>
-
-                  <!-- 5. 小米几何质感 -->
+                  <!-- 4. 小米几何质感 -->
                   <div class="font-preset-chip" data-font="misans" style="font-family: 'MiSans', 'Noto Sans SC', sans-serif;">
                     <div class="font-preset-header">
                       <span class="font-preset-title">小米几何质感</span>
@@ -543,26 +607,31 @@
               </div>
             </div>
 
-            <!-- 浏览偏好 -->
+            <!-- 偏好与设置 -->
             <div class="settings-group">
-              <span class="settings-group-title">浏览偏好</span>
+              <span class="settings-group-title" data-i18n="settings_general_group">通用偏好 (Preferences)</span>
               <div class="settings-card">
+                <!-- 界面语言 (Language) -->
                 <div class="settings-tile">
                   <div class="settings-tile-leading">
-                    <div class="settings-icon-box purple">
-                      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    <div class="settings-icon-box blue">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                     </div>
                     <div class="settings-tile-content">
-                      <span class="settings-tile-title">浏览模式</span>
+                      <span class="settings-tile-title" data-i18n="settings_lang">界面语言 (Language)</span>
+                      <span class="settings-tile-desc" data-i18n="settings_lang_desc">选择软件显示语言，默认自适应系统语言</span>
                     </div>
                   </div>
                   <div class="settings-tile-action">
-                    <select class="m3-select" id="select-config-loadmode">
-                      <option value="pagination" selected>分页加载</option>
-                      <option value="infinite">无限滚动</option>
+                    <select class="m3-select" id="select-config-language">
+                      <option value="zh-CN">简体中文 (zh-CN)</option>
+                      <option value="en-US">English (en-US)</option>
+                      <option value="ja-JP">日本語 (ja-JP)</option>
+                      <option value="ko-KR">한국어 (ko-KR)</option>
                     </select>
                   </div>
                 </div>
+
 
                 <div class="settings-tile">
                   <div class="settings-tile-leading">
@@ -752,6 +821,107 @@
           </div>
         </section>
 
+        <!-- ================= PAGE 4: 关于 ================= -->
+        <section id="tab-about" class="tab-page">
+          <header class="page-header">
+            <div class="page-title-wrap">
+              <h1 class="page-title" data-i18n="about_title">关于</h1>
+            </div>
+          </header>
+
+          <div class="about-container">
+            <!-- App Hero Card -->
+            <div class="about-hero-card">
+              <div class="about-hero-icon-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="4"/>
+                  <circle cx="8.5" cy="8.5" r="2"/>
+                  <polyline points="21 15 16 10 5 21"/>
+                </svg>
+              </div>
+              <h2 class="about-hero-title" data-i18n="about_app_name">Wallpaper 4K 壁纸管理器</h2>
+              <div class="about-hero-badge-row">
+                <span class="about-version-badge" id="app-version-label">v0.2.0</span>
+                <span class="about-tag-badge">Tauri v2</span>
+                <span class="about-tag-badge">Rust 2021</span>
+                <span class="about-tag-badge">Material You</span>
+              </div>
+              <p class="about-hero-desc" data-i18n="about_app_desc">
+                基于 Tauri v2 + Rust 构建的超轻量跨图源桌面壁纸工具，融合 WinUI 3 Fluent Design 与 Material You 质感设计。
+              </p>
+              <div class="about-update-action-row">
+                <button class="m3-btn m3-btn-filled" id="btn-check-update">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="icon-update-refresh" class="update-refresh-icon"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                  <span id="btn-check-update-text" data-i18n="about_check_update">检查更新</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Specs & Ecosystem Cards -->
+            <div class="settings-group" style="margin-top: 20px;">
+              <span class="settings-group-title" data-i18n="about_open_source">开源生态与直达链接</span>
+              <div class="settings-card">
+                <a class="settings-tile settings-tile-link" id="link-about-repo" href="https://github.com/Mokssa/wallpaper_app" target="_blank" style="text-decoration: none; color: inherit; cursor: pointer;">
+                  <div class="settings-tile-leading">
+                    <div class="settings-icon-box purple">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+                    </div>
+                    <div class="settings-tile-content">
+                      <span class="settings-tile-title" data-i18n="about_repo_link">GitHub 源码仓库</span>
+                      <span class="settings-tile-desc" data-i18n="about_repo_desc">查看源码、Star 支持或提交 Issue 反馈</span>
+                    </div>
+                  </div>
+                  <div class="settings-tile-action">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; opacity: 0.6;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                  </div>
+                </a>
+
+                <a class="settings-tile settings-tile-link" id="link-about-releases" href="https://github.com/Mokssa/wallpaper_app/releases" target="_blank" style="text-decoration: none; color: inherit; cursor: pointer;">
+                  <div class="settings-tile-leading">
+                    <div class="settings-icon-box blue">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="8 17 12 21 16 17"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/></svg>
+                    </div>
+                    <div class="settings-tile-content">
+                      <span class="settings-tile-title" data-i18n="about_releases_link">发行版本下载</span>
+                      <span class="settings-tile-desc" data-i18n="about_releases_desc">获取便携版压缩包与官方安装程序</span>
+                    </div>
+                  </div>
+                  <div class="settings-tile-action">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; opacity: 0.6;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                  </div>
+                </a>
+
+                <a class="settings-tile settings-tile-link" id="link-about-issues" href="https://github.com/Mokssa/wallpaper_app/issues" target="_blank" style="text-decoration: none; color: inherit; cursor: pointer;">
+                  <div class="settings-tile-leading">
+                    <div class="settings-icon-box green">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    </div>
+                    <div class="settings-tile-content">
+                      <span class="settings-tile-title" data-i18n="about_issues_link">问题与建议反馈</span>
+                      <span class="settings-tile-desc" data-i18n="about_issues_desc">提交 Bug 报告或功能改进建议</span>
+                    </div>
+                  </div>
+                  <div class="settings-tile-action">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; opacity: 0.6;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                  </div>
+                </a>
+
+                <div class="settings-tile">
+                  <div class="settings-tile-leading">
+                    <div class="settings-icon-box amber">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    </div>
+                    <div class="settings-tile-content">
+                      <span class="settings-tile-title" data-i18n="about_license_card">开源许可协议</span>
+                      <span class="settings-tile-desc" data-i18n="about_license_desc">本项目基于 MIT License 开放源码，自由使用与分发。</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
       </main>
     </div>
 
@@ -857,7 +1027,61 @@
     </div>
   </div>
 
-  <!-- 5) Flutter SnackBar -->
+  <!-- 4) M3 Update Dialog (M3 28px Corner, Surface Container High) -->
+  <div class="m3-dialog-backdrop" id="update-modal">
+    <div class="m3-dialog-surface update-dialog-surface">
+      <div class="update-dialog-header">
+        <div class="update-dialog-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </div>
+        <div class="update-dialog-title-wrap">
+          <h3 class="update-dialog-title" id="update-modal-title">发现新版本</h3>
+          <div class="update-dialog-badge-row">
+            <span class="update-badge current" id="update-badge-current">当前: v0.2.0</span>
+            <span class="update-arrow">→</span>
+            <span class="update-badge latest" id="update-badge-latest">最新: v0.2.0</span>
+          </div>
+        </div>
+        <button class="m3-dialog-close-btn" id="btn-close-update" title="关闭">✕</button>
+      </div>
+
+      <div class="update-dialog-body">
+        <div class="update-notes-title">新版本亮点与更新内容：</div>
+        <div class="update-notes-content" id="update-modal-notes">
+          <!-- Release notes will be injected here -->
+        </div>
+      </div>
+
+      <div class="update-dialog-footer">
+        <button class="m3-btn m3-btn-tonal" id="btn-update-cancel">稍后再说</button>
+        <button class="m3-btn m3-btn-filled" id="btn-update-download">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>前往下载更新</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5) 通用 M3 模态确认弹窗 (二次确认) -->
+  <div class="confirm-dialog-backdrop" id="confirm-dialog-backdrop" style="display: none;">
+    <div class="confirm-dialog-surface">
+      <div class="confirm-dialog-header">
+        <div class="confirm-dialog-icon-box" id="confirm-dialog-icon-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <h3 class="confirm-dialog-title" id="confirm-dialog-title" data-i18n="confirm_dialog_title">操作确认</h3>
+      </div>
+      <div class="confirm-dialog-body" id="confirm-dialog-message">
+        确认要执行此操作吗？
+      </div>
+      <div class="confirm-dialog-actions">
+        <button class="m3-btn m3-btn-tonal" id="btn-confirm-cancel" data-i18n="confirm_dialog_cancel">取消</button>
+        <button class="m3-btn m3-btn-danger" id="btn-confirm-ok" data-i18n="confirm_dialog_ok">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6) Flutter SnackBar -->
   <div class="flutter-snackbar-container" id="flutter-snackbar">
     <div class="snackbar-icon-box" id="snackbar-icon">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
@@ -865,6 +1089,7 @@
     <span class="snackbar-text" id="snackbar-text">操作已完成</span>
   </div>
 
+  <script src="i18n.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

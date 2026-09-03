@@ -6,6 +6,10 @@ fn default_font_family() -> String {
     "rounded".to_string()
 }
 
+fn default_language() -> String {
+    "zh-CN".to_string()
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AppConfig {
     pub query: String,
@@ -20,7 +24,9 @@ pub struct AppConfig {
     pub load_mode: String,  // "pagination" | "infinite"
     pub card_ratio: String, // "uniform" | "original"
     #[serde(default = "default_font_family")]
-    pub font_family: String, // "rounded" | "youyuan" | "fluent" | "wenkai" | "misans"
+    pub font_family: String, // "rounded" | "youyuan" | "fluent" | "misans"
+    #[serde(default = "default_language")]
+    pub language: String, // "zh-CN" | "en-US" | "ja-JP" | "ko-KR"
 }
 
 pub fn default_cache_dir() -> String {
@@ -51,6 +57,7 @@ impl Default for AppConfig {
             load_mode: "pagination".to_string(),
             card_ratio: "uniform".to_string(),
             font_family: "rounded".to_string(),
+            language: "zh-CN".to_string(),
         }
     }
 }
@@ -78,9 +85,9 @@ impl AppConfig {
                 }
             }
         }
-        let default_config = Self::default();
-        let _ = default_config.save();
-        default_config
+        let config = Self::default();
+        let _ = config.save();
+        config
     }
 
     pub fn save(&self) -> Result<(), Box<dyn std::error::Error>> {
@@ -109,6 +116,7 @@ mod tests {
         assert_eq!(config.load_mode, "pagination");
         assert_eq!(config.card_ratio, "uniform");
         assert_eq!(config.font_family, "rounded");
+        assert_eq!(config.language, "zh-CN");
     }
 
     #[test]
@@ -124,7 +132,7 @@ mod tests {
 
     #[test]
     fn test_partial_config_backward_compatibility() {
-        // Missing font_family and pexels_api_key should receive default values
+        // Missing font_family, language and pexels_api_key should receive default values
         let partial_json = r#"{
             "query": "minimalist",
             "cache_dir": "D:/Wallpapers",
@@ -140,6 +148,7 @@ mod tests {
         let config: AppConfig = serde_json::from_str(partial_json).expect("Should deserialize partial config with defaults");
         assert_eq!(config.query, "minimalist");
         assert_eq!(config.font_family, "rounded", "Missing font_family should default to rounded");
+        assert_eq!(config.language, "zh-CN", "Missing language should default to zh-CN");
         assert_eq!(config.pexels_api_key, "", "Missing pexels_api_key should default to empty string");
     }
 

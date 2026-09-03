@@ -83,23 +83,35 @@ const btnRefreshGallery = document.getElementById('btn-refresh-gallery');
 const btnOpenCacheFolder = document.getElementById('btn-open-cache-folder');
 const btnGotoExplore = document.getElementById('btn-goto-explore');
 
+// Gallery Batch Management DOM
+const btnGalleryBatchToggle = document.getElementById('btn-gallery-batch-toggle');
+const btnGalleryBatchToggleText = document.getElementById('btn-gallery-batch-toggle-text');
+const galleryBatchToolbar = document.getElementById('gallery-batch-toolbar');
+const checkBatchSelectAll = document.getElementById('check-batch-select-all');
+const batchSelectedBadge = document.getElementById('batch-selected-badge');
+const btnBatchDelete = document.getElementById('btn-batch-delete');
+const btnBatchExit = document.getElementById('btn-batch-exit');
+
 // Explore DOM
 const segmentedButtons = document.querySelectorAll('#segmented-source-group .segmented-btn');
 const inputOnlineQuery = document.getElementById('input-online-query');
 const btnSearchOnline = document.getElementById('btn-search-online');
 const onlineGrid = document.getElementById('online-grid');
 
-const paginationBar = document.getElementById('pagination-bar');
 const infiniteLoader = document.getElementById('infinite-loader');
-const btnPrevPage = document.getElementById('btn-prev-page');
-const btnNextPage = document.getElementById('btn-next-page');
-const pageInfo = document.getElementById('page-info');
+
+// History DOM
+const tabHistory = document.getElementById('tab-history');
+const historyGrid = document.getElementById('history-grid');
+const historyCountBadge = document.getElementById('history-count-badge');
+const historyEmptyState = document.getElementById('history-empty-state');
+const btnClearHistory = document.getElementById('btn-clear-history');
+const btnHistoryGotoExplore = document.getElementById('btn-history-goto-explore');
 
 // Settings DOM
 const themePaletteChips = document.querySelectorAll('.theme-palette-chip');
 const checkAmoledMode = document.getElementById('check-amoled-mode');
 const selectConfigRandomSource = document.getElementById('select-config-random-source');
-const selectConfigLoadmode = document.getElementById('select-config-loadmode');
 const selectConfigCardratio = document.getElementById('select-config-cardratio');
 const inputConfigQuery = document.getElementById('input-config-query');
 const inputConfigUnsplashKey = document.getElementById('input-config-unsplash-key');
@@ -109,6 +121,19 @@ const btnBrowseDir = document.getElementById('btn-browse-dir');
 const inputConfigInterval = document.getElementById('input-config-interval');
 const checkConfigAutoupdate = document.getElementById('check-config-autoupdate');
 const checkAutoLaunch = document.getElementById('check-auto-launch');
+const selectConfigLanguage = document.getElementById('select-config-language');
+
+// Generic M3 Confirmation Dialog DOM
+const confirmDialogBackdrop = document.getElementById('confirm-dialog-backdrop');
+const confirmDialogTitle = document.getElementById('confirm-dialog-title');
+const confirmDialogMessage = document.getElementById('confirm-dialog-message');
+const btnConfirmCancel = document.getElementById('btn-confirm-cancel');
+const btnConfirmOk = document.getElementById('btn-confirm-ok');
+
+// About Page DOM Links
+const linkAboutRepo = document.getElementById('link-about-repo');
+const linkAboutReleases = document.getElementById('link-about-releases');
+const linkAboutIssues = document.getElementById('link-about-issues');
 
 // Modal Elements
 const detailModal = document.getElementById('detail-modal');
@@ -138,6 +163,19 @@ const lbBtnClose = document.getElementById('lb-btn-close');
 // Flutter SnackBar DOM
 const flutterSnackbar = document.getElementById('flutter-snackbar');
 const snackbarText = document.getElementById('snackbar-text');
+
+// Update Modal & Check Update Elements
+const btnCheckUpdate = document.getElementById('btn-check-update');
+const btnCheckUpdateText = document.getElementById('btn-check-update-text');
+const iconUpdateRefresh = document.getElementById('icon-update-refresh');
+const appVersionLabel = document.getElementById('app-version-label');
+const updateModal = document.getElementById('update-modal');
+const btnCloseUpdate = document.getElementById('btn-close-update');
+const btnUpdateCancel = document.getElementById('btn-update-cancel');
+const btnUpdateDownload = document.getElementById('btn-update-download');
+const updateBadgeCurrent = document.getElementById('update-badge-current');
+const updateBadgeLatest = document.getElementById('update-badge-latest');
+const updateModalNotes = document.getElementById('update-modal-notes');
 
 // ==========================================================================
 // 1) Material Design 3 (M3) Dynamic Theme Engine
@@ -531,10 +569,10 @@ function setupThemeSystem() {
 }
 
 // ==========================================================================
-// 1.1) Typography & Font Customization Engine (圆润/幼圆/现代/文楷/小米几何)
+// 1.1) Typography & Font Customization Engine (圆润/幼圆/现代/小米几何)
 // ==========================================================================
 
-const ALL_VALID_FONTS = ['rounded', 'youyuan', 'fluent', 'wenkai', 'misans'];
+const ALL_VALID_FONTS = ['rounded', 'youyuan', 'fluent', 'misans'];
 
 function applyFontFamily(fontName) {
   const font = ALL_VALID_FONTS.includes(fontName) ? fontName : 'rounded';
@@ -633,7 +671,11 @@ function switchTab(tabName) {
     }
   });
 
-  if (tabName === 'explore' && appConfig.load_mode === 'infinite') {
+  if (tabName === 'history') {
+    loadHistory();
+  }
+
+  if (tabName === 'explore') {
     setTimeout(checkAndFillViewport, 80);
   }
 }
@@ -651,6 +693,12 @@ function setupNavigation() {
       switchTab('explore');
     });
   }
+
+  if (btnHistoryGotoExplore) {
+    btnHistoryGotoExplore.addEventListener('click', () => {
+      switchTab('explore');
+    });
+  }
 }
 
 // ==========================================================================
@@ -659,6 +707,7 @@ function setupNavigation() {
 function openWallpaperDetails(item, type = 'online', imgSrc = '') {
   currentDetailItem = item;
   currentDetailType = type;
+  if (item) recordBrowseHistory(item);
 
   const rawUrl = item ? (item.raw_url || item.url || item.file_path || item.thumb_url) : imgSrc;
   const thumbUrl = item ? (item.thumb_url || imgSrc) : imgSrc;
@@ -753,11 +802,115 @@ function openExternalLink(url) {
 }
 
 // ==========================================================================
+// 4.5) M3 Update Dialog & Online Version Inspector
+// ==========================================================================
+
+let currentUpdateInfo = null;
+
+function openUpdateModal(updateInfo) {
+  if (!updateModal) return;
+  currentUpdateInfo = updateInfo;
+
+  if (updateBadgeCurrent) {
+    updateBadgeCurrent.textContent = `当前: v${updateInfo.current_version || '0.1.0'}`;
+  }
+  if (updateBadgeLatest) {
+    updateBadgeLatest.textContent = `最新: v${updateInfo.latest_version}`;
+  }
+  if (updateModalNotes) {
+    const rawNotes = updateInfo.release_notes ? updateInfo.release_notes.trim() : '';
+    updateModalNotes.textContent = rawNotes || '暂无详细更新日志。建议升级至最新版本以获得更流畅的体验与最新功能。';
+  }
+
+  updateModal.classList.add('active');
+}
+
+function closeUpdateModal() {
+  if (updateModal) {
+    updateModal.classList.remove('active');
+  }
+}
+
+// ==========================================================================
+// 4.6) Generic M3 Confirmation Dialog Controller (二次确认)
+// ==========================================================================
+
+let pendingConfirmAction = null;
+
+function openConfirmDialog({ title, message, okText, okDanger = true, onConfirm }) {
+  if (!confirmDialogBackdrop) {
+    if (typeof onConfirm === 'function') onConfirm();
+    return;
+  }
+  if (confirmDialogTitle && title) confirmDialogTitle.textContent = title;
+  if (confirmDialogMessage && message) confirmDialogMessage.textContent = message;
+  if (btnConfirmOk && okText) btnConfirmOk.textContent = okText;
+  if (btnConfirmOk) {
+    if (okDanger) {
+      btnConfirmOk.className = 'm3-btn m3-btn-danger';
+    } else {
+      btnConfirmOk.className = 'm3-btn m3-btn-filled';
+    }
+  }
+  pendingConfirmAction = onConfirm;
+  confirmDialogBackdrop.style.display = 'flex';
+}
+
+function closeConfirmDialog() {
+  if (confirmDialogBackdrop) {
+    confirmDialogBackdrop.style.display = 'none';
+  }
+  pendingConfirmAction = null;
+}
+
+async function checkUpdateAction(isManual = true) {
+  if (btnCheckUpdate) {
+    btnCheckUpdate.disabled = true;
+  }
+  if (iconUpdateRefresh) {
+    iconUpdateRefresh.classList.add('spinning');
+  }
+  if (btnCheckUpdateText) {
+    btnCheckUpdateText.textContent = '检查中...';
+  }
+
+  try {
+    const info = await invoke('check_app_update');
+    if (info && info.current_version && appVersionLabel) {
+      appVersionLabel.textContent = `当前版本: v${info.current_version}`;
+    }
+
+    if (info && info.has_update) {
+      openUpdateModal(info);
+      showSnackBar(`发现新版本 v${info.latest_version}`);
+    } else if (isManual) {
+      showSnackBar(`当前已是最新版本 (v${info?.current_version || '0.1.0'})`);
+    }
+  } catch (err) {
+    console.error('Failed to check for updates:', err);
+    if (isManual) {
+      showSnackBar(`检查更新失败: ${err}`, true);
+    }
+  } finally {
+    if (btnCheckUpdate) {
+      btnCheckUpdate.disabled = false;
+    }
+    if (iconUpdateRefresh) {
+      iconUpdateRefresh.classList.remove('spinning');
+    }
+    if (btnCheckUpdateText) {
+      btnCheckUpdateText.textContent = '检查更新';
+    }
+  }
+}
+
+// ==========================================================================
 // 5) Fullscreen Lightbox & Interactive Photo Viewer (全屏放大超清原图)
 // ==========================================================================
 function openLightbox(imgSrc, item, type = 'online') {
   currentDetailItem = item;
   currentDetailType = type;
+  if (item) recordBrowseHistory(item);
 
   lbZoom = 1.0;
   lbPosX = 0;
@@ -943,10 +1096,25 @@ function setupLightboxInteractions() {
           updateLightboxTransform();
           break;
       }
+    } else if (confirmDialogBackdrop && confirmDialogBackdrop.style.display === 'flex') {
+      if (e.key === 'Escape') {
+        closeConfirmDialog();
+      } else if (e.key === 'Enter') {
+        if (typeof pendingConfirmAction === 'function') {
+          pendingConfirmAction();
+        }
+        closeConfirmDialog();
+      }
     } else if (detailModal && detailModal.classList.contains('active')) {
       if (e.key === 'Escape') {
         closeWallpaperDetails();
       }
+    } else if (updateModal && updateModal.classList.contains('active')) {
+      if (e.key === 'Escape') {
+        closeUpdateModal();
+      }
+    } else if (isBatchMode && e.key === 'Escape') {
+      toggleBatchMode(false);
     }
   });
 }
@@ -999,7 +1167,6 @@ function updateConfigUI() {
   updateRandomSourceChipsUI(appConfig.random_source || 'all');
   if (inputConfigQuery) inputConfigQuery.value = appConfig.query || '';
   if (inputOnlineQuery) inputOnlineQuery.value = appConfig.query || '';
-  if (selectConfigLoadmode) selectConfigLoadmode.value = appConfig.load_mode || 'pagination';
   if (selectConfigCardratio) selectConfigCardratio.value = appConfig.card_ratio || 'uniform';
   if (inputConfigUnsplashKey) inputConfigUnsplashKey.value = appConfig.unsplash_access_key || '';
   if (inputConfigPexelsKey) inputConfigPexelsKey.value = appConfig.pexels_api_key || '';
@@ -1013,6 +1180,14 @@ function updateConfigUI() {
   }
   if (appConfig.font_family) {
     applyFontFamily(appConfig.font_family);
+  }
+
+  // Synchronize Language
+  if (appConfig.language && typeof setLanguage === 'function') {
+    setLanguage(appConfig.language);
+  }
+  if (selectConfigLanguage && appConfig.language) {
+    selectConfigLanguage.value = appConfig.language;
   }
 
   if (checkAutoLaunch) {
@@ -1036,11 +1211,13 @@ function applyDisplaySettings() {
     onlineGrid.classList.toggle('ratio-uniform', isUniform);
     onlineGrid.classList.toggle('ratio-original', !isUniform);
   }
+  if (historyGrid) {
+    historyGrid.classList.toggle('ratio-uniform', isUniform);
+    historyGrid.classList.toggle('ratio-original', !isUniform);
+  }
 
-  const isInfinite = (appConfig.load_mode === 'infinite');
-  if (paginationBar) paginationBar.style.display = isInfinite ? 'none' : 'flex';
   if (infiniteLoader) infiniteLoader.style.display = 'none'; // 仅在滚动触发拉取时按需显示
-  if (isInfinite) setTimeout(checkAndFillViewport, 80);
+  setTimeout(checkAndFillViewport, 80);
 }
 
 function renderSkeletonGrid(container, count = 8) {
@@ -1060,7 +1237,7 @@ async function saveConfig() {
   try {
     appConfig.random_source = selectConfigRandomSource ? selectConfigRandomSource.value : (appConfig.random_source || "all");
     appConfig.query = inputConfigQuery ? inputConfigQuery.value.trim() : "";
-    appConfig.load_mode = selectConfigLoadmode ? selectConfigLoadmode.value : "pagination";
+    appConfig.load_mode = "infinite";
     appConfig.card_ratio = selectConfigCardratio ? selectConfigCardratio.value : "uniform";
     appConfig.theme_color = appConfig.theme_color || "indigo";
     appConfig.custom_theme_color = appConfig.custom_theme_color || localStorage.getItem('wp_custom_theme_color') || "#8b5cf6";
@@ -1094,7 +1271,7 @@ async function pickCacheDir() {
 }
 
 // ==========================================================================
-// 7) Local Gallery Rendering & Actions (支持卡片双击全屏、详情全屏)
+// 7) Local Gallery Rendering & Actions (支持批量选择、二次确认与全屏预览)
 // ==========================================================================
 async function renderGallery(items) {
   cachedWallpapers = Array.isArray(items) ? items : [];
@@ -1107,6 +1284,7 @@ async function renderGallery(items) {
   if (cachedWallpapers.length === 0) {
     galleryEmptyState.style.display = 'flex';
     galleryGrid.style.display = 'none';
+    toggleBatchMode(false);
     return;
   }
 
@@ -1116,6 +1294,18 @@ async function renderGallery(items) {
   for (const item of cachedWallpapers) {
     const card = document.createElement('div');
     card.className = 'm3-wallpaper-card';
+    card.setAttribute('data-filepath', item.file_path);
+
+    if (isBatchMode) {
+      card.classList.add('batch-mode');
+      const cb = document.createElement('div');
+      cb.className = 'gallery-card-checkbox';
+      cb.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"/></svg>';
+      card.appendChild(cb);
+      if (selectedWallpapers.has(item.file_path)) {
+        card.classList.add('batch-selected');
+      }
+    }
 
     const imgWrapper = document.createElement('div');
     imgWrapper.className = 'm3-card-img-wrapper skeleton';
@@ -1137,14 +1327,18 @@ async function renderGallery(items) {
       imgWrapper.classList.remove('skeleton');
       img.classList.add('loaded');
     };
+    if (img.complete) {
+      imgWrapper.classList.remove('skeleton');
+      img.classList.add('loaded');
+    }
 
-    // Hover Action Buttons (去除多余的全屏缩放按钮，点击图片即可查看)
+    // Hover Action Buttons
     const actions = document.createElement('div');
     actions.className = 'm3-card-actions';
 
     const btnApply = document.createElement('button');
     btnApply.className = 'm3-action-icon-btn';
-    btnApply.title = '设为桌面壁纸';
+    btnApply.title = typeof t === 'function' ? t('action_set_wallpaper') : '设为桌面壁纸';
     btnApply.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
     btnApply.addEventListener('click', async (e) => {
       e.stopPropagation();
@@ -1153,17 +1347,28 @@ async function renderGallery(items) {
 
     const btnDelete = document.createElement('button');
     btnDelete.className = 'm3-action-icon-btn';
-    btnDelete.title = '删除此壁纸';
+    btnDelete.title = typeof t === 'function' ? t('action_delete_wallpaper') : '删除此壁纸';
     btnDelete.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
-    btnDelete.addEventListener('click', async (e) => {
+    btnDelete.addEventListener('click', (e) => {
       e.stopPropagation();
-      try {
-        await invoke('delete_wallpaper', { filePath: item.file_path });
-        showSnackBar(`已删除壁纸`);
-        await loadWallpapers();
-      } catch (err) {
-        showSnackBar(`删除壁纸失败: ${err}`, true);
-      }
+      const confirmTitle = typeof t === 'function' ? t('confirm_delete_single_title') : '确认删除壁纸？';
+      const confirmMsg = typeof t === 'function' ? t('confirm_delete_single_msg') : '确定要从本地永久删除这张壁纸吗？此操作不可恢复。';
+      const deleteText = typeof t === 'function' ? t('confirm_dialog_delete') : '删除';
+      openConfirmDialog({
+        title: confirmTitle,
+        message: confirmMsg,
+        okText: deleteText,
+        okDanger: true,
+        onConfirm: async () => {
+          try {
+            await invoke('delete_wallpaper', { filePath: item.file_path });
+            showSnackBar(typeof t === 'function' ? t('toast_delete_success') : '已删除壁纸');
+            await loadWallpapers();
+          } catch (err) {
+            showSnackBar(`删除壁纸失败: ${err}`, true);
+          }
+        }
+      });
     });
 
     actions.appendChild(btnApply);
@@ -1174,11 +1379,135 @@ async function renderGallery(items) {
     card.appendChild(actions);
 
     card.addEventListener('click', () => {
-      openLightbox(imgSrc, item, 'local');
+      if (isBatchMode) {
+        toggleCardSelection(item.file_path);
+      } else {
+        openLightbox(imgSrc, item, 'local');
+      }
     });
 
     galleryGrid.appendChild(card);
   }
+
+  updateBatchUI();
+}
+
+// ==========================================================================
+// 7.1) Local Gallery Batch Management Engine (批量选择与批量删除)
+// ==========================================================================
+
+let isBatchMode = false;
+const selectedWallpapers = new Set();
+
+function toggleBatchMode(force = null) {
+  isBatchMode = force !== null ? force : !isBatchMode;
+  if (!isBatchMode) {
+    selectedWallpapers.clear();
+  }
+  if (galleryBatchToolbar) {
+    galleryBatchToolbar.style.display = isBatchMode ? 'flex' : 'none';
+  }
+  if (btnGalleryBatchToggleText) {
+    btnGalleryBatchToggleText.textContent = isBatchMode
+      ? (typeof t === 'function' ? t('gallery_batch_exit') : '退出管理')
+      : (typeof t === 'function' ? t('gallery_batch_btn') : '批量管理');
+  }
+  updateBatchUI();
+}
+
+function updateBatchUI() {
+  if (!galleryGrid) return;
+  const cards = galleryGrid.querySelectorAll('.m3-wallpaper-card');
+  cards.forEach(card => {
+    const filePath = card.getAttribute('data-filepath');
+    if (isBatchMode) {
+      card.classList.add('batch-mode');
+      let cb = card.querySelector('.gallery-card-checkbox');
+      if (!cb) {
+        cb = document.createElement('div');
+        cb.className = 'gallery-card-checkbox';
+        cb.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"/></svg>';
+        card.appendChild(cb);
+      }
+      if (selectedWallpapers.has(filePath)) {
+        card.classList.add('batch-selected');
+      } else {
+        card.classList.remove('batch-selected');
+      }
+    } else {
+      card.classList.remove('batch-mode', 'batch-selected');
+      const cb = card.querySelector('.gallery-card-checkbox');
+      if (cb) cb.remove();
+    }
+  });
+
+  const count = selectedWallpapers.size;
+  if (batchSelectedBadge) {
+    batchSelectedBadge.textContent = typeof t === 'function'
+      ? t('gallery_selected_count', { count })
+      : `已选择 ${count} 项`;
+  }
+  if (btnBatchDelete) {
+    btnBatchDelete.disabled = count === 0;
+  }
+  if (checkBatchSelectAll) {
+    checkBatchSelectAll.checked = cachedWallpapers.length > 0 && count === cachedWallpapers.length;
+    checkBatchSelectAll.indeterminate = count > 0 && count < cachedWallpapers.length;
+  }
+}
+
+function toggleCardSelection(filePath) {
+  if (selectedWallpapers.has(filePath)) {
+    selectedWallpapers.delete(filePath);
+  } else {
+    selectedWallpapers.add(filePath);
+  }
+  updateBatchUI();
+}
+
+function selectAllBatch(selectAll) {
+  if (selectAll) {
+    cachedWallpapers.forEach(item => {
+      if (item && item.file_path) {
+        selectedWallpapers.add(item.file_path);
+      }
+    });
+  } else {
+    selectedWallpapers.clear();
+  }
+  updateBatchUI();
+}
+
+function executeBatchDelete() {
+  const count = selectedWallpapers.size;
+  if (count === 0) {
+    showSnackBar(typeof t === 'function' ? t('toast_select_at_least_one') : '请先选择需要删除的壁纸', true);
+    return;
+  }
+
+  const title = typeof t === 'function' ? t('confirm_delete_batch_title') : '确认批量删除壁纸？';
+  const msg = typeof t === 'function'
+    ? t('confirm_delete_batch_msg', { count })
+    : `确定要从本地永久删除选中的 ${count} 张壁纸吗？此操作不可恢复。`;
+  const delBtnText = typeof t === 'function' ? t('confirm_dialog_delete') : '删除';
+
+  openConfirmDialog({
+    title,
+    message: msg,
+    okText: `${delBtnText} (${count})`,
+    okDanger: true,
+    onConfirm: async () => {
+      try {
+        const filePaths = Array.from(selectedWallpapers);
+        await invoke('delete_wallpapers_batch', { filePaths });
+        showSnackBar(typeof t === 'function' ? t('toast_batch_delete_success', { count }) : `已成功批量删除 ${count} 张本地壁纸`);
+        toggleBatchMode(false);
+        await loadWallpapers();
+      } catch (err) {
+        showSnackBar(`批量删除失败: ${err}`, true);
+      }
+    }
+  });
 }
 
 async function loadWallpapers() {
@@ -1221,6 +1550,219 @@ async function downloadAndSetOnlineAction(item) {
   } catch (err) {
     showSnackBar(`应用壁纸失败: ${err}`, true);
   }
+}
+
+// ==========================================================================
+// 7.2) Browsing History Engine (浏览记录持久化与渲染引擎)
+// ==========================================================================
+
+async function recordBrowseHistory(item) {
+  if (!item) return;
+  try {
+    const rawUrl = item.raw_url || item.url || item.file_path || item.thumb_url || '';
+    const thumbUrl = item.thumb_url || item.thumbnail_url || item.file_path || rawUrl || '';
+    const histItem = {
+      id: String(item.id || item.file_path || rawUrl || Date.now()),
+      title: String(item.title || item.name || 'Wallpaper'),
+      thumb_url: String(thumbUrl),
+      raw_url: String(rawUrl),
+      source: String(item.source || currentSource || 'online'),
+      viewed_at: Math.floor(Date.now() / 1000)
+    };
+    await invoke('record_browse_history', { item: histItem });
+  } catch (err) {
+    console.warn('Failed to record browse history:', err);
+  }
+}
+
+async function loadHistory() {
+  if (!historyGrid) return;
+  try {
+    const items = await invoke('get_browse_history');
+    renderHistory(items || []);
+  } catch (err) {
+    console.error('Failed to load browse history:', err);
+    renderHistory([]);
+  }
+}
+
+function formatRelativeTime(timestamp) {
+  if (!timestamp) return '';
+  const now = Math.floor(Date.now() / 1000);
+  const diff = now - timestamp;
+  if (diff < 60) return '刚刚';
+  if (diff < 3600) return `${Math.floor(diff / 60)} 分钟前`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)} 小时前`;
+  const d = new Date(timestamp * 1000);
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const hours = String(d.getHours()).padStart(2, '0');
+  const mins = String(d.getMinutes()).padStart(2, '0');
+  return `${month}-${day} ${hours}:${mins}`;
+}
+
+function renderHistory(items) {
+  if (!historyGrid) return;
+
+  if (historyCountBadge) {
+    historyCountBadge.textContent = typeof t === 'function' ? t('history_count', { count: items.length }) : `${items.length} 张`;
+  }
+
+  if (!items || items.length === 0) {
+    if (historyEmptyState) historyEmptyState.style.display = 'flex';
+    historyGrid.style.display = 'none';
+    historyGrid.innerHTML = '';
+    return;
+  }
+
+  if (historyEmptyState) historyEmptyState.style.display = 'none';
+  historyGrid.style.display = 'grid';
+  historyGrid.innerHTML = '';
+
+  items.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'm3-wallpaper-card history-card';
+
+    const imgWrapper = document.createElement('div');
+    imgWrapper.className = 'm3-card-img-wrapper skeleton';
+
+    const img = document.createElement('img');
+    img.className = 'm3-card-img';
+    img.alt = item.title || 'Wallpaper';
+    img.loading = 'lazy';
+
+    const imgSrc = item.thumb_url || item.raw_url;
+    if (imgSrc.startsWith('http://') || imgSrc.startsWith('https://') || imgSrc.startsWith('data:')) {
+      img.src = imgSrc;
+    } else {
+      invoke('read_file_data_url', { filePath: imgSrc }).then(dataUrl => {
+        if (dataUrl) img.src = dataUrl;
+        else img.src = imgSrc;
+      }).catch(() => {
+        img.src = imgSrc;
+      });
+    }
+
+    img.onload = () => {
+      imgWrapper.classList.remove('skeleton');
+      img.classList.add('loaded');
+    };
+    if (img.complete) {
+      imgWrapper.classList.remove('skeleton');
+      img.classList.add('loaded');
+    }
+
+    // Hover Action Buttons
+    const actions = document.createElement('div');
+    actions.className = 'm3-card-actions';
+
+    const btnApply = document.createElement('button');
+    btnApply.className = 'm3-action-icon-btn';
+    btnApply.title = typeof t === 'function' ? t('action_set_wallpaper') : '设为桌面壁纸';
+    btnApply.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+    btnApply.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (item.raw_url && (item.raw_url.startsWith('http://') || item.raw_url.startsWith('https://'))) {
+        await downloadAndSetOnlineAction(item);
+      } else {
+        await setWallpaperAction(item.raw_url || item.thumb_url, item.title);
+      }
+    });
+    actions.appendChild(btnApply);
+
+    if (item.raw_url && (item.raw_url.startsWith('http://') || item.raw_url.startsWith('https://'))) {
+      const btnDownload = document.createElement('button');
+      btnDownload.className = 'm3-action-icon-btn';
+      btnDownload.title = typeof t === 'function' ? t('modal_btn_download') : '保存到本地';
+      btnDownload.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
+      btnDownload.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        await downloadOnlyAction(item);
+      });
+      actions.appendChild(btnDownload);
+    }
+
+    // Single item delete from history button
+    const btnDelete = document.createElement('button');
+    btnDelete.className = 'm3-action-icon-btn action-delete-history';
+    btnDelete.title = typeof t === 'function' ? t('history_delete_item') : '从记录中移除';
+    btnDelete.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>';
+    btnDelete.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      try {
+        await invoke('delete_browse_history_item', { id: item.id || item.raw_url });
+        card.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+        card.style.opacity = '0';
+        card.style.transform = 'scale(0.85)';
+        setTimeout(() => {
+          if (card.parentNode) card.parentNode.removeChild(card);
+          const remaining = historyGrid.querySelectorAll('.history-card').length;
+          if (historyCountBadge) {
+            historyCountBadge.textContent = typeof t === 'function' ? t('history_count', { count: remaining }) : `${remaining} 张`;
+          }
+          if (remaining === 0) {
+            if (historyEmptyState) historyEmptyState.style.display = 'flex';
+            historyGrid.style.display = 'none';
+          }
+        }, 250);
+        showSnackBar(typeof t === 'function' ? t('toast_history_item_deleted') : '已从浏览记录移除');
+      } catch (err) {
+        showSnackBar(String(err), true);
+      }
+    });
+    actions.appendChild(btnDelete);
+
+    imgWrapper.appendChild(img);
+    imgWrapper.appendChild(actions);
+
+    // Card Info Footer
+    const infoBar = document.createElement('div');
+    infoBar.className = 'history-card-info';
+
+    const titleEl = document.createElement('div');
+    titleEl.className = 'history-card-title';
+    const displayTitle = item.title || item.name || 'Wallpaper';
+    titleEl.textContent = displayTitle;
+    titleEl.title = displayTitle;
+
+    const metaEl = document.createElement('div');
+    metaEl.className = 'history-card-meta';
+
+    const sourceTag = document.createElement('span');
+    const srcKey = (item.source || 'online').toLowerCase();
+    sourceTag.className = `history-source-tag source-${srcKey}`;
+    const sourceLabels = {
+      bing: 'Bing',
+      pexels: 'Pexels',
+      unsplash: 'Unsplash',
+      wallhaven: 'Wallhaven',
+      local: 'Local'
+    };
+    sourceTag.textContent = sourceLabels[srcKey] || (item.source || 'Online');
+
+    const timeTag = document.createElement('span');
+    timeTag.className = 'history-time-tag';
+    timeTag.textContent = formatRelativeTime(item.viewed_at);
+
+    metaEl.appendChild(sourceTag);
+    metaEl.appendChild(timeTag);
+
+    infoBar.appendChild(titleEl);
+    infoBar.appendChild(metaEl);
+
+    card.appendChild(imgWrapper);
+    card.appendChild(infoBar);
+
+    card.addEventListener('click', () => {
+      if (item.raw_url && (item.raw_url.startsWith('http://') || item.raw_url.startsWith('https://'))) {
+        openWallpaperDetails(item, 'online', item.raw_url || item.thumb_url);
+      } else {
+        openLightbox(imgSrc, item, 'local');
+      }
+    });
+
+    historyGrid.appendChild(card);
+  });
 }
 
 // ==========================================================================
@@ -1345,14 +1887,12 @@ function renderOnlineGrid(items, append = false) {
   // 追加模式下，经过去重后没有任何新壁纸，说明图源已无更多壁纸，立即停止无限加载与翻页
   if (append && uniqueItems.length === 0) {
     hasMoreOnline = false;
-    if (btnNextPage) btnNextPage.disabled = true;
     if (infiniteLoader) infiniteLoader.style.display = 'none';
     return 0;
   }
 
   if (uniqueItems.length === 0 && !append) {
     hasMoreOnline = false;
-    if (btnNextPage) btnNextPage.disabled = true;
     if (infiniteLoader) infiniteLoader.style.display = 'none';
     onlineGrid.innerHTML = `
       <div class="flutter-empty-state" style="grid-column: 1 / -1;">
@@ -1383,6 +1923,10 @@ function renderOnlineGrid(items, append = false) {
       imgWrapper.classList.remove('skeleton');
       img.classList.add('loaded');
     };
+    if (img.complete) {
+      imgWrapper.classList.remove('skeleton');
+      img.classList.add('loaded');
+    }
 
     img.onerror = async () => {
       try {
@@ -1508,9 +2052,6 @@ async function loadOnlineWallpapers(append = false) {
   // Unsplash 专属未配置 Key 友好拦截与引导
   if (currentSource === 'unsplash' && (!appConfig.unsplash_access_key || !appConfig.unsplash_access_key.trim())) {
     renderUnsplashKeyPrompt();
-    if (pageInfo) pageInfo.textContent = `第 1 页`;
-    if (btnPrevPage) btnPrevPage.disabled = true;
-    if (btnNextPage) btnNextPage.disabled = true;
     return;
   }
 
@@ -1537,16 +2078,11 @@ async function loadOnlineWallpapers(append = false) {
   }
 
   try {
-    if (pageInfo) pageInfo.textContent = `第 ${onlinePage} 页`;
-    if (btnPrevPage) btnPrevPage.disabled = (onlinePage <= 1);
-
     if (!append) {
       renderSkeletonGrid(onlineGrid, 8);
       if (infiniteLoader) infiniteLoader.style.display = 'none';
     } else {
-      if (infiniteLoader && appConfig.load_mode === 'infinite') {
-        infiniteLoader.style.display = 'flex';
-      }
+      if (infiniteLoader) infiniteLoader.style.display = 'flex';
     }
 
     const list = await invoke('fetch_online_wallpapers', {
@@ -1573,10 +2109,6 @@ async function loadOnlineWallpapers(append = false) {
     if (append && addedCount === 0) {
       hasMoreOnline = false;
     }
-
-    if (btnNextPage) {
-      btnNextPage.disabled = !hasMoreOnline;
-    }
   } catch (err) {
     if (thisRequestId !== onlineRequestId) return;
     console.error('Failed to load online wallpapers:', err);
@@ -1593,7 +2125,7 @@ async function loadOnlineWallpapers(append = false) {
       if (infiniteLoader) infiniteLoader.style.display = 'none';
 
       // 大屏或高分屏自适应填满：若视口未被撑开导致无法产生滚动条，自动加载下一批填满视口
-      if (hasMoreOnline && appConfig.load_mode === 'infinite') {
+      if (hasMoreOnline) {
         setTimeout(checkAndFillViewport, 80);
       }
     }
@@ -1601,7 +2133,7 @@ async function loadOnlineWallpapers(append = false) {
 }
 
 function checkAndFillViewport() {
-  if (appConfig.load_mode !== 'infinite') return;
+  if (typeof document === 'undefined' || typeof window === 'undefined') return;
   if (!hasMoreOnline || isOnlineLoading || isInfiniteLoading) return;
   if (!mainScrollEl) return;
 
@@ -1620,7 +2152,6 @@ function setupInfiniteScroll() {
   if (!mainScrollEl) return;
 
   mainScrollEl.addEventListener('scroll', () => {
-    if (appConfig.load_mode !== 'infinite') return;
     if (!hasMoreOnline) return;
 
     const exploreTab = document.getElementById('tab-explore');
@@ -2015,26 +2546,27 @@ function setupContextualSourceControls() {
     });
   }
 
-  if (btnPrevPage) {
-    btnPrevPage.addEventListener('click', () => {
-      if (onlinePage > 1) {
-        onlinePage--;
-        loadOnlineWallpapers(false);
-      }
-    });
-  }
-
-  if (btnNextPage) {
-    btnNextPage.addEventListener('click', () => {
-      if (hasMoreOnline) {
-        onlinePage++;
-        loadOnlineWallpapers(false);
-      }
+  if (btnClearHistory) {
+    btnClearHistory.addEventListener('click', () => {
+      openConfirmDialog({
+        title: typeof t === 'function' ? t('confirm_clear_history_title') : '确认清空浏览记录？',
+        message: typeof t === 'function' ? t('confirm_clear_history_msg') : '确定要清空所有已保存的浏览历史吗？此操作不可撤销。',
+        okText: typeof t === 'function' ? t('history_clear_btn') : '清空记录',
+        okDanger: true,
+        onConfirm: async () => {
+          try {
+            await invoke('clear_browse_history');
+            showSnackBar(typeof t === 'function' ? t('toast_history_cleared') : '浏览记录已清空');
+            loadHistory();
+          } catch (err) {
+            showSnackBar(String(err), true);
+          }
+        }
+      });
     });
   }
 
   if (selectConfigRandomSource) selectConfigRandomSource.addEventListener('change', saveConfig);
-  if (selectConfigLoadmode) selectConfigLoadmode.addEventListener('change', saveConfig);
   if (selectConfigCardratio) selectConfigCardratio.addEventListener('change', saveConfig);
   if (inputConfigQuery) inputConfigQuery.addEventListener('change', saveConfig);
   if (inputConfigUnsplashKey) inputConfigUnsplashKey.addEventListener('change', saveConfig);
@@ -2084,16 +2616,120 @@ function setupContextualSourceControls() {
   }
 
   if (modalBtnDelete) {
-    modalBtnDelete.addEventListener('click', async () => {
+    modalBtnDelete.addEventListener('click', () => {
       if (!currentDetailItem || currentDetailType !== 'local') return;
-      try {
-        await invoke('delete_wallpaper', { filePath: currentDetailItem.file_path });
-        showSnackBar(`已删除壁纸`);
-        closeWallpaperDetails();
-        await loadWallpapers();
-      } catch (err) {
-        showSnackBar(`删除壁纸失败: ${err}`, true);
+      const targetItem = currentDetailItem;
+      const confirmTitle = typeof t === 'function' ? t('confirm_delete_single_title') : '确认删除壁纸？';
+      const confirmMsg = typeof t === 'function' ? t('confirm_delete_single_msg') : '确定要从本地永久删除这张壁纸吗？此操作不可恢复。';
+      const deleteText = typeof t === 'function' ? t('confirm_dialog_delete') : '删除';
+
+      openConfirmDialog({
+        title: confirmTitle,
+        message: confirmMsg,
+        okText: deleteText,
+        okDanger: true,
+        onConfirm: async () => {
+          try {
+            await invoke('delete_wallpaper', { filePath: targetItem.file_path });
+            showSnackBar(typeof t === 'function' ? t('toast_delete_success') : '已删除壁纸');
+            closeWallpaperDetails();
+            await loadWallpapers();
+          } catch (err) {
+            showSnackBar(`删除壁纸失败: ${err}`, true);
+          }
+        }
+      });
+    });
+  }
+
+  // Gallery Batch Management Listeners
+  if (btnGalleryBatchToggle) {
+    btnGalleryBatchToggle.addEventListener('click', () => toggleBatchMode());
+  }
+  if (btnBatchExit) {
+    btnBatchExit.addEventListener('click', () => toggleBatchMode(false));
+  }
+  if (checkBatchSelectAll) {
+    checkBatchSelectAll.addEventListener('change', () => selectAllBatch(checkBatchSelectAll.checked));
+  }
+  if (btnBatchDelete) {
+    btnBatchDelete.addEventListener('click', executeBatchDelete);
+  }
+
+  // Generic Confirmation Dialog Listeners
+  if (btnConfirmCancel) {
+    btnConfirmCancel.addEventListener('click', closeConfirmDialog);
+  }
+  if (btnConfirmOk) {
+    btnConfirmOk.addEventListener('click', () => {
+      if (typeof pendingConfirmAction === 'function') {
+        pendingConfirmAction();
       }
+      closeConfirmDialog();
+    });
+  }
+  if (confirmDialogBackdrop) {
+    confirmDialogBackdrop.addEventListener('click', (e) => {
+      if (e.target === confirmDialogBackdrop) closeConfirmDialog();
+    });
+  }
+
+  // Language Switcher Listener
+  if (selectConfigLanguage) {
+    selectConfigLanguage.addEventListener('change', (e) => {
+      const lang = e.target.value;
+      if (typeof setLanguage === 'function') {
+        setLanguage(lang);
+      }
+      appConfig.language = lang;
+      saveConfig();
+      showSnackBar(typeof t === 'function' ? t('toast_lang_changed') : '语言已切换');
+      updateBatchUI();
+    });
+  }
+
+  // About Page Links
+  if (linkAboutRepo) {
+    linkAboutRepo.addEventListener('click', (e) => {
+      e.preventDefault();
+      invoke('open_in_browser', { url: 'https://github.com/Mokssa/wallpaper_app' });
+    });
+  }
+  if (linkAboutReleases) {
+    linkAboutReleases.addEventListener('click', (e) => {
+      e.preventDefault();
+      invoke('open_in_browser', { url: 'https://github.com/Mokssa/wallpaper_app/releases' });
+    });
+  }
+  if (linkAboutIssues) {
+    linkAboutIssues.addEventListener('click', (e) => {
+      e.preventDefault();
+      invoke('open_in_browser', { url: 'https://github.com/Mokssa/wallpaper_app/issues' });
+    });
+  }
+
+  // Update Modal Listeners
+  if (btnCheckUpdate) {
+    btnCheckUpdate.addEventListener('click', () => checkUpdateAction(true));
+  }
+  if (btnCloseUpdate) {
+    btnCloseUpdate.addEventListener('click', closeUpdateModal);
+  }
+  if (btnUpdateCancel) {
+    btnUpdateCancel.addEventListener('click', closeUpdateModal);
+  }
+  if (btnUpdateDownload) {
+    btnUpdateDownload.addEventListener('click', () => {
+      const targetUrl = currentUpdateInfo?.download_url || currentUpdateInfo?.release_url || 'https://github.com/Mokssa/wallpaper_app/releases';
+      invoke('open_in_browser', { url: targetUrl }).catch(() => {
+        window.open(targetUrl, '_blank');
+      });
+      closeUpdateModal();
+    });
+  }
+  if (updateModal) {
+    updateModal.addEventListener('click', (e) => {
+      if (e.target === updateModal) closeUpdateModal();
     });
   }
 }
@@ -2225,9 +2861,13 @@ function initM3RippleEngine() {
 
 // Initialization
 document.addEventListener('DOMContentLoaded', async () => {
+  if (typeof initI18n === 'function') {
+    initI18n();
+  }
   setupEvents();
   initM3RippleEngine();
   await loadConfig();
   await loadWallpapers();
   await loadOnlineWallpapers(false);
+  await loadHistory();
 });

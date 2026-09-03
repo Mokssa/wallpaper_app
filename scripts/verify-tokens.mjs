@@ -180,7 +180,6 @@ const fontPresets = [
   { name: 'HarmonyOS / Rounded', patterns: [/\.font-rounded\b/, /\.font-harmony\b/] },
   { name: 'Cute YouYuan / Soft', patterns: [/\.font-youyuan\b/, /\.font-yahei\b/] },
   { name: 'Fluent / Segoe UI / Modern', patterns: [/\.font-fluent\b/, /\.font-modern\b/, /\.font-segoe\b/] },
-  { name: '霞鹜文楷 WenKai', patterns: [/\.font-wenkai\b/] },
   { name: 'MiSans Modern / Geometric', patterns: [/\.font-misans\b/, /\.font-miui\b/] }
 ];
 

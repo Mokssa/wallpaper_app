@@ -1,6 +1,6 @@
 [package]
 name = "wallpaper_app"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 description = "A modern WinUI 3 style Windows wallpaper app built with Tauri v2 and Rust"
 

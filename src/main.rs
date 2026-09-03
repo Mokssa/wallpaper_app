@@ -3,10 +3,12 @@
 
 mod config;
 mod downloader;
+mod history;
 mod wallpaper_setter;
 
 use config::AppConfig;
 use downloader::{OnlineWallpaper, WallpaperDownloader, WallpaperItem};
+use history::{BrowseHistoryItem, load_browse_history, record_browse_history as save_history_item, clear_browse_history as clear_history_data, delete_browse_history_item as delete_history_item};
 use wallpaper_setter::WallpaperSetter;
 
 use base64::Engine;
@@ -197,6 +199,17 @@ fn delete_wallpaper(file_path: String) -> Result<(), String> {
 }
 
 #[tauri::command]
+fn delete_wallpapers_batch(file_paths: Vec<String>) -> Result<usize, String> {
+    let mut deleted_count = 0;
+    for file_path in file_paths {
+        if delete_wallpaper(file_path).is_ok() {
+            deleted_count += 1;
+        }
+    }
+    Ok(deleted_count)
+}
+
+#[tauri::command]
 fn get_current_wallpaper() -> Option<String> {
     WallpaperSetter::get_current_wallpaper()
 }
@@ -284,6 +297,164 @@ fn open_cache_folder() -> Result<(), String> {
     Ok(())
 }
 
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct UpdateInfo {
+    pub has_update: bool,
+    pub current_version: String,
+    pub latest_version: String,
+    pub release_name: String,
+    pub release_notes: String,
+    pub published_at: String,
+    pub release_url: String,
+    pub download_url: Option<String>,
+}
+
+pub fn compare_semver(latest: &str, current: &str) -> bool {
+    let parse_ver = |v: &str| -> Vec<u64> {
+        v.split('.')
+            .map(|part| {
+                part.chars()
+                    .take_while(|c| c.is_ascii_digit())
+                    .collect::<String>()
+                    .parse::<u64>()
+                    .unwrap_or(0)
+            })
+            .collect()
+    };
+
+    let latest_parts = parse_ver(latest);
+    let current_parts = parse_ver(current);
+
+    for i in 0..latest_parts.len().max(current_parts.len()) {
+        let l = latest_parts.get(i).copied().unwrap_or(0);
+        let c = current_parts.get(i).copied().unwrap_or(0);
+        if l > c {
+            return true;
+        } else if l < c {
+            return false;
+        }
+    }
+    false
+}
+
+#[tauri::command]
+async fn check_app_update() -> Result<UpdateInfo, String> {
+    let current_version = env!("CARGO_PKG_VERSION").to_string();
+    let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(12))
+        .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+        .build()
+        .map_err(|e| format!("创建网络请求客户端失败: {}", e))?;
+
+    let api_url = "https://api.github.com/repos/Mokssa/wallpaper_app/releases/latest";
+    let api_res = client.get(api_url)
+        .header("Accept", "application/vnd.github.v3+json")
+        .send()
+        .await;
+
+    // 策略 A：若 GitHub REST API 成功返回 (HTTP 200)，优先从标准 JSON 解析完整更新日志与元数据
+    if let Ok(res) = api_res {
+        if res.status().is_success() {
+            if let Ok(json) = res.json::<serde_json::Value>().await {
+                let tag_name = json["tag_name"].as_str().unwrap_or("").trim().to_string();
+                if !tag_name.is_empty() {
+                    let release_name = json["name"].as_str().unwrap_or(&tag_name).to_string();
+                    let release_notes = json["body"].as_str().unwrap_or("").to_string();
+                    let published_at = json["published_at"].as_str().unwrap_or("").to_string();
+                    let release_url = json["html_url"].as_str().unwrap_or("https://github.com/Mokssa/wallpaper_app/releases").to_string();
+
+                    let mut download_url = None;
+                    if let Some(assets) = json["assets"].as_array() {
+                        for asset in assets {
+                            let name = asset["name"].as_str().unwrap_or("");
+                            let browser_download_url = asset["browser_download_url"].as_str();
+                            if name.ends_with(".zip") || name.ends_with(".exe") {
+                                if let Some(dl) = browser_download_url {
+                                    download_url = Some(dl.to_string());
+                                    if name.ends_with(".zip") {
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if download_url.is_none() {
+                        download_url = Some(release_url.clone());
+                    }
+
+                    let clean_latest = tag_name.trim_start_matches('v').trim().to_string();
+                    let clean_current = current_version.trim_start_matches('v').trim().to_string();
+                    let has_update = compare_semver(&clean_latest, &clean_current);
+
+                    return Ok(UpdateInfo {
+                        has_update,
+                        current_version,
+                        latest_version: clean_latest,
+                        release_name,
+                        release_notes,
+                        published_at,
+                        release_url,
+                        download_url,
+                    });
+                }
+            }
+        }
+    }
+
+    // 策略 B（无限制兜底）：当 API 触发 403 限流或阻断时，直接请求 Releases 重定向页面 (无 API 速率限制)
+    let web_url = "https://github.com/Mokssa/wallpaper_app/releases/latest";
+    let web_res = client.get(web_url)
+        .send()
+        .await
+        .map_err(|e| format!("连接 GitHub 页面失败: {}", e))?;
+
+    let final_url = web_res.url().to_string();
+    // 重定向地址格式形如 https://github.com/Mokssa/wallpaper_app/releases/tag/v0.1.0
+    let tag_name = if let Some(pos) = final_url.rfind("/tag/") {
+        final_url[pos + 5..].trim().to_string()
+    } else {
+        return Err("未能解析 GitHub 最新发行版版本号".to_string());
+    };
+
+    let clean_latest = tag_name.trim_start_matches('v').trim().to_string();
+    let clean_current = current_version.trim_start_matches('v').trim().to_string();
+    let has_update = compare_semver(&clean_latest, &clean_current);
+
+    let release_url = final_url.clone();
+    let download_url = format!("https://github.com/Mokssa/wallpaper_app/releases/download/{}/Wallpaper_{}_x64_portable.zip", tag_name, tag_name);
+
+    Ok(UpdateInfo {
+        has_update,
+        current_version,
+        latest_version: if clean_latest.is_empty() { env!("CARGO_PKG_VERSION").to_string() } else { clean_latest },
+        release_name: format!("Wallpaper {}", tag_name),
+        release_notes: "发现新版本！点击下方按钮可前往 GitHub Releases 页面查看完整更新日志并下载安装程序。".to_string(),
+        published_at: String::new(),
+        release_url,
+        download_url: Some(download_url),
+    })
+}
+
+#[tauri::command]
+fn get_browse_history() -> Vec<BrowseHistoryItem> {
+    load_browse_history()
+}
+
+#[tauri::command]
+fn record_browse_history(item: BrowseHistoryItem) -> Result<(), String> {
+    save_history_item(item)
+}
+
+#[tauri::command]
+fn clear_browse_history() -> Result<(), String> {
+    clear_history_data()
+}
+
+#[tauri::command]
+fn delete_browse_history_item(id: String) -> Result<(), String> {
+    delete_history_item(&id)
+}
+
 fn main() {
     tauri::Builder::default()
         .setup(|app| {
@@ -344,6 +515,7 @@ fn main() {
             download_and_set_online_wallpaper,
             set_desktop_wallpaper,
             delete_wallpaper,
+            delete_wallpapers_batch,
             get_current_wallpaper,
             window_minimize,
             window_toggle_maximize,
@@ -351,7 +523,12 @@ fn main() {
             show_main_window,
             get_auto_launch_enabled,
             set_auto_launch_enabled,
-            open_in_browser
+            open_in_browser,
+            check_app_update,
+            get_browse_history,
+            record_browse_history,
+            clear_browse_history,
+            delete_browse_history_item
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -359,4 +536,92 @@ fn main() {
 
 fn tauri_plugin_single_instance_init() -> tauri::plugin::TauriPlugin<tauri::Wry> {
     tauri::plugin::Builder::new("wallpaper_app_core").build()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_compare_semver_updates() {
+        // Newer versions trigger update
+        assert!(compare_semver("0.2.0", "0.1.0"));
+        assert!(compare_semver("1.0.0", "0.9.9"));
+        assert!(compare_semver("0.1.1", "0.1.0"));
+        assert!(compare_semver("2.0.0", "1.99.99"));
+
+        // Same or older versions do not trigger update
+        assert!(!compare_semver("0.1.0", "0.1.0"));
+        assert!(!compare_semver("0.0.9", "0.1.0"));
+        assert!(!compare_semver("0.1.0", "0.2.0"));
+        assert!(!compare_semver("1.0.0", "1.0.1"));
+
+        // Suffix handling
+        assert!(compare_semver("0.2.0-beta", "0.1.0"));
+        assert!(!compare_semver("0.1.0-rc1", "0.1.0"));
+    }
+
+    #[tokio::test]
+    async fn test_check_app_update_live() {
+        let res = check_app_update().await;
+        assert!(res.is_ok(), "check_app_update failed: {:?}", res);
+        let info = res.unwrap();
+        assert!(!info.latest_version.is_empty());
+        assert_eq!(info.current_version, env!("CARGO_PKG_VERSION"));
+    }
+
+    #[test]
+    fn test_delete_wallpapers_batch() {
+        let temp_dir = std::env::temp_dir().join("wallpaper_app_batch_test");
+        let _ = fs::create_dir_all(&temp_dir);
+        let f1 = temp_dir.join("test_batch_1.jpg");
+        let f2 = temp_dir.join("test_batch_2.jpg");
+        let _ = fs::write(&f1, "dummy1");
+        let _ = fs::write(&f2, "dummy2");
+        assert!(f1.exists());
+        assert!(f2.exists());
+
+        let count = delete_wallpapers_batch(vec![
+            f1.to_string_lossy().to_string(),
+            f2.to_string_lossy().to_string(),
+        ]).expect("batch delete should succeed");
+
+        assert_eq!(count, 2);
+        assert!(!f1.exists());
+        assert!(!f2.exists());
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_browse_history_commands() {
+        let item = BrowseHistoryItem {
+            id: "hist-test-1".to_string(),
+            title: "Test History Title".to_string(),
+            thumb_url: "thumb_test.jpg".to_string(),
+            raw_url: "raw_test.jpg".to_string(),
+            source: "bing".to_string(),
+            viewed_at: 1234567,
+        };
+        let _ = record_browse_history(item.clone());
+        let list = get_browse_history();
+        assert!(list.iter().any(|h| h.id == "hist-test-1"));
+
+        let item2 = BrowseHistoryItem {
+            id: "hist-test-2".to_string(),
+            title: "Test History Title 2".to_string(),
+            thumb_url: "thumb_test2.jpg".to_string(),
+            raw_url: "raw_test2.jpg".to_string(),
+            source: "bing".to_string(),
+            viewed_at: 1234568,
+        };
+        let _ = record_browse_history(item2);
+        let _ = delete_browse_history_item("hist-test-1".to_string());
+        let list_after_delete = get_browse_history();
+        assert!(!list_after_delete.iter().any(|h| h.id == "hist-test-1"));
+        assert!(list_after_delete.iter().any(|h| h.id == "hist-test-2"));
+
+        let _ = clear_browse_history();
+        let list_cleared = get_browse_history();
+        assert!(list_cleared.is_empty());
+    }
 }
