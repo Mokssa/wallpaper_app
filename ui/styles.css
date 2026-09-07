@@ -8,7 +8,6 @@
 :root {
   /* 默认字体：鸿蒙舒适圆润 + Nunito / 微软雅黑 UI */
   --font-family: "HarmonyOS Sans SC", "HarmonyOS Sans", "PingFang SC", "Nunito", "Microsoft YaHei UI", -apple-system, sans-serif;
-  --nav-rail-width: 210px;
 
   /* ==========================================================================
      M3 Color System Tokens (Indigo Default / Master Theme)
@@ -1111,10 +1110,10 @@ body.theme-amoled .flutter-titlebar {
 }
 
 .flutter-nav-rail {
-  width: var(--nav-rail-width, 210px);
-  min-width: var(--nav-rail-width, 210px);
-  max-width: var(--nav-rail-width, 210px);
-  flex: 0 0 var(--nav-rail-width, 210px);
+  width: 210px;
+  min-width: 210px;
+  max-width: 210px;
+  flex: 0 0 210px;
   flex-shrink: 0;
   flex-grow: 0;
   background: var(--md-sys-color-surface-container-low);
@@ -1138,55 +1137,6 @@ body.theme-amoled .flutter-titlebar {
   gap: 14px;
 }
 
-.nav-profile-card {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-  border-radius: var(--md-shape-corner-md);
-  background: var(--md-sys-color-surface-container);
-  border: 1px solid var(--md-sys-color-outline-variant);
-  transition: background var(--md-sys-motion-duration-short) ease,
-              border-color var(--md-sys-motion-duration-short) ease;
-}
-
-.nav-profile-card:hover {
-  background: var(--md-sys-color-surface-container-high);
-  border-color: var(--md-sys-color-outline);
-}
-
-.nav-profile-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--md-shape-corner-sm);
-  background: var(--md-sys-color-primary-gradient);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-  flex-shrink: 0;
-}
-
-.nav-profile-avatar svg {
-  width: 18px;
-  height: 18px;
-  fill: #ffffff;
-}
-
-.nav-profile-info {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.nav-profile-name {
-  font-size: var(--md-sys-typescale-title-small-size, 14px);
-  font-weight: var(--md-sys-typescale-title-small-weight, 600);
-  color: var(--md-sys-color-on-surface);
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
-}
 
 .nav-menu {
   display: flex;
@@ -1386,78 +1336,7 @@ body.theme-amoled .flutter-titlebar {
   fill: none;
 }
 
-/* Responsive / Compact Navigation Rail (80px mode) */
-@media (max-width: 860px) {
-  :root {
-    --nav-rail-width: 80px;
-  }
-  .flutter-nav-rail {
-    width: 80px;
-    min-width: 80px;
-    max-width: 80px;
-    flex: 0 0 80px;
-    flex-shrink: 0;
-    padding: 12px 6px;
-    align-items: center;
-  }
 
-  .nav-profile-card {
-    padding: 6px;
-    justify-content: center;
-    border-radius: var(--md-shape-corner-sm);
-  }
-
-  .nav-profile-info {
-    display: none;
-  }
-
-  .nav-item,
-  .nav-rail-item {
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 4px;
-    height: 56px;
-    min-height: 56px;
-    max-height: 56px;
-    padding: 6px 2px;
-    border-radius: var(--md-shape-corner-md);
-  }
-
-  .nav-item .indicator-pill,
-  .nav-rail-item .indicator-pill {
-    inset: auto;
-    width: 56px;
-    height: 32px;
-    top: 4px;
-    left: 50%;
-    transform: translateX(-50%);
-    border-radius: var(--md-shape-corner-full);
-  }
-
-  .nav-item.active .indicator-pill,
-  .nav-rail-item.active .indicator-pill {
-    transform: translateX(-50%);
-  }
-
-  .nav-item .nav-item-label,
-  .nav-rail-item .nav-item-label {
-    font-size: 11px;
-    text-align: center;
-  }
-
-  .btn-quick-random span {
-    display: none;
-  }
-
-  .btn-quick-random {
-    width: 48px;
-    height: 48px;
-    padding: 0;
-    margin: 0 auto;
-    border-radius: var(--md-shape-corner-full);
-  }
-}
 
 /* ==========================================================================
    3) Main Stage & Pure Visual Grid

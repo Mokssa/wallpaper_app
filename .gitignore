@@ -31,3 +31,5 @@ cache/
 /test
 config/history.json
 docs/sample_wallpapers/
+*.zip
+dist_portable/
