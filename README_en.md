@@ -96,17 +96,17 @@ git clone https://github.com/Mokssa/wallpaper_app.git
 cd wallpaper_app
 
 # 2. Install dependencies
-npm install
+npm ci
 
 # 3. Run full test suite (Rust unit tests + 285+ frontend tests)
 cargo test
 npm test
 
 # 4. Run in dev mode
-cargo tauri dev
+npm run dev
 
 # 5. Build production release
-cargo tauri build
+npm run build
 ```
 
 Binary output is generated at `target/release/wallpaper_app.exe`.
@@ -115,21 +115,24 @@ Binary output is generated at `target/release/wallpaper_app.exe`.
 
 ## ⚙️ Configuration
 
-A default configuration file is automatically created at `config/settings.json`:
+A default configuration file is automatically created at `%LOCALAPPDATA%/com.wallpaperapp.dev/settings.json`:
 
 ```json
 {
-  "cache_dir": "cache/wallpapers",
+  "schema_version": 1,
+  "query": "",
+  "cache_dir": "C:/Users/your-name/Documents/wallpaper_app",
   "wallpaper_style": "fill",
   "auto_update_enabled": false,
   "auto_update_interval_minutes": 60,
+  "batch_count": 6,
   "random_source": "all",
   "theme_color": "indigo",
   "custom_theme_color": null,
   "amoled_mode": false,
-  "font_family": "misans",
-  "language": "en-US",
-  "load_mode": "pagination",
+  "font_family": "rounded",
+  "language": "zh-CN",
+  "load_mode": "infinite",
   "card_ratio": "uniform",
   "unsplash_access_key": "",
   "pexels_api_key": ""
@@ -143,3 +146,7 @@ A default configuration file is automatically created at `config/settings.json`:
 ## 📄 License
 
 Licensed under the [MIT License](LICENSE). Free for personal and commercial use.
+
+
+<!-- Runtime/storage behavior and validation are documented in the implementation report. -->
+[Optimization implementation / 优化实施记录](docs/optimization-implementation.md)

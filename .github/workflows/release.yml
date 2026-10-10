@@ -20,7 +20,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
@@ -28,14 +28,21 @@ jobs:
       - name: Rust cache
         uses: swatinem/rust-cache@v2
 
-      - name: Install Tauri CLI
-        run: npm install -g @tauri-apps/cli
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify project
+        run: npm run test:all
+
+      - name: Verify Rust
+        run: cargo test --locked
 
       - name: Build Tauri Application
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          tauriScript: npm run tauri
           tagName: ${{ github.ref_name }}
           releaseName: 'Wallpaper ${{ github.ref_name }}'
           releaseBody: |

@@ -95,17 +95,17 @@ git clone https://github.com/Mokssa/wallpaper_app.git
 cd wallpaper_app
 
 # 2. 의존성 설치
-npm install
+npm ci
 
 # 3. 전체 테스트 실행 (Rust 유닛 테스트 + 285개 이상의 UI 테스트)
 cargo test
 npm test
 
 # 4. 개발 모드 실행
-cargo tauri dev
+npm run dev
 
 # 5. 배포용 빌드
-cargo tauri build
+npm run build
 ```
 
 빌드된 실행 파일은 `target/release/wallpaper_app.exe` 경로에 생성됩니다.
@@ -114,21 +114,24 @@ cargo tauri build
 
 ## ⚙️ 설정 파일 안내
 
-프로그램을 처음 실행하면 `config/settings.json` 파일이 자동 생성됩니다:
+프로그램을 처음 실행하면 `%LOCALAPPDATA%/com.wallpaperapp.dev/settings.json` 파일이 자동 생성됩니다:
 
 ```json
 {
-  "cache_dir": "cache/wallpapers",
+  "schema_version": 1,
+  "query": "",
+  "cache_dir": "C:/Users/your-name/Documents/wallpaper_app",
   "wallpaper_style": "fill",
   "auto_update_enabled": false,
   "auto_update_interval_minutes": 60,
+  "batch_count": 6,
   "random_source": "all",
   "theme_color": "indigo",
   "custom_theme_color": null,
   "amoled_mode": false,
-  "font_family": "misans",
-  "language": "ko-KR",
-  "load_mode": "pagination",
+  "font_family": "rounded",
+  "language": "zh-CN",
+  "load_mode": "infinite",
   "card_ratio": "uniform",
   "unsplash_access_key": "",
   "pexels_api_key": ""
@@ -142,3 +145,7 @@ cargo tauri build
 ## 📄 라이선스
 
 이 프로젝트는 [MIT License](LICENSE)에 따라 자유롭게 사용 및 배포할 수 있습니다.
+
+
+<!-- Runtime/storage behavior and validation are documented in the implementation report. -->
+[Optimization implementation / 优化实施记录](docs/optimization-implementation.md)

@@ -41,7 +41,7 @@
 <img src="docs/screenshots/settings.png" alt="个性化设置" width="85%" style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); margin-bottom: 24px;" />
 
 ### 独立关于页面 (About & Update Engine)
-独立展示软件版本与生态，集成双轨无限制 GitHub Release 检查更新引擎。
+独立展示软件版本与生态，集成GitHub Release 检查更新与页面回退。
 <img src="docs/screenshots/about.png" alt="关于与版本检查" width="85%" style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); margin-bottom: 24px;" />
 
 </div>
@@ -60,10 +60,10 @@
   - **自定义调色板 (Color Picker)**：自由选取任意十六进制主色调，智能计算派生完整的暗色/亮色 Token 体系。
   - **纯黑 AMOLED 模式**：极客纯黑底色，省电护眼且对比鲜明。
   - **精选屏显字体**：鸿蒙舒适圆体、软萌可爱幼圆、现代极简屏显 (Segoe UI)、几何质感 (MiSans)。
-- **双轨无限制版本更新检测** —
+- **版本更新检测与回退** —
   - 智能优先调用 GitHub Release REST 接口获取完整更新日志。
-  - 当触发 GitHub 未鉴权 IP 频率限制 (403 Forbidden) 时，自动平滑回退至 HTTP 302 重定向解析通道，无视任何速率限制。
-- **原生极速与低内存占用** — 基于 Rust 2021 + Windows 原生 Win32 API (`SystemParametersInfoW`) 设置壁纸，内存占用极低（运行仅占用数十 MB 内存）。
+  - 当触发 GitHub 未鉴权 IP 频率限制 (403 Forbidden) 时，尝试通过发行版页面重定向获取版本；网络故障和站点限制仍可能使检查失败。
+- **原生极速与低内存占用** — 基于 Rust 2021 + Windows 原生 Win32 API (`SystemParametersInfoW`) 设置壁纸，图库使用缩略图、按需加载和虚拟网格；实际内存占用取决于图片数量、预览分辨率与系统环境。
 - **后台轮换与托盘驻留** — 支持开机自启、关闭窗口最小化至系统托盘、双击托盘图标快速还原、多图源后台定时自动轮换。
 
 ---
@@ -96,17 +96,17 @@ git clone https://github.com/Mokssa/wallpaper_app.git
 cd wallpaper_app
 
 # 2. 安装前端开发测试依赖
-npm install
+npm ci
 
-# 3. 运行完整自动化测试套件 (Rust 单元测试 + 前端 285+ 测试用例)
+# 3. 运行自动化测试 (离线 Rust 测试 + 前端回归测试)
 cargo test
 npm test
 
 # 4. 调试模式运行
-cargo tauri dev
+npm run dev
 
 # 5. 正式发布打包 (生成便携版与安装包)
-cargo tauri build
+npm run build
 ```
 
 编译产物位于 `target/release/wallpaper_app.exe`。
@@ -115,21 +115,24 @@ cargo tauri build
 
 ## ⚙️ 配置文件说明
 
-应用程序在初次运行时会在当前工作目录下生成 `config/settings.json`：
+应用程序使用固定的用户应用数据目录保存配置，首次升级会复制旧配置并保留原文件： `%LOCALAPPDATA%/com.wallpaperapp.dev/settings.json`：
 
 ```json
 {
-  "cache_dir": "cache/wallpapers",
+  "schema_version": 1,
+  "query": "",
+  "cache_dir": "C:/Users/your-name/Documents/wallpaper_app",
   "wallpaper_style": "fill",
   "auto_update_enabled": false,
   "auto_update_interval_minutes": 60,
+  "batch_count": 6,
   "random_source": "all",
   "theme_color": "indigo",
   "custom_theme_color": null,
   "amoled_mode": false,
-  "font_family": "misans",
+  "font_family": "rounded",
   "language": "zh-CN",
-  "load_mode": "pagination",
+  "load_mode": "infinite",
   "card_ratio": "uniform",
   "unsplash_access_key": "",
   "pexels_api_key": ""
@@ -143,3 +146,7 @@ cargo tauri build
 ## 📄 开源许可证
 
 本项目基于 [MIT License](LICENSE) 开放源代码，您可以自由商用、修改与分发。
+
+
+<!-- Runtime/storage behavior and validation are documented in the implementation report. -->
+[Optimization implementation / 优化实施记录](docs/optimization-implementation.md)

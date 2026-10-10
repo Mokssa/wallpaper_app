@@ -34,6 +34,12 @@ let appConfig = {
   cache_dir: "cache/wallpapers",
   auto_update_interval_minutes: 60,
   auto_update_enabled: false,
+  batch_count: 6,
+  wallpaper_style: "fill",
+  pexels_api_key: "",
+  font_family: "rounded",
+  language: "zh-CN",
+  custom_theme_color: null,
   unsplash_access_key: "",
   load_mode: "pagination",
   card_ratio: "uniform",
@@ -52,6 +58,12 @@ const pageLimit = 24;
 let hasMoreOnline = true;
 let isInfiniteLoading = false;
 let isOnlineLoading = false;
+let activeOnlineKey = '';
+let galleryLoadId = 0;
+let configSaveChain = Promise.resolve();
+let exploreLoaded = false;
+let onlineVirtualGrid = null;
+let galleryVirtualGrid = null;
 let searchDebounceTimer = null;
 let currentDetailItem = null;
 let currentDetailType = 'online';
@@ -675,7 +687,13 @@ function switchTab(tabName) {
     loadHistory();
   }
 
+  if (tabName === 'gallery') {
+    galleryVirtualGrid?.render();
+    window.WallpaperImages?.activate(galleryGrid);
+  }
+
   if (tabName === 'explore') {
+    if (!exploreLoaded) { exploreLoaded = true; loadOnlineWallpapers(false); }
     setTimeout(checkAndFillViewport, 80);
   }
 }
@@ -710,7 +728,7 @@ function openWallpaperDetails(item, type = 'online', imgSrc = '') {
   if (item) recordBrowseHistory(item);
 
   const rawUrl = item ? (item.raw_url || item.url || item.file_path || item.thumb_url) : imgSrc;
-  const thumbUrl = item ? (item.thumb_url || imgSrc) : imgSrc;
+  const thumbUrl = type === 'local' ? imgSrc : (item ? (item.thumb_url || imgSrc) : imgSrc);
 
   // 1. 先用缩略图瞬间占位，避免任何等待
   modalImg.src = thumbUrl || rawUrl;
@@ -923,6 +941,13 @@ function openLightbox(imgSrc, item, type = 'online') {
   // 1. 先用缩略图瞬间秒开占位
   lbImage.src = thumbUrl || rawUrl;
   fullscreenLightbox.classList.add('active');
+  if (type === 'local') {
+    window.WallpaperImages.localUrl(item.file_path || item.raw_url || item.thumb_url, false, invoke)
+      .then(url => {
+        if (currentDetailItem === item && fullscreenLightbox.classList.contains('active')) lbImage.src = url;
+      }).catch(err => showSnackBar(String(err), true));
+    return;
+  }
 
   // 2. 异步加载 Wallhaven / Unsplash / Bing 真实 4K/8K 原图并无缝无感替换为极清大图
   if (rawUrl && rawUrl !== thumbUrl) {
@@ -1156,6 +1181,16 @@ async function loadConfig() {
     const res = await invoke('get_config');
     if (res) {
       appConfig = { ...appConfig, ...res };
+      if ((res.schema_version || 0) < 1) {
+        try {
+          appConfig.theme_color = localStorage.getItem('wp_theme_color') || appConfig.theme_color;
+          const amoled = localStorage.getItem('wp_amoled_mode');
+          if (amoled !== null) appConfig.amoled_mode = amoled === '1';
+          appConfig.custom_theme_color = localStorage.getItem('wp_custom_theme_color') || appConfig.custom_theme_color;
+        } catch (_) {}
+        appConfig.schema_version = 1;
+        await invoke('save_config', { config: { ...appConfig } });
+      }
       updateConfigUI();
     }
   } catch (err) {
@@ -1217,6 +1252,8 @@ function applyDisplaySettings() {
   }
 
   if (infiniteLoader) infiniteLoader.style.display = 'none'; // 仅在滚动触发拉取时按需显示
+  onlineVirtualGrid?.update(onlineWallpapers);
+  galleryVirtualGrid?.update(cachedWallpapers);
   setTimeout(checkAndFillViewport, 80);
 }
 
@@ -1245,13 +1282,17 @@ async function saveConfig() {
     appConfig.font_family = appConfig.font_family || "rounded";
     appConfig.unsplash_access_key = inputConfigUnsplashKey ? inputConfigUnsplashKey.value.trim() : (appConfig.unsplash_access_key || "");
     appConfig.pexels_api_key = inputConfigPexelsKey ? inputConfigPexelsKey.value.trim() : (appConfig.pexels_api_key || "");
-    appConfig.auto_update_interval_minutes = inputConfigInterval ? parseInt(inputConfigInterval.value) || 60 : 60;
+    appConfig.auto_update_interval_minutes = inputConfigInterval ? Math.min(1440, Math.max(5, parseInt(inputConfigInterval.value) || 60)) : 60;
     appConfig.auto_update_enabled = checkConfigAutoupdate ? checkConfigAutoupdate.checked : false;
 
-    await invoke('save_config', { config: appConfig });
+    const snapshot = { ...appConfig };
+    configSaveChain = configSaveChain.catch(() => {}).then(() => invoke('save_config', { config: snapshot }));
+    await configSaveChain;
     applyDisplaySettings();
+    return true;
   } catch (err) {
-    showSnackBar(`保存设置失败: ${err}`, true);
+    showSnackBar(message('toast_config_failed', { error: String(err) }), true);
+    return false;
   }
 }
 
@@ -1259,14 +1300,19 @@ async function pickCacheDir() {
   try {
     const selected = await invoke('select_cache_dir');
     if (selected) {
+      const previousDirectory = appConfig.cache_dir;
       appConfig.cache_dir = selected;
       if (labelCacheDir) labelCacheDir.textContent = selected;
-      await invoke('save_config', { config: appConfig });
-      showSnackBar(`壁纸存储路径已更新`);
+      if (!await saveConfig()) {
+        appConfig.cache_dir = previousDirectory;
+        if (labelCacheDir) labelCacheDir.textContent = previousDirectory;
+        return;
+      }
+      showSnackBar(message('toast_directory_updated'));
       await loadWallpapers();
     }
   } catch (err) {
-    showSnackBar(`选择路径失败: ${err}`, true);
+    showSnackBar(message('toast_directory_failed', { error: String(err) }), true);
   }
 }
 
@@ -1275,10 +1321,11 @@ async function pickCacheDir() {
 // ==========================================================================
 async function renderGallery(items) {
   cachedWallpapers = Array.isArray(items) ? items : [];
+  galleryVirtualGrid?.destroy(); galleryVirtualGrid = null;
   galleryGrid.innerHTML = '';
 
   if (galleryCountBadge) {
-    galleryCountBadge.textContent = `${cachedWallpapers.length} 张`;
+    galleryCountBadge.textContent = message('history_count', { count: cachedWallpapers.length });
   }
 
   if (cachedWallpapers.length === 0) {
@@ -1291,7 +1338,15 @@ async function renderGallery(items) {
   galleryEmptyState.style.display = 'none';
   galleryGrid.style.display = 'grid';
 
-  for (const item of cachedWallpapers) {
+  if (!galleryVirtualGrid) galleryVirtualGrid = new window.WallpaperVirtualGrid(galleryGrid, mainScrollEl, createLocalCard);
+  galleryVirtualGrid.update(cachedWallpapers);
+
+
+  updateBatchUI();
+}
+
+function createLocalCard(item) {
+
     const card = document.createElement('div');
     card.className = 'm3-wallpaper-card';
     card.setAttribute('data-filepath', item.file_path);
@@ -1310,18 +1365,10 @@ async function renderGallery(items) {
     const imgWrapper = document.createElement('div');
     imgWrapper.className = 'm3-card-img-wrapper skeleton';
 
-    let imgSrc = '';
-    try {
-      imgSrc = await invoke('read_file_data_url', { filePath: item.file_path });
-    } catch (e) {
-      console.warn('Failed to read image data url:', e);
-    }
-    if (!imgSrc) imgSrc = item.file_path;
-
     const img = document.createElement('img');
     img.className = 'm3-card-img';
-    img.alt = 'Wallpaper';
-    img.src = imgSrc;
+    img.alt = item.title || 'Wallpaper';
+    img.loading = 'lazy'; img.decoding = 'async';
 
     img.onload = () => {
       imgWrapper.classList.remove('skeleton');
@@ -1365,7 +1412,7 @@ async function renderGallery(items) {
             showSnackBar(typeof t === 'function' ? t('toast_delete_success') : '已删除壁纸');
             await loadWallpapers();
           } catch (err) {
-            showSnackBar(`删除壁纸失败: ${err}`, true);
+            showSnackBar(message('toast_delete_failed', { error: String(err) }), true);
           }
         }
       });
@@ -1382,14 +1429,12 @@ async function renderGallery(items) {
       if (isBatchMode) {
         toggleCardSelection(item.file_path);
       } else {
-        openLightbox(imgSrc, item, 'local');
+        openLightbox(img.src, item, 'local');
       }
     });
 
-    galleryGrid.appendChild(card);
-  }
-
-  updateBatchUI();
+    window.WallpaperImages.loadLocal(img, item.file_path, invoke);
+    return card;
 }
 
 // ==========================================================================
@@ -1499,56 +1544,74 @@ function executeBatchDelete() {
     onConfirm: async () => {
       try {
         const filePaths = Array.from(selectedWallpapers);
-        await invoke('delete_wallpapers_batch', { filePaths });
-        showSnackBar(typeof t === 'function' ? t('toast_batch_delete_success', { count }) : `已成功批量删除 ${count} 张本地壁纸`);
-        toggleBatchMode(false);
+        const result = await invoke('delete_wallpapers_batch', { filePaths });
+        const deleted = result?.deleted || [];
+        const failed = result?.failed || [];
         await loadWallpapers();
+        selectedWallpapers.clear(); failed.forEach(item => selectedWallpapers.add(item.file_path));
+        if (failed.length) {
+          updateBatchUI(); showSnackBar(message('toast_batch_partial', { deleted: deleted.length, failed: failed.length }), true);
+        } else {
+          toggleBatchMode(false); showSnackBar(message('toast_batch_delete_success', { count: deleted.length }));
+        }
       } catch (err) {
-        showSnackBar(`批量删除失败: ${err}`, true);
+        showSnackBar(message('toast_batch_failed', { error: String(err) }), true);
       }
     }
   });
 }
 
 async function loadWallpapers() {
+  const loadId = ++galleryLoadId;
   try {
     const items = await invoke('get_cached_wallpapers');
-    await renderGallery(items);
+    if (loadId === galleryLoadId) await renderGallery(items);
   } catch (err) {
-    showSnackBar(`获取本地壁纸失败: ${err}`, true);
+    if (loadId !== galleryLoadId) return;
+    showSnackBar(message('toast_gallery_failed', { error: String(err) }), true);
     renderGallery([]);
   }
 }
 
 async function setWallpaperAction(filePath, title) {
   try {
-    showSnackBar(`正在应用壁纸...`);
+    showSnackBar(message('toast_setting'));
     await invoke('set_desktop_wallpaper', { pathStr: filePath });
     showSnackBar(`已成功设为 Windows 桌面壁纸！`);
   } catch (err) {
-    showSnackBar(`设置壁纸失败: ${err}`, true);
+    showSnackBar(message('toast_setting_failed', { error: String(err) }), true);
   }
 }
 
+function message(key, params = {}) {
+  return typeof window.t === 'function' ? window.t(key, params) : key;
+}
+function normalizeOnlineItem(item) {
+  return { id: String(item.id || ''), title: item.title || 'Wallpaper', author: item.author || '',
+    thumb_url: item.thumb_url || item.raw_url || '', raw_url: item.raw_url || '', source: item.source || '',
+    copyright_link: item.copyright_link || null };
+}
 async function downloadOnlyAction(item) {
   try {
-    showSnackBar(`正在保存壁纸...`);
-    await invoke('download_and_set_online_wallpaper', { item });
-    showSnackBar(`壁纸已成功保存到本地图库！`);
+    showSnackBar(message('toast_saving'));
+    await invoke('download_online_wallpaper', { item: normalizeOnlineItem(item) });
+    showSnackBar(message('toast_saved'));
     await loadWallpapers();
   } catch (err) {
-    showSnackBar(`保存壁纸失败: ${err}`, true);
+    showSnackBar(message('toast_save_failed', { error: String(err) }), true);
   }
 }
 
 async function downloadAndSetOnlineAction(item) {
   try {
-    showSnackBar(`正在下载并应用壁纸...`);
-    await invoke('download_and_set_online_wallpaper', { item });
-    showSnackBar(`已成功下载并设为桌面壁纸！`);
+    showSnackBar(message('toast_downloading'));
+    await invoke('download_and_set_online_wallpaper', { item: normalizeOnlineItem(item) });
+    showSnackBar(message('toast_applied'));
     await loadWallpapers();
+    return true;
   } catch (err) {
-    showSnackBar(`应用壁纸失败: ${err}`, true);
+    showSnackBar(message('toast_apply_failed', { error: String(err) }), true);
+    return false;
   }
 }
 
@@ -1564,6 +1627,8 @@ async function recordBrowseHistory(item) {
     const histItem = {
       id: String(item.id || item.file_path || rawUrl || Date.now()),
       title: String(item.title || item.name || 'Wallpaper'),
+      author: String(item.author || ''),
+      copyright_link: item.copyright_link || null,
       thumb_url: String(thumbUrl),
       raw_url: String(rawUrl),
       source: String(item.source || currentSource || 'online'),
@@ -1590,9 +1655,9 @@ function formatRelativeTime(timestamp) {
   if (!timestamp) return '';
   const now = Math.floor(Date.now() / 1000);
   const diff = now - timestamp;
-  if (diff < 60) return '刚刚';
-  if (diff < 3600) return `${Math.floor(diff / 60)} 分钟前`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)} 小时前`;
+  if (diff < 60) return message('time_just_now');
+  if (diff < 3600) return message('time_minutes', { count: Math.floor(diff / 60) });
+  if (diff < 86400) return message('time_hours', { count: Math.floor(diff / 3600) });
   const d = new Date(timestamp * 1000);
   const month = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
@@ -1617,6 +1682,7 @@ function renderHistory(items) {
 
   if (historyEmptyState) historyEmptyState.style.display = 'none';
   historyGrid.style.display = 'grid';
+  window.WallpaperImages?.release(historyGrid);
   historyGrid.innerHTML = '';
 
   items.forEach(item => {
@@ -1635,12 +1701,7 @@ function renderHistory(items) {
     if (imgSrc.startsWith('http://') || imgSrc.startsWith('https://') || imgSrc.startsWith('data:')) {
       img.src = imgSrc;
     } else {
-      invoke('read_file_data_url', { filePath: imgSrc }).then(dataUrl => {
-        if (dataUrl) img.src = dataUrl;
-        else img.src = imgSrc;
-      }).catch(() => {
-        img.src = imgSrc;
-      });
+      queueMicrotask(() => window.WallpaperImages.loadLocal(img, imgSrc, invoke));
     }
 
     img.onload = () => {
@@ -1757,7 +1818,7 @@ function renderHistory(items) {
       if (item.raw_url && (item.raw_url.startsWith('http://') || item.raw_url.startsWith('https://'))) {
         openWallpaperDetails(item, 'online', item.raw_url || item.thumb_url);
       } else {
-        openLightbox(imgSrc, item, 'local');
+        openLightbox(img.src, item, 'local');
       }
     });
 
@@ -1771,7 +1832,7 @@ function renderHistory(items) {
 async function handleQuickRandom() {
   const selectedSource = appConfig.random_source || (selectConfigRandomSource ? selectConfigRandomSource.value : 'all');
 
-  showSnackBar('正在随机挑选精美壁纸...');
+  showSnackBar(message('toast_random_loading'));
 
   try {
     if (selectedSource === 'local') {
@@ -1779,7 +1840,7 @@ async function handleQuickRandom() {
         const randomItem = cachedWallpapers[Math.floor(Math.random() * cachedWallpapers.length)];
         await setWallpaperAction(randomItem.file_path, randomItem.title);
       } else {
-        showSnackBar('本地图库暂无壁纸，请前往发现壁纸下载', true);
+        showSnackBar(message('toast_local_empty'), true);
       }
       return;
     }
@@ -1799,24 +1860,25 @@ async function handleQuickRandom() {
         const shuffled = [...list].sort(() => Math.random() - 0.5);
         for (let i = 0; i < Math.min(3, shuffled.length); i++) {
           try {
-            await downloadAndSetOnlineAction(shuffled[i]);
-            applied = true;
+            applied = await downloadAndSetOnlineAction(shuffled[i]);
+            if (!applied) continue;
             break;
           } catch (e) {
             console.warn('Random wallpaper candidate failed, trying next:', e);
           }
         }
         if (!applied) {
-          showSnackBar(`壁纸下载应用遇到网络波动，请重试`, true);
+          showSnackBar(message('toast_random_network'), true);
         }
       } else {
-        showSnackBar(`未能在图库中获取到随机壁纸`, true);
+        showSnackBar(message('toast_random_empty'), true);
       }
       return;
     }
 
     // 全部图源 (混合随机)
-    const onlineSources = ['pexels', 'bing', 'unsplash', 'wallhaven'];
+    const onlineSources = ['pexels', 'bing', 'wallhaven'];
+    if (appConfig.unsplash_access_key?.trim()) onlineSources.push('unsplash');
     const pickOnlineSource = onlineSources[Math.floor(Math.random() * onlineSources.length)];
     const randomPage = (pickOnlineSource === 'bing') ? 1 : (Math.floor(Math.random() * 4) + 1);
 
@@ -1838,8 +1900,8 @@ async function handleQuickRandom() {
       const shuffled = [...list].sort(() => Math.random() - 0.5);
       for (let i = 0; i < Math.min(3, shuffled.length); i++) {
         try {
-          await downloadAndSetOnlineAction(shuffled[i]);
-          applied = true;
+          applied = await downloadAndSetOnlineAction(shuffled[i]);
+          if (!applied) continue;
           break;
         } catch (e) {
           console.warn('Random wallpaper candidate failed, trying next:', e);
@@ -1858,7 +1920,7 @@ async function handleQuickRandom() {
 
   } catch (err) {
     console.error('Failed to quick random:', err);
-    showSnackBar(`随机换壁纸失败: ${err}`, true);
+    showSnackBar(message('toast_random_failed', { error: String(err) }), true);
   }
 }
 
@@ -1869,6 +1931,7 @@ function renderOnlineGrid(items, append = false) {
   const newItems = Array.isArray(items) ? items : [];
   
   if (!append) {
+    onlineVirtualGrid?.destroy(); onlineVirtualGrid = null;
     onlineWallpapers = [];
     seenOnlineUrls.clear();
     onlineGrid.innerHTML = '';
@@ -1907,7 +1970,22 @@ function renderOnlineGrid(items, append = false) {
 
   onlineWallpapers = onlineWallpapers.concat(uniqueItems);
 
-  uniqueItems.forEach(item => {
+  if (!onlineVirtualGrid) onlineVirtualGrid = new window.WallpaperVirtualGrid(onlineGrid, mainScrollEl, createOnlineCard);
+  onlineVirtualGrid.update(onlineWallpapers);
+
+  return uniqueItems.length;
+}
+
+function removeOnlineItem(item, card) {
+  card.remove();
+  if (onlineWallpapers.includes(item)) {
+    onlineWallpapers = onlineWallpapers.filter(w => w !== item);
+    onlineVirtualGrid?.update(onlineWallpapers);
+  }
+}
+
+function createOnlineCard(item) {
+
     const card = document.createElement('div');
     card.className = 'm3-wallpaper-card';
 
@@ -1917,6 +1995,7 @@ function renderOnlineGrid(items, append = false) {
     const img = document.createElement('img');
     img.className = 'm3-card-img';
     img.alt = 'Wallpaper';
+    img.loading = 'lazy'; img.decoding = 'async';
     img.src = item.thumb_url;
 
     img.onload = () => {
@@ -1928,19 +2007,21 @@ function renderOnlineGrid(items, append = false) {
       img.classList.add('loaded');
     }
 
+    let fallbackAttempted = false;
     img.onerror = async () => {
+      if (fallbackAttempted) { removeOnlineItem(item, card); return; }
+      fallbackAttempted = true;
       try {
         const base64Data = await invoke('fetch_remote_image_base64', { url: item.thumb_url });
+        if (!card.isConnected) return;
         if (base64Data) {
           img.src = base64Data;
         } else {
           // 遇到无法访问的坏图直接静默从界面和数据集中过滤剔除
-          card.remove();
-          onlineWallpapers = onlineWallpapers.filter(w => w.id !== item.id);
+          removeOnlineItem(item, card);
         }
       } catch (e) {
-        card.remove();
-        onlineWallpapers = onlineWallpapers.filter(w => w.id !== item.id);
+        removeOnlineItem(item, card);
       }
     };
 
@@ -1977,9 +2058,7 @@ function renderOnlineGrid(items, append = false) {
       openWallpaperDetails(item, 'online', item.raw_url || item.thumb_url);
     });
 
-    onlineGrid.appendChild(card);
-  });
-  return uniqueItems.length;
+    return card;
 }
 
 let onlineRequestId = 0;
@@ -2003,6 +2082,8 @@ const wallhavenSearchState = {
 };
 
 function renderUnsplashKeyPrompt() {
+  onlineVirtualGrid?.destroy(); onlineVirtualGrid = null;
+  onlineWallpapers = []; seenOnlineUrls.clear();
   if (!onlineGrid) return;
   onlineGrid.innerHTML = `
     <div class="unsplash-prompt-card">
@@ -2047,16 +2128,14 @@ function renderUnsplashKeyPrompt() {
 }
 
 async function loadOnlineWallpapers(append = false) {
-  if (isOnlineLoading) return;
-
   // Unsplash 专属未配置 Key 友好拦截与引导
   if (currentSource === 'unsplash' && (!appConfig.unsplash_access_key || !appConfig.unsplash_access_key.trim())) {
+    ++onlineRequestId;
+    isOnlineLoading = false;
+    isInfiniteLoading = false;
     renderUnsplashKeyPrompt();
     return;
   }
-
-  isOnlineLoading = true;
-  const thisRequestId = ++onlineRequestId;
 
   // 严格根据各官网参数规范组织专属查询参数
   let query = '';
@@ -2077,8 +2156,18 @@ async function loadOnlineWallpapers(append = false) {
     query = `${wallhavenSearchState.keyword}|${wallhavenSearchState.category}|${wallhavenSearchState.sort}|${wallhavenSearchState.aspectRatio}|${wallhavenSearchState.timeRange}|${wallhavenSearchState.randomSeed}`;
   }
 
+  const source = currentSource;
+  const page = onlinePage;
+  const key = JSON.stringify([source, query, page]);
+  if (isOnlineLoading && (append || key === activeOnlineKey)) return;
+  if (!append) { hasMoreOnline = true; exploreLoaded = true; }
+  isOnlineLoading = true; activeOnlineKey = key;
+  const thisRequestId = ++onlineRequestId;
+  let succeeded = false;
+
   try {
     if (!append) {
+      onlineVirtualGrid?.destroy(); onlineVirtualGrid = null;
       renderSkeletonGrid(onlineGrid, 8);
       if (infiniteLoader) infiniteLoader.style.display = 'none';
     } else {
@@ -2086,9 +2175,9 @@ async function loadOnlineWallpapers(append = false) {
     }
 
     const list = await invoke('fetch_online_wallpapers', {
-      source: currentSource,
+      source,
       query,
-      page: onlinePage,
+      page,
       limit: pageLimit,
     });
 
@@ -2096,6 +2185,7 @@ async function loadOnlineWallpapers(append = false) {
       return;
     }
 
+    succeeded = true;
     const safeList = Array.isArray(list) ? list : [];
     if (safeList.length === 0) {
       hasMoreOnline = false;
@@ -2111,12 +2201,13 @@ async function loadOnlineWallpapers(append = false) {
     }
   } catch (err) {
     if (thisRequestId !== onlineRequestId) return;
+    if (append) onlinePage = Math.max(1, page - 1);
     console.error('Failed to load online wallpapers:', err);
     if (String(err).includes('UNSPLASH_KEY')) {
       renderUnsplashKeyPrompt();
     } else {
-      showSnackBar(`壁纸加载失败: ${err}`, true);
-      if (!append) renderOnlineGrid([]);
+      showSnackBar(message('toast_load_failed', { error: String(err) }), true);
+      if (!append) { onlineGrid.innerHTML = ''; }
     }
   } finally {
     if (thisRequestId === onlineRequestId) {
@@ -2125,7 +2216,8 @@ async function loadOnlineWallpapers(append = false) {
       if (infiniteLoader) infiniteLoader.style.display = 'none';
 
       // 大屏或高分屏自适应填满：若视口未被撑开导致无法产生滚动条，自动加载下一批填满视口
-      if (hasMoreOnline) {
+      activeOnlineKey = '';
+      if (succeeded && hasMoreOnline) {
         setTimeout(checkAndFillViewport, 80);
       }
     }
@@ -2635,7 +2727,7 @@ function setupContextualSourceControls() {
             closeWallpaperDetails();
             await loadWallpapers();
           } catch (err) {
-            showSnackBar(`删除壁纸失败: ${err}`, true);
+            showSnackBar(message('toast_delete_failed', { error: String(err) }), true);
           }
         }
       });
@@ -2868,6 +2960,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   initM3RippleEngine();
   await loadConfig();
   await loadWallpapers();
-  await loadOnlineWallpapers(false);
-  await loadHistory();
+  if (window.__TAURI__?.event?.listen) {
+    await window.__TAURI__.event.listen('rotation_completed', () => loadWallpapers());
+    await window.__TAURI__.event.listen('rotation_failed', event => showSnackBar(message('toast_rotation_failed', { error: event.payload }), true));
+  }
 });

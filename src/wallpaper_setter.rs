@@ -4,8 +4,7 @@ use std::path::Path;
 use windows_sys::Win32::{
     Foundation::BOOL,
     UI::WindowsAndMessaging::{
-        SystemParametersInfoW, SPI_SETDESKWALLPAPER,
-        SPIF_SENDCHANGE, SPIF_UPDATEINIFILE,
+        SystemParametersInfoW, SPIF_SENDCHANGE, SPIF_UPDATEINIFILE, SPI_SETDESKWALLPAPER,
     },
 };
 
@@ -48,20 +47,24 @@ impl WallpaperSetter {
         #[cfg(target_os = "windows")]
         {
             let (ws, tw): (&str, &str) = match style {
-                "fill"    => ("10", "0"),
-                "fit"     => ("6",  "0"),
-                "stretch" => ("2",  "0"),
-                "tile"    => ("0",  "1"),
-                "center"  => ("0",  "0"),
-                "span"    => ("22", "0"),
-                _         => ("10", "0"),
+                "fill" => ("10", "0"),
+                "fit" => ("6", "0"),
+                "stretch" => ("2", "0"),
+                "tile" => ("0", "1"),
+                "center" => ("0", "0"),
+                "span" => ("22", "0"),
+                _ => ("10", "0"),
             };
             let hkcu = RegKey::predef(HKEY_CURRENT_USER);
             let desktop = hkcu
                 .open_subkey_with_flags("Control Panel\\Desktop", KEY_SET_VALUE)
                 .map_err(|e| e.to_string())?;
-            desktop.set_value("WallpaperStyle", &ws.to_string()).map_err(|e| e.to_string())?;
-            desktop.set_value("TileWallpaper",  &tw.to_string()).map_err(|e| e.to_string())?;
+            desktop
+                .set_value("WallpaperStyle", &ws.to_string())
+                .map_err(|e| e.to_string())?;
+            desktop
+                .set_value("TileWallpaper", &tw.to_string())
+                .map_err(|e| e.to_string())?;
         }
         Ok(())
     }
@@ -73,7 +76,11 @@ impl WallpaperSetter {
             let hkcu = RegKey::predef(HKEY_CURRENT_USER);
             let desktop = hkcu.open_subkey("Control Panel\\Desktop").ok()?;
             let path: String = desktop.get_value("Wallpaper").ok()?;
-            if path.is_empty() { None } else { Some(path) }
+            if path.is_empty() {
+                None
+            } else {
+                Some(path)
+            }
         }
         #[cfg(not(target_os = "windows"))]
         None

@@ -7,11 +7,17 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:tokens": "node scripts/verify-tokens.mjs",
-    "test:all": "node scripts/verify-tokens.mjs && vitest run"
+    "test:all": "node scripts/check-project.mjs && node scripts/verify-tokens.mjs && vitest run",
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "check": "node scripts/check-project.mjs",
+    "benchmark": "node scripts/benchmark-gallery.mjs"
   },
   "devDependencies": {
+    "@tauri-apps/cli": "2.12.1",
     "@testing-library/dom": "^10.4.0",
     "jsdom": "^26.0.0",
-    "vitest": "^3.0.7"
+    "vitest": "5.0.3"
   }
 }

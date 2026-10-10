@@ -95,17 +95,17 @@ git clone https://github.com/Mokssa/wallpaper_app.git
 cd wallpaper_app
 
 # 2. 依存パッケージのインストール
-npm install
+npm ci
 
 # 3. テストの実行 (Rust 単体テスト + 285以上のUIテスト)
 cargo test
 npm test
 
 # 4. 開発モードで実行
-cargo tauri dev
+npm run dev
 
 # 5. リリースビルド
-cargo tauri build
+npm run build
 ```
 
 実行ファイルは `target/release/wallpaper_app.exe` に生成されます。
@@ -114,21 +114,24 @@ cargo tauri build
 
 ## ⚙️ 設定ファイル
 
-初回起動時に `config/settings.json` が生成されます：
+初回起動時に `%LOCALAPPDATA%/com.wallpaperapp.dev/settings.json` が生成されます：
 
 ```json
 {
-  "cache_dir": "cache/wallpapers",
+  "schema_version": 1,
+  "query": "",
+  "cache_dir": "C:/Users/your-name/Documents/wallpaper_app",
   "wallpaper_style": "fill",
   "auto_update_enabled": false,
   "auto_update_interval_minutes": 60,
+  "batch_count": 6,
   "random_source": "all",
   "theme_color": "indigo",
   "custom_theme_color": null,
   "amoled_mode": false,
-  "font_family": "misans",
-  "language": "ja-JP",
-  "load_mode": "pagination",
+  "font_family": "rounded",
+  "language": "zh-CN",
+  "load_mode": "infinite",
   "card_ratio": "uniform",
   "unsplash_access_key": "",
   "pexels_api_key": ""
@@ -142,3 +145,7 @@ cargo tauri build
 ## 📄 ライセンス
 
 本ソフトウェアは [MIT License](LICENSE) のもとで公開されています。
+
+
+<!-- Runtime/storage behavior and validation are documented in the implementation report. -->
+[Optimization implementation / 优化实施记录](docs/optimization-implementation.md)

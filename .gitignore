@@ -28,7 +28,6 @@ Thumbs.db
 cache/
 /node_modules
 /.agents
-/test
 config/history.json
 docs/sample_wallpapers/
 *.zip

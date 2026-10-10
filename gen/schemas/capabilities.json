@@ -1,1 +1,1 @@
-{}
+{"main-window":{"identifier":"main-window","description":"Core events and window operations for the local application window.","local":true,"windows":["main"],"permissions":["core:default"]}}
