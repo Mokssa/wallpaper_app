@@ -26,7 +26,7 @@
       // Hidden tabs have zero width; keep their current window until ResizeObserver reports visibility.
       if (this.items.length > 120 && container.clientWidth <= 0 && this.cards.size) return;
       let start = 0; let end = this.items.length; let stride = 0; let columns = 1; let gap = 0;
-      if (this.items.length > 120 && scroll?.clientHeight > 0 && !container.classList.contains('ratio-original')) {
+      if (this.items.length > 120 && scroll?.clientHeight > 0) {
         const style = getComputedStyle(container);
         columns = Math.max(1, style.gridTemplateColumns.split(' ').filter(x => x && x !== 'none').length);
         gap = parseFloat(style.rowGap) || 16;

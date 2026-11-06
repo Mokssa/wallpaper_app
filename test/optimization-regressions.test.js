@@ -7,7 +7,8 @@ import { loadIndexHTML, resetMockBackendState, setupMockTauri, mockBackendState 
 const source = fs.readFileSync(path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../ui/app.js'), 'utf8').split('// Initialization')[0];
 function runtime() {
   return new Function(source + `
-    return { loadOnlineWallpapers, renderGallery, downloadOnlyAction, handleQuickRandom, renderOnlineGrid,
+    return { loadOnlineWallpapers, renderGallery, renderHistory, openWallpaperDetails, openLightbox,
+      downloadOnlyAction, handleQuickRandom, renderOnlineGrid,
       recordBrowseHistory, saveConfig, pickCacheDir, loadWallpapers, executeBatchDelete,
       confirm: () => pendingConfirmAction(),
       configure: config => Object.assign(appConfig, config),
@@ -111,5 +112,42 @@ describe('User-visible optimization regressions', () => {
     const api = runtime(); api.select([path]); api.executeBatchDelete(); await api.confirm();
     expect(api.state().selected).toEqual([path]);
     expect(document.getElementById('snackbar-text').textContent).toContain('失败');
+  });
+
+  it('enforces uniform 16:10 ratio across gallery, online, and history grids', async () => {
+    const api = runtime();
+    api.configure({ card_ratio: 'original' });
+    await api.renderGallery([{ file_path: 'D:/Wallpapers/local.jpg', title: 'Local' }]);
+    api.renderOnlineGrid([item('pexels')]);
+    api.renderHistory([{ id: 'h1', title: 'Hist', thumb_url: 'https://example.com/h1.jpg', raw_url: 'https://example.com/h1.jpg', source: 'pexels' }]);
+
+    for (const id of ['gallery-grid', 'online-grid', 'history-grid']) {
+      const grid = document.getElementById(id);
+      expect(grid?.classList.contains('ratio-uniform')).toBe(true);
+      expect(grid?.classList.contains('ratio-original')).toBe(false);
+    }
+  });
+
+  it('never assigns raw Windows paths directly to img.src in history, modal, or lightbox', async () => {
+    const verbatimPath = '\\\\?\\C:\\Users\\cst\\Documents\\wallpaper_app\\local_4k.jpg';
+    const api = runtime();
+
+    api.renderHistory([{ id: 'local-hist', title: 'Local Verbatim', thumb_url: verbatimPath, raw_url: verbatimPath, source: 'local' }]);
+    await new Promise(r => setTimeout(r, 20));
+    const histImg = document.querySelector('#history-grid img');
+    const histSrc = histImg?.getAttribute('src') || '';
+    expect(histSrc.startsWith('\\\\?\\')).toBe(false);
+
+    api.openWallpaperDetails({ file_path: verbatimPath, title: 'Local Verbatim' }, 'local', '');
+    const modalImg = document.getElementById('modal-wallpaper-img');
+    expect((modalImg?.getAttribute('src') || '').startsWith('\\\\?\\')).toBe(false);
+    await new Promise(r => setTimeout(r, 20));
+    expect(modalImg?.getAttribute('src') || '').toMatch(/^(http:\/\/asset\.localhost\/|data:image\/)/);
+
+    api.openLightbox(verbatimPath, { file_path: verbatimPath, title: 'Local Verbatim' }, 'local');
+    const lbImg = document.getElementById('lb-image');
+    expect((lbImg?.getAttribute('src') || '').startsWith('\\\\?\\')).toBe(false);
+    await new Promise(r => setTimeout(r, 20));
+    expect(lbImg?.getAttribute('src') || '').toMatch(/^(http:\/\/asset\.localhost\/|data:image\/)/);
   });
 });

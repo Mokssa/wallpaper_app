@@ -9,8 +9,7 @@
       if (!job.img.isConnected) continue;
       active++;
       job.run().catch(() => {
-        job.img.closest('.skeleton')?.classList.remove('skeleton');
-        job.img.alt = 'Image unavailable';
+        markBroken(job.img, job.onFail);
       }).finally(() => { active--; pump(); });
     }
   }
@@ -32,40 +31,67 @@
     pump();
   }
 
+  function markBroken(img, onFail) {
+    img.closest('.skeleton')?.classList.remove('skeleton');
+    img.classList.remove('loaded');
+    img.alt = '';
+    img.removeAttribute('src');
+    if (typeof onFail === 'function' && onFail(img) === true) return;
+    img.closest('.m3-card-img-wrapper')?.classList.add('img-error');
+  }
+
   async function localUrl(path, thumbnail, invoke) {
     const localPath = await invoke('get_local_image_path', { filePath: path, thumbnail });
     if (!localPath) throw new Error('Local image path unavailable');
-    if (localPath.startsWith('data:')) return localPath;
-    const convert = window.__TAURI__?.core?.convertFileSrc;
-    if (typeof convert !== 'function') throw new Error('Asset protocol unavailable');
+    if (
+      localPath.startsWith('data:') ||
+      localPath.startsWith('http://') ||
+      localPath.startsWith('https://') ||
+      localPath.startsWith('asset:')
+    ) {
+      return localPath;
+    }
+    const convert = window.__TAURI__?.core?.convertFileSrc || window.__TAURI_INTERNALS__?.convertFileSrc;
+    if (typeof convert !== 'function') {
+      return invoke('read_file_data_url', { filePath: path });
+    }
     return convert(localPath);
   }
-  function loadLocal(img, path, invoke) {
+  function loadLocal(img, path, invoke, options = {}) {
     img.loading = 'lazy'; img.decoding = 'async';
-    let fallbackUsed = false;
+    let stage = 0;
     img.onerror = async () => {
-      if (fallbackUsed || !img.isConnected) {
-        img.closest('.skeleton')?.classList.remove('skeleton');
-        img.alt = 'Image unavailable';
-        return;
+      if (!img.isConnected) return;
+      while (stage < 2) {
+        stage++;
+        try {
+          const nextUrl = stage === 1
+            ? await localUrl(path, false, invoke)
+            : await invoke('read_file_data_url', { filePath: path });
+          if (nextUrl && img.isConnected) {
+            img.src = nextUrl;
+            return;
+          }
+        } catch (_) {}
       }
-      fallbackUsed = true;
-      try {
-        const original = await localUrl(path, false, invoke);
-        if (img.isConnected) img.src = original;
-      } catch (_) {
-        img.closest('.skeleton')?.classList.remove('skeleton');
-        img.alt = 'Image unavailable';
-      }
+      stage = 3;
+      markBroken(img, options.onFail);
     };
-    const job = { img, run: async () => {
+    const job = { img, onFail: options.onFail, run: async () => {
       let url;
       try {
+        stage = 0;
         url = await localUrl(path, true, invoke);
       } catch (_) {
-        fallbackUsed = true;
-        url = await localUrl(path, false, invoke);
+        try {
+          stage = 1;
+          url = await localUrl(path, false, invoke);
+        } catch (__) {
+          stage = 2;
+          url = await invoke('read_file_data_url', { filePath: path });
+        }
       }
+      if (!url) throw new Error('Image unavailable');
       if (img.isConnected) img.src = url;
     } };
     if (observer) { jobs.set(img, job); observer.observe(img); }

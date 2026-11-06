@@ -27,8 +27,8 @@ fn thumbnail_in(source: &Path, cache: &Path) -> Result<PathBuf, String> {
         .hash(&mut hash);
     480u32.hash(&mut hash);
     let target = cache.join(format!("{:016x}.jpg", hash.finish()));
-    if target.exists() {
-        return Ok(target);
+    if target.metadata().is_ok_and(|m| m.len() > 0) && crate::network::validate_image(&target).is_ok() {
+        return Ok(crate::gallery::clean_windows_path(target));
     }
     let mut reader = ImageReader::open(&source)
         .map_err(|e| e.to_string())?
@@ -61,7 +61,7 @@ fn thumbnail_in(source: &Path, cache: &Path) -> Result<PathBuf, String> {
             let _ = std::fs::remove_file(entry.path());
         }
     }
-    Ok(target)
+    Ok(crate::gallery::clean_windows_path(target))
 }
 
 #[cfg(test)]
@@ -78,6 +78,10 @@ mod tests {
         assert_eq!(decoded.width(), 480);
         assert!(decoded.height() <= 480);
         assert_eq!(thumbnail_in(&source, &cache).unwrap(), first);
+        std::fs::write(&first, b"").unwrap();
+        let regenerated = thumbnail_in(&source, &cache).unwrap();
+        assert_eq!(regenerated, first);
+        assert!(image::open(&regenerated).is_ok());
         image::RgbImage::new(100, 100).save(&source).unwrap();
         assert_ne!(thumbnail_in(&source, &cache).unwrap(), first);
     }

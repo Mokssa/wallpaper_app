@@ -81,6 +81,7 @@ async fn get_local_image_path(
     })
     .await
     .map_err(|e| e.to_string())??;
+    let path = gallery::clean_windows_path(path);
     app.asset_protocol_scope()
         .allow_file(&path)
         .map_err(|e| e.to_string())?;

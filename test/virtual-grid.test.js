@@ -29,9 +29,9 @@ describe('Virtual grid preserves scrollable item access', () => {
       grid.destroy();
     }
   });
-  it('retains normal rendering for small and original-ratio grids', () => {
+  it('retains normal rendering for small grids and virtualizes large grids uniformly at 16:10', () => {
     const small = makeGrid(100); expect(small.cards.size).toBe(100); small.destroy();
     container.classList.add('ratio-original');
-    const original = makeGrid(150); expect(original.cards.size).toBe(150); original.destroy();
+    const large = makeGrid(150); expect(large.cards.size).toBeLessThan(50); large.destroy();
   });
 });

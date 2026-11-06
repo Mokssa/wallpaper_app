@@ -41,4 +41,60 @@ describe('local image loading lifecycle', () => {
     await new Promise(resolve => setTimeout(resolve, 0));
     expect(image.src).toContain(encodeURIComponent('D:/original.jpg'));
   });
+
+  it('recovers via read_file_data_url when asset protocol URLs fail to decode', async () => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'm3-card-img-wrapper skeleton';
+    const image = document.createElement('img');
+    wrapper.appendChild(image);
+    document.body.appendChild(wrapper);
+
+    const calls = [];
+    const invoke = async (command, args) => {
+      calls.push({ command, args });
+      if (command === 'get_local_image_path') {
+        return args.thumbnail ? 'D:/thumb.jpg' : 'D:/original.jpg';
+      }
+      if (command === 'read_file_data_url') {
+        return 'data:image/jpeg;base64,/9j/4AAQSkZJRg==';
+      }
+      throw new Error(`Unexpected command: ${command}`);
+    };
+
+    window.WallpaperImages.loadLocal(image, '\\\\?\\D:\\wallpaper.jpg', invoke);
+    window.WallpaperImages.activate(document.body);
+    await new Promise(resolve => setTimeout(resolve, 0));
+    expect(image.src).toContain(encodeURIComponent('D:/thumb.jpg'));
+
+    // Stage 0 -> Stage 1 (original asset URL)
+    await image.onerror();
+    expect(image.src).toContain(encodeURIComponent('D:/original.jpg'));
+
+    // Stage 1 -> Stage 2 (Base64 data URL fallback)
+    await image.onerror();
+    expect(image.src).toBe('data:image/jpeg;base64,/9j/4AAQSkZJRg==');
+    expect(calls.some(c => c.command === 'read_file_data_url')).toBe(true);
+  });
+
+  it('cleans up broken src/alt and marks wrapper with img-error when all local fallbacks fail', async () => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'm3-card-img-wrapper skeleton';
+    const image = document.createElement('img');
+    image.alt = 'Should Not Leak';
+    wrapper.appendChild(image);
+    document.body.appendChild(wrapper);
+
+    const invoke = async () => {
+      throw new Error('file deleted from disk');
+    };
+
+    window.WallpaperImages.loadLocal(image, 'D:/missing.jpg', invoke);
+    window.WallpaperImages.activate(document.body);
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    expect(wrapper.classList.contains('skeleton')).toBe(false);
+    expect(wrapper.classList.contains('img-error')).toBe(true);
+    expect(image.getAttribute('src')).toBeNull();
+    expect(image.alt).toBe('');
+  });
 });

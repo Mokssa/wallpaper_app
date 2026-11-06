@@ -6,13 +6,24 @@ use std::{
     path::{Path, PathBuf},
 };
 
+pub fn clean_windows_path(path: PathBuf) -> PathBuf {
+    if let Some(s) = path.to_str() {
+        if let Some(stripped) = s.strip_prefix(r"\\?\") {
+            if !stripped.starts_with(r"UNC\") && stripped.as_bytes().get(1) == Some(&b':') {
+                return PathBuf::from(stripped);
+            }
+        }
+    }
+    path
+}
+
 pub fn image_path(root: &Path, path: &Path) -> Result<PathBuf, String> {
     let root = root.canonicalize().map_err(|e| e.to_string())?;
     let path = path.canonicalize().map_err(|e| e.to_string())?;
     if !path.starts_with(&root) || !path.is_file() || !is_image(&path) {
         return Err("Image is outside the selected wallpaper directory".into());
     }
-    Ok(path)
+    Ok(clean_windows_path(path))
 }
 
 pub fn is_image(path: &Path) -> bool {
@@ -173,5 +184,16 @@ mod tests {
         fs::write(dir.path().join("personal.json"), b"{}").unwrap();
         scan(dir.path()).unwrap();
         assert!(dir.path().join("personal.json").exists());
+    }
+    #[test]
+    fn clean_windows_path_strips_verbatim_drive_prefix_only() {
+        assert_eq!(
+            clean_windows_path(PathBuf::from(r"\\?\C:\Users\cst\wallpaper.jpg")),
+            PathBuf::from(r"C:\Users\cst\wallpaper.jpg")
+        );
+        assert_eq!(
+            clean_windows_path(PathBuf::from(r"\\?\UNC\server\share\wallpaper.jpg")),
+            PathBuf::from(r"\\?\UNC\server\share\wallpaper.jpg")
+        );
     }
 }

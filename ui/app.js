@@ -169,6 +169,7 @@ const lbZoomLevel = document.getElementById('lb-zoom-level');
 const lbBtnZoomIn = document.getElementById('lb-btn-zoom-in');
 const lbBtnZoomOut = document.getElementById('lb-btn-zoom-out');
 const lbBtnReset = document.getElementById('lb-btn-reset');
+const lbBtnDownload = document.getElementById('lb-btn-download');
 const lbBtnApply = document.getElementById('lb-btn-apply');
 const lbBtnClose = document.getElementById('lb-btn-close');
 
@@ -706,6 +707,19 @@ function setupNavigation() {
     });
   });
 
+  const settingsSubnavItems = document.querySelectorAll('#settings-subnav .settings-subnav-item');
+  settingsSubnavItems.forEach(btn => {
+    btn.addEventListener('click', () => {
+      settingsSubnavItems.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const targetId = btn.getAttribute('data-target');
+      const targetEl = targetId ? document.getElementById(targetId) : null;
+      if (targetEl) {
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
   if (btnGotoExplore) {
     btnGotoExplore.addEventListener('click', () => {
       switchTab('explore');
@@ -722,6 +736,27 @@ function setupNavigation() {
 // ==========================================================================
 // 4) Details Modal Dialog (渐进式超清原图与真实分辨率)
 // ==========================================================================
+function isRenderableImgUrl(url) {
+  if (!url || typeof url !== 'string') return false;
+  return (
+    url.startsWith('http://') ||
+    url.startsWith('https://') ||
+    url.startsWith('data:') ||
+    url.startsWith('asset:') ||
+    url.startsWith('blob:')
+  );
+}
+
+async function resolveLocalDisplayUrl(pathStr) {
+  if (!pathStr) throw new Error('Local image path unavailable');
+  if (isRenderableImgUrl(pathStr)) return pathStr;
+  try {
+    return await window.WallpaperImages.localUrl(pathStr, false, invoke);
+  } catch (_) {
+    return await invoke('read_file_data_url', { filePath: pathStr });
+  }
+}
+
 function openWallpaperDetails(item, type = 'online', imgSrc = '') {
   currentDetailItem = item;
   currentDetailType = type;
@@ -729,12 +764,28 @@ function openWallpaperDetails(item, type = 'online', imgSrc = '') {
 
   const rawUrl = item ? (item.raw_url || item.url || item.file_path || item.thumb_url) : imgSrc;
   const thumbUrl = type === 'local' ? imgSrc : (item ? (item.thumb_url || imgSrc) : imgSrc);
+  const isLocalSource = type === 'local' || Boolean(rawUrl && !isRenderableImgUrl(rawUrl));
 
-  // 1. 先用缩略图瞬间占位，避免任何等待
-  modalImg.src = thumbUrl || rawUrl;
+  const modalTitleEl = document.getElementById('modal-title');
+  const modalSubtitleEl = document.getElementById('modal-subtitle');
+  if (modalTitleEl) {
+    modalTitleEl.textContent = (item && item.title) ? item.title : (type === 'local' ? '本地珍藏壁纸' : '精选超清壁纸');
+  }
+
+  // 1. 先用合法缩略图瞬间占位，避免将原始磁盘路径直接写入 img.src 导致裂图
+  const previewPlaceholder = isRenderableImgUrl(thumbUrl) ? thumbUrl : (isRenderableImgUrl(rawUrl) ? rawUrl : '');
+  if (previewPlaceholder) {
+    modalImg.src = previewPlaceholder;
+  } else {
+    modalImg.removeAttribute('src');
+  }
 
   // 分辨率展示：若本地壁纸或数据源已知分辨率则立即秒显，否则采用优雅微型骨架屏占位
   const knownRes = (item && item.resolution) ? String(item.resolution).replace('x', ' × ') : null;
+  if (modalSubtitleEl) {
+    const srcLabel = (item && item.source) ? String(item.source).toUpperCase() : (type === 'local' ? '本地图库' : String(currentSource || 'ONLINE').toUpperCase());
+    modalSubtitleEl.textContent = `${knownRes || '4K UHD'} · ${srcLabel}`;
+  }
   if (modalMetaResolution) {
     if (knownRes) {
       modalMetaResolution.classList.remove('skeleton');
@@ -746,7 +797,54 @@ function openWallpaperDetails(item, type = 'online', imgSrc = '') {
   }
 
   // 2. 加载真实超高清原图并展示真实 4K/8K 分辨率
-  if (rawUrl) {
+  if (isLocalSource) {
+    const localTarget = (item && item.file_path) || rawUrl;
+    resolveLocalDisplayUrl(localTarget).then(url => {
+      if (!url || !detailModal.classList.contains('active') || currentDetailItem !== item) return;
+      const fallbackToDataUrl = async () => {
+        try {
+          const dataUrl = await invoke('read_file_data_url', { filePath: localTarget });
+          if (dataUrl && detailModal.classList.contains('active') && currentDetailItem === item) {
+            modalImg.onerror = null;
+            modalImg.src = dataUrl;
+          }
+        } catch (_) {}
+        if (modalMetaResolution && modalMetaResolution.classList.contains('skeleton')) {
+          modalMetaResolution.classList.remove('skeleton');
+          modalMetaResolution.textContent = knownRes || '4K UHD';
+        }
+      };
+
+      if (!previewPlaceholder || previewPlaceholder === url) {
+        modalImg.onload = () => {
+          if (detailModal.classList.contains('active') && currentDetailItem === item && modalMetaResolution && modalImg.naturalWidth) {
+            modalMetaResolution.classList.remove('skeleton');
+            modalMetaResolution.textContent = `${modalImg.naturalWidth} × ${modalImg.naturalHeight}`;
+          }
+        };
+        modalImg.onerror = fallbackToDataUrl;
+        modalImg.src = url;
+      } else {
+        const hdImage = new Image();
+        hdImage.onload = () => {
+          if (detailModal.classList.contains('active') && currentDetailItem === item) {
+            modalImg.src = url;
+            if (modalMetaResolution && hdImage.naturalWidth) {
+              modalMetaResolution.classList.remove('skeleton');
+              modalMetaResolution.textContent = `${hdImage.naturalWidth} × ${hdImage.naturalHeight}`;
+            }
+          }
+        };
+        hdImage.onerror = fallbackToDataUrl;
+        hdImage.src = url;
+      }
+    }).catch(() => {
+      if (modalMetaResolution && modalMetaResolution.classList.contains('skeleton')) {
+        modalMetaResolution.classList.remove('skeleton');
+        modalMetaResolution.textContent = knownRes || '4K UHD';
+      }
+    });
+  } else if (rawUrl) {
     const hdImage = new Image();
     hdImage.src = rawUrl;
     hdImage.onload = () => {
@@ -780,7 +878,35 @@ function openWallpaperDetails(item, type = 'online', imgSrc = '') {
     modalMetaResolution.textContent = '4K UHD';
   }
 
-  // 源地址链接 (真实原图下载直链)
+  // 源地址链接 (真实原图下载直链) 与 Bento 元数据面板
+  const modalMetaSource = document.getElementById('modal-meta-source');
+  const modalMetaAuthor = document.getElementById('modal-meta-author');
+  const modalMetaAspect = document.getElementById('modal-meta-aspect');
+  const modalMetaFormat = document.getElementById('modal-meta-format');
+  if (modalMetaSource) {
+    modalMetaSource.textContent = (item && item.source)
+      ? String(item.source).toUpperCase()
+      : (type === 'local' ? 'LOCAL' : String(currentSource || 'ONLINE').toUpperCase());
+  }
+  if (modalMetaAuthor) {
+    modalMetaAuthor.textContent = (item && (item.author || item.photographer || item.copyright))
+      ? String(item.author || item.photographer || item.copyright)
+      : (type === 'local' ? 'Local Library' : 'Curated UHD');
+  }
+  if (modalMetaAspect) {
+    modalMetaAspect.textContent = '16:9 UHD';
+  }
+  if (modalMetaFormat) {
+    const lowerUrl = String(rawUrl || '').toLowerCase();
+    if (lowerUrl.includes('.png')) {
+      modalMetaFormat.textContent = 'PNG / Lossless';
+    } else if (lowerUrl.includes('.webp')) {
+      modalMetaFormat.textContent = 'WEBP / UHD';
+    } else {
+      modalMetaFormat.textContent = 'JPEG / UHD';
+    }
+  }
+
   const sourceUrl = rawUrl || '';
   if (modalMetaLinkText) {
     modalMetaLinkText.textContent = sourceUrl || '本地文件';
@@ -935,16 +1061,47 @@ function openLightbox(imgSrc, item, type = 'online') {
   lbPosY = 0;
   updateLightboxTransform();
 
+  const lbTitleEl = document.getElementById('lb-wallpaper-title');
+  const lbIndexBadgeEl = document.getElementById('lb-index-badge');
+  if (lbTitleEl) {
+    lbTitleEl.textContent = (item && item.title) ? item.title : (type === 'local' ? '本地超清壁纸' : '在线精选壁纸');
+  }
+  if (lbIndexBadgeEl) {
+    const list = type === 'local' ? cachedWallpapers : onlineWallpapers;
+    const idx = Array.isArray(list) ? list.indexOf(item) : -1;
+    lbIndexBadgeEl.textContent = (idx >= 0 && list.length > 0)
+      ? `${idx + 1} / ${list.length}`
+      : ((item && item.resolution) ? String(item.resolution) : '4K UHD');
+  }
+
   const rawUrl = item ? (item.raw_url || item.url || item.file_path || item.thumb_url) : imgSrc;
   const thumbUrl = item ? (item.thumb_url || imgSrc) : imgSrc;
+  const isLocalSource = type === 'local' || Boolean(rawUrl && !isRenderableImgUrl(rawUrl));
 
-  // 1. 先用缩略图瞬间秒开占位
-  lbImage.src = thumbUrl || rawUrl;
+  // 1. 先用合法缩略图瞬间秒开占位，避免将原始磁盘路径直接写入 lbImage.src
+  const initialLbSrc = isRenderableImgUrl(thumbUrl) ? thumbUrl : (isRenderableImgUrl(rawUrl) ? rawUrl : '');
+  if (initialLbSrc) {
+    lbImage.src = initialLbSrc;
+  } else {
+    lbImage.removeAttribute('src');
+  }
   fullscreenLightbox.classList.add('active');
-  if (type === 'local') {
-    window.WallpaperImages.localUrl(item.file_path || item.raw_url || item.thumb_url, false, invoke)
+  if (isLocalSource) {
+    const localTarget = (item && (item.file_path || item.raw_url || item.thumb_url)) || rawUrl;
+    resolveLocalDisplayUrl(localTarget)
       .then(url => {
-        if (currentDetailItem === item && fullscreenLightbox.classList.contains('active')) lbImage.src = url;
+        if (currentDetailItem === item && fullscreenLightbox.classList.contains('active') && url) {
+          lbImage.onerror = async () => {
+            lbImage.onerror = null;
+            try {
+              const dataUrl = await invoke('read_file_data_url', { filePath: localTarget });
+              if (dataUrl && currentDetailItem === item && fullscreenLightbox.classList.contains('active')) {
+                lbImage.src = dataUrl;
+              }
+            } catch (_) {}
+          };
+          lbImage.src = url;
+        }
       }).catch(err => showSnackBar(String(err), true));
     return;
   }
@@ -1062,6 +1219,17 @@ function setupLightboxInteractions() {
     });
   }
 
+  if (lbBtnDownload) {
+    lbBtnDownload.addEventListener('click', async () => {
+      if (!currentDetailItem) return;
+      if (currentDetailType === 'local') {
+        showSnackBar('当前壁纸已保存在本地图库');
+      } else {
+        await downloadOnlyAction(currentDetailItem);
+      }
+    });
+  }
+
   if (lbBtnApply) {
     lbBtnApply.addEventListener('click', async () => {
       if (!currentDetailItem) return;
@@ -1075,8 +1243,22 @@ function setupLightboxInteractions() {
 
   if (lbBtnClose) lbBtnClose.addEventListener('click', closeLightbox);
 
-  // 全局键盘快捷键 (Lightbox 与 Modal)
+  // 全局键盘快捷键 (Lightbox、Modal 与 Ctrl+K 搜索聚焦)
   window.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      switchTab('explore');
+      const searchInputId = currentSource === 'pexels'
+        ? 'input-pexels-query'
+        : (currentSource === 'unsplash' ? 'input-unsplash-query' : 'input-wallhaven-query');
+      const searchEl = document.getElementById(searchInputId);
+      if (searchEl) {
+        searchEl.focus();
+        searchEl.select?.();
+      }
+      return;
+    }
+
     // 若当前焦点在输入框/选择框，不触发快捷键
     if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) {
       return;
@@ -1202,7 +1384,8 @@ function updateConfigUI() {
   updateRandomSourceChipsUI(appConfig.random_source || 'all');
   if (inputConfigQuery) inputConfigQuery.value = appConfig.query || '';
   if (inputOnlineQuery) inputOnlineQuery.value = appConfig.query || '';
-  if (selectConfigCardratio) selectConfigCardratio.value = appConfig.card_ratio || 'uniform';
+  appConfig.card_ratio = 'uniform';
+  if (selectConfigCardratio) selectConfigCardratio.value = 'uniform';
   if (inputConfigUnsplashKey) inputConfigUnsplashKey.value = appConfig.unsplash_access_key || '';
   if (inputConfigPexelsKey) inputConfigPexelsKey.value = appConfig.pexels_api_key || '';
   if (labelCacheDir) labelCacheDir.textContent = appConfig.cache_dir || 'cache/wallpapers';
@@ -1225,6 +1408,8 @@ function updateConfigUI() {
     selectConfigLanguage.value = appConfig.language;
   }
 
+  syncCustomM3Selects();
+
   if (checkAutoLaunch) {
     invoke('get_auto_launch_enabled').then(enabled => {
       checkAutoLaunch.checked = !!enabled;
@@ -1237,23 +1422,26 @@ function updateConfigUI() {
 }
 
 function applyDisplaySettings() {
-  const isUniform = (appConfig.card_ratio !== 'original');
+  appConfig.card_ratio = 'uniform';
   if (galleryGrid) {
-    galleryGrid.classList.toggle('ratio-uniform', isUniform);
-    galleryGrid.classList.toggle('ratio-original', !isUniform);
+    galleryGrid.classList.add('ratio-uniform');
+    galleryGrid.classList.remove('ratio-original');
   }
   if (onlineGrid) {
-    onlineGrid.classList.toggle('ratio-uniform', isUniform);
-    onlineGrid.classList.toggle('ratio-original', !isUniform);
+    onlineGrid.classList.add('ratio-uniform');
+    onlineGrid.classList.remove('ratio-original');
   }
   if (historyGrid) {
-    historyGrid.classList.toggle('ratio-uniform', isUniform);
-    historyGrid.classList.toggle('ratio-original', !isUniform);
+    historyGrid.classList.add('ratio-uniform');
+    historyGrid.classList.remove('ratio-original');
   }
 
   if (infiniteLoader) infiniteLoader.style.display = 'none'; // 仅在滚动触发拉取时按需显示
   onlineVirtualGrid?.update(onlineWallpapers);
   galleryVirtualGrid?.update(cachedWallpapers);
+  if (document.getElementById('tab-gallery')?.classList.contains('active')) {
+    window.WallpaperImages?.activate(galleryGrid);
+  }
   setTimeout(checkAndFillViewport, 80);
 }
 
@@ -1275,7 +1463,7 @@ async function saveConfig() {
     appConfig.random_source = selectConfigRandomSource ? selectConfigRandomSource.value : (appConfig.random_source || "all");
     appConfig.query = inputConfigQuery ? inputConfigQuery.value.trim() : "";
     appConfig.load_mode = "infinite";
-    appConfig.card_ratio = selectConfigCardratio ? selectConfigCardratio.value : "uniform";
+    appConfig.card_ratio = "uniform";
     appConfig.theme_color = appConfig.theme_color || "indigo";
     appConfig.custom_theme_color = appConfig.custom_theme_color || localStorage.getItem('wp_custom_theme_color') || "#8b5cf6";
     appConfig.amoled_mode = !!appConfig.amoled_mode;
@@ -1340,7 +1528,9 @@ async function renderGallery(items) {
 
   if (!galleryVirtualGrid) galleryVirtualGrid = new window.WallpaperVirtualGrid(galleryGrid, mainScrollEl, createLocalCard);
   galleryVirtualGrid.update(cachedWallpapers);
-
+  if (document.getElementById('tab-gallery')?.classList.contains('active')) {
+    window.WallpaperImages?.activate(galleryGrid);
+  }
 
   updateBatchUI();
 }
@@ -1367,15 +1557,17 @@ function createLocalCard(item) {
 
     const img = document.createElement('img');
     img.className = 'm3-card-img';
-    img.alt = item.title || 'Wallpaper';
+    img.alt = '';
     img.loading = 'lazy'; img.decoding = 'async';
 
     img.onload = () => {
-      imgWrapper.classList.remove('skeleton');
+      imgWrapper.classList.remove('skeleton', 'img-error');
+      img.alt = item.title || 'Wallpaper';
       img.classList.add('loaded');
     };
-    if (img.complete) {
-      imgWrapper.classList.remove('skeleton');
+    if (img.complete && img.naturalWidth > 0 && img.getAttribute('src')) {
+      imgWrapper.classList.remove('skeleton', 'img-error');
+      img.alt = item.title || 'Wallpaper';
       img.classList.add('loaded');
     }
 
@@ -1384,7 +1576,7 @@ function createLocalCard(item) {
     actions.className = 'm3-card-actions';
 
     const btnApply = document.createElement('button');
-    btnApply.className = 'm3-action-icon-btn';
+    btnApply.className = 'm3-action-icon-btn action-apply';
     btnApply.title = typeof t === 'function' ? t('action_set_wallpaper') : '设为桌面壁纸';
     btnApply.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
     btnApply.addEventListener('click', async (e) => {
@@ -1421,15 +1613,33 @@ function createLocalCard(item) {
     actions.appendChild(btnApply);
     actions.appendChild(btnDelete);
 
+    const cardBadge = document.createElement('span');
+    cardBadge.className = 'm3-card-badge';
+    cardBadge.textContent = String(item.source || 'LOCAL').toUpperCase();
+
+    const cardInfo = document.createElement('div');
+    cardInfo.className = 'm3-card-info';
+    const cardTitle = document.createElement('span');
+    cardTitle.className = 'm3-card-title';
+    cardTitle.textContent = item.title || '本地珍藏壁纸';
+    const cardSub = document.createElement('span');
+    cardSub.className = 'm3-card-sub';
+    cardSub.textContent = `${item.resolution || '4K UHD'} · ${String(item.source || 'LOCAL').toUpperCase()}`;
+    cardInfo.appendChild(cardTitle);
+    cardInfo.appendChild(cardSub);
+
     imgWrapper.appendChild(img);
     card.appendChild(imgWrapper);
+    card.appendChild(cardBadge);
+    card.appendChild(cardInfo);
     card.appendChild(actions);
 
     card.addEventListener('click', () => {
       if (isBatchMode) {
         toggleCardSelection(item.file_path);
       } else {
-        openLightbox(img.src, item, 'local');
+        const loadedSrc = img.classList.contains('loaded') ? (img.getAttribute('src') || '') : '';
+        openLightbox(loadedSrc, item, 'local');
       }
     });
 
@@ -1685,6 +1895,9 @@ function renderHistory(items) {
   window.WallpaperImages?.release(historyGrid);
   historyGrid.innerHTML = '';
 
+  historyGrid.classList.add('ratio-uniform');
+  historyGrid.classList.remove('ratio-original');
+
   items.forEach(item => {
     const card = document.createElement('div');
     card.className = 'm3-wallpaper-card history-card';
@@ -1694,23 +1907,83 @@ function renderHistory(items) {
 
     const img = document.createElement('img');
     img.className = 'm3-card-img';
-    img.alt = item.title || 'Wallpaper';
+    img.alt = '';
     img.loading = 'lazy';
-
-    const imgSrc = item.thumb_url || item.raw_url;
-    if (imgSrc.startsWith('http://') || imgSrc.startsWith('https://') || imgSrc.startsWith('data:')) {
-      img.src = imgSrc;
-    } else {
-      queueMicrotask(() => window.WallpaperImages.loadLocal(img, imgSrc, invoke));
-    }
+    img.decoding = 'async';
 
     img.onload = () => {
-      imgWrapper.classList.remove('skeleton');
+      imgWrapper.classList.remove('skeleton', 'img-error');
+      img.alt = item.title || item.name || 'Wallpaper';
       img.classList.add('loaded');
     };
-    if (img.complete) {
+
+    const markHistoryBroken = () => {
       imgWrapper.classList.remove('skeleton');
-      img.classList.add('loaded');
+      imgWrapper.classList.add('img-error');
+      img.classList.remove('loaded');
+      img.alt = '';
+      img.removeAttribute('src');
+    };
+
+    const loadHistoryRemote = (primaryUrl, secondaryUrl = '') => {
+      let remoteStage = 0;
+      const distinctSecondary = (
+        secondaryUrl &&
+        secondaryUrl !== primaryUrl &&
+        (secondaryUrl.startsWith('http://') || secondaryUrl.startsWith('https://'))
+      ) ? secondaryUrl : '';
+
+      img.onerror = async () => {
+        if (!card.isConnected) return;
+        if (remoteStage === 0 && distinctSecondary) {
+          remoteStage = 1;
+          img.src = distinctSecondary;
+          return;
+        }
+        if (remoteStage < 2) {
+          remoteStage = 2;
+          const proxyTarget = distinctSecondary || primaryUrl;
+          if (proxyTarget && (proxyTarget.startsWith('http://') || proxyTarget.startsWith('https://'))) {
+            try {
+              const base64Data = await invoke('fetch_remote_image_base64', { url: proxyTarget });
+              if (!card.isConnected) return;
+              if (base64Data) {
+                img.src = base64Data;
+                return;
+              }
+            } catch (_) {
+              // Fall through to markHistoryBroken
+            }
+          }
+        }
+        markHistoryBroken();
+      };
+
+      img.src = primaryUrl;
+      if (img.complete && img.naturalWidth > 0 && img.getAttribute('src')) {
+        imgWrapper.classList.remove('skeleton', 'img-error');
+        img.alt = item.title || item.name || 'Wallpaper';
+        img.classList.add('loaded');
+      }
+    };
+
+    const imgSrc = item.thumb_url || item.raw_url || '';
+    if (!imgSrc) {
+      markHistoryBroken();
+    } else if (isRenderableImgUrl(imgSrc)) {
+      loadHistoryRemote(imgSrc, item.raw_url || '');
+    } else {
+      queueMicrotask(() => window.WallpaperImages?.loadLocal(img, imgSrc, invoke, {
+        onFail: () => {
+          if (item.raw_url && (item.raw_url.startsWith('http://') || item.raw_url.startsWith('https://'))) {
+            imgWrapper.classList.remove('img-error');
+            imgWrapper.classList.add('skeleton');
+            loadHistoryRemote(item.raw_url, '');
+            return true;
+          }
+          return false;
+        },
+      }));
     }
 
     // Hover Action Buttons
@@ -1818,12 +2091,15 @@ function renderHistory(items) {
       if (item.raw_url && (item.raw_url.startsWith('http://') || item.raw_url.startsWith('https://'))) {
         openWallpaperDetails(item, 'online', item.raw_url || item.thumb_url);
       } else {
-        openLightbox(img.src, item, 'local');
+        const loadedSrc = img.classList.contains('loaded') ? (img.getAttribute('src') || '') : '';
+        openLightbox(loadedSrc, item, 'local');
       }
     });
 
     historyGrid.appendChild(card);
   });
+
+  queueMicrotask(() => window.WallpaperImages?.activate(historyGrid));
 }
 
 // ==========================================================================
@@ -1929,6 +2205,10 @@ async function handleQuickRandom() {
 // ==========================================================================
 function renderOnlineGrid(items, append = false) {
   const newItems = Array.isArray(items) ? items : [];
+  if (onlineGrid) {
+    onlineGrid.classList.add('ratio-uniform');
+    onlineGrid.classList.remove('ratio-original');
+  }
   
   if (!append) {
     onlineVirtualGrid?.destroy(); onlineVirtualGrid = null;
@@ -1994,25 +2274,24 @@ function createOnlineCard(item) {
 
     const img = document.createElement('img');
     img.className = 'm3-card-img';
-    img.alt = 'Wallpaper';
+    img.alt = '';
     img.loading = 'lazy'; img.decoding = 'async';
-    img.src = item.thumb_url;
 
     img.onload = () => {
-      imgWrapper.classList.remove('skeleton');
+      imgWrapper.classList.remove('skeleton', 'img-error');
+      img.alt = item.title || item.author || 'Wallpaper';
       img.classList.add('loaded');
     };
-    if (img.complete) {
-      imgWrapper.classList.remove('skeleton');
-      img.classList.add('loaded');
-    }
 
+    const initialUrl = item.thumb_url || item.raw_url || '';
     let fallbackAttempted = false;
     img.onerror = async () => {
       if (fallbackAttempted) { removeOnlineItem(item, card); return; }
       fallbackAttempted = true;
+      const fallbackSourceUrl = item.thumb_url || item.raw_url;
+      if (!fallbackSourceUrl) { removeOnlineItem(item, card); return; }
       try {
-        const base64Data = await invoke('fetch_remote_image_base64', { url: item.thumb_url });
+        const base64Data = await invoke('fetch_remote_image_base64', { url: fallbackSourceUrl });
         if (!card.isConnected) return;
         if (base64Data) {
           img.src = base64Data;
@@ -2025,12 +2304,23 @@ function createOnlineCard(item) {
       }
     };
 
+    if (initialUrl) {
+      img.src = initialUrl;
+      if (img.complete && img.naturalWidth > 0 && img.getAttribute('src')) {
+        imgWrapper.classList.remove('skeleton', 'img-error');
+        img.alt = item.title || item.author || 'Wallpaper';
+        img.classList.add('loaded');
+      }
+    } else {
+      queueMicrotask(() => removeOnlineItem(item, card));
+    }
+
     // Hover Quick Action Buttons (去除多余的全屏缩放按钮，点击图片即可查看)
     const actions = document.createElement('div');
     actions.className = 'm3-card-actions';
 
     const btnApply = document.createElement('button');
-    btnApply.className = 'm3-action-icon-btn';
+    btnApply.className = 'm3-action-icon-btn action-apply';
     btnApply.title = '一键设为桌面壁纸';
     btnApply.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
     btnApply.addEventListener('click', async (e) => {
@@ -2050,8 +2340,25 @@ function createOnlineCard(item) {
     actions.appendChild(btnApply);
     actions.appendChild(btnDownload);
 
+    const cardBadge = document.createElement('span');
+    cardBadge.className = 'm3-card-badge';
+    cardBadge.textContent = String(item.source || currentSource || 'ONLINE').toUpperCase();
+
+    const cardInfo = document.createElement('div');
+    cardInfo.className = 'm3-card-info';
+    const cardTitle = document.createElement('span');
+    cardTitle.className = 'm3-card-title';
+    cardTitle.textContent = item.title || item.author || '精选超清壁纸';
+    const cardSub = document.createElement('span');
+    cardSub.className = 'm3-card-sub';
+    cardSub.textContent = `${item.resolution || '4K UHD'} · ${String(item.source || currentSource || 'ONLINE').toUpperCase()}`;
+    cardInfo.appendChild(cardTitle);
+    cardInfo.appendChild(cardSub);
+
     imgWrapper.appendChild(img);
     card.appendChild(imgWrapper);
+    card.appendChild(cardBadge);
+    card.appendChild(cardInfo);
     card.appendChild(actions);
 
     card.addEventListener('click', () => {
@@ -2321,6 +2628,39 @@ function setupEvents() {
     });
   }
 
+  // 复制原图链接或本地路径到剪贴板
+  if (btnCopyLink) {
+    btnCopyLink.addEventListener('click', async () => {
+      const linkToCopy = currentDetailItem
+        ? (currentDetailItem.raw_url || currentDetailItem.url || currentDetailItem.file_path || currentDetailItem.thumb_url || '')
+        : (modalMetaLinkText ? modalMetaLinkText.textContent : '');
+      if (!linkToCopy) return;
+      try {
+        if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+          await navigator.clipboard.writeText(linkToCopy);
+        }
+        showSnackBar('已复制链接到剪贴板');
+      } catch (e) {
+        showSnackBar('已复制链接到剪贴板');
+      }
+    });
+  }
+
+  // 详情面板色板圆点点击复制 HEX
+  const detailColorDots = document.querySelectorAll('.detail-color-dot');
+  detailColorDots.forEach(dot => {
+    dot.addEventListener('click', async () => {
+      const hex = dot.getAttribute('data-color') || dot.getAttribute('title') || '';
+      if (!hex) return;
+      try {
+        if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+          await navigator.clipboard.writeText(hex);
+        }
+      } catch (e) {}
+      showSnackBar(`已复制色值 ${hex}`);
+    });
+  });
+
   // 详情弹窗中点击预览图进入全屏缩放 Lightbox
   if (dialogPreviewBox) {
     dialogPreviewBox.addEventListener('click', () => {
@@ -2332,7 +2672,19 @@ function setupEvents() {
   }
 
   if (modalBtnLightbox) {
-    modalBtnLightbox.addEventListener('click', () => {
+    modalBtnLightbox.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (currentDetailItem) {
+        const src = modalImg.src || (currentDetailItem.raw_url || currentDetailItem.url || currentDetailItem.thumb_url);
+        openLightbox(src, currentDetailItem, currentDetailType);
+      }
+    });
+  }
+
+  const modalBtnFullscreen = document.getElementById('modal-btn-fullscreen');
+  if (modalBtnFullscreen) {
+    modalBtnFullscreen.addEventListener('click', (e) => {
+      e.stopPropagation();
       if (currentDetailItem) {
         const src = modalImg.src || (currentDetailItem.raw_url || currentDetailItem.url || currentDetailItem.thumb_url);
         openLightbox(src, currentDetailItem, currentDetailType);
@@ -2773,6 +3125,7 @@ function setupContextualSourceControls() {
       if (typeof setLanguage === 'function') {
         setLanguage(lang);
       }
+      syncCustomM3Selects();
       appConfig.language = lang;
       saveConfig();
       showSnackBar(typeof t === 'function' ? t('toast_lang_changed') : '语言已切换');
@@ -2822,6 +3175,204 @@ function setupContextualSourceControls() {
   if (updateModal) {
     updateModal.addEventListener('click', (e) => {
       if (e.target === updateModal) closeUpdateModal();
+    });
+  }
+
+  setupCustomM3Selects();
+}
+
+// ==========================================================================
+// Custom Material Design 3 Animated Select Dropdown Controller
+// ==========================================================================
+function syncSingleCustomM3Select(selectEl) {
+  if (!selectEl) return;
+  const wrapper = selectEl.closest('.m3-custom-select');
+  if (!wrapper) return;
+
+  const labelEl = wrapper.querySelector('.m3-custom-select-label');
+  const optionBtns = wrapper.querySelectorAll('.m3-custom-select-option');
+  const options = Array.from(selectEl.options || []);
+  const selectedOpt = options.find(o => o.value === selectEl.value) || options[selectEl.selectedIndex] || options[0];
+
+  if (labelEl && selectedOpt) {
+    labelEl.textContent = selectedOpt.textContent || selectedOpt.value;
+  }
+
+  optionBtns.forEach((btn, idx) => {
+    const nativeOpt = options[idx];
+    const textSpan = btn.querySelector('.m3-custom-select-option-text');
+    if (nativeOpt && textSpan) {
+      textSpan.textContent = nativeOpt.textContent || nativeOpt.value;
+    }
+    const isSelected = btn.getAttribute('data-value') === (selectedOpt ? selectedOpt.value : selectEl.value);
+    btn.classList.toggle('selected', isSelected);
+    btn.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+  });
+}
+
+function syncCustomM3Selects() {
+  document.querySelectorAll('select.m3-select').forEach(selectEl => {
+    syncSingleCustomM3Select(selectEl);
+  });
+}
+
+function closeAllCustomM3Selects(exceptWrapper = null) {
+  document.querySelectorAll('.m3-custom-select.open').forEach(wrapper => {
+    if (wrapper !== exceptWrapper) {
+      wrapper.classList.remove('open');
+      const trigger = wrapper.querySelector('.m3-custom-select-trigger');
+      if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    }
+  });
+}
+
+function setupCustomM3Selects() {
+  const selects = document.querySelectorAll('select.m3-select');
+  selects.forEach(selectEl => {
+    if (selectEl.dataset.m3Enhanced === 'true') {
+      syncSingleCustomM3Select(selectEl);
+      return;
+    }
+    const parent = selectEl.parentNode;
+    if (!parent) return;
+
+    selectEl.dataset.m3Enhanced = 'true';
+    selectEl.classList.add('m3-select-enhanced');
+    selectEl.setAttribute('tabindex', '-1');
+    selectEl.setAttribute('aria-hidden', 'true');
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'm3-custom-select';
+    parent.insertBefore(wrapper, selectEl);
+    wrapper.appendChild(selectEl);
+
+    const trigger = document.createElement('button');
+    trigger.type = 'button';
+    trigger.className = 'm3-custom-select-trigger';
+    trigger.setAttribute('aria-haspopup', 'listbox');
+    trigger.setAttribute('aria-expanded', 'false');
+    const ariaLabel = selectEl.getAttribute('aria-label') || selectEl.getAttribute('title') || '';
+    if (ariaLabel) trigger.setAttribute('aria-label', ariaLabel);
+
+    const labelSpan = document.createElement('span');
+    labelSpan.className = 'm3-custom-select-label';
+
+    const chevronSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    chevronSvg.setAttribute('class', 'm3-custom-select-chevron');
+    chevronSvg.setAttribute('aria-hidden', 'true');
+    chevronSvg.setAttribute('viewBox', '0 0 24 24');
+    chevronSvg.setAttribute('fill', 'none');
+    chevronSvg.setAttribute('stroke', 'currentColor');
+    chevronSvg.setAttribute('stroke-width', '2.2');
+    chevronSvg.setAttribute('stroke-linecap', 'round');
+    chevronSvg.setAttribute('stroke-linejoin', 'round');
+    const chevronPoly = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+    chevronPoly.setAttribute('points', '6 9 12 15 18 9');
+    chevronSvg.appendChild(chevronPoly);
+
+    trigger.appendChild(labelSpan);
+    trigger.appendChild(chevronSvg);
+
+    const menu = document.createElement('div');
+    menu.className = 'm3-custom-select-menu';
+    menu.setAttribute('role', 'listbox');
+
+    Array.from(selectEl.options || []).forEach(opt => {
+      const optBtn = document.createElement('button');
+      optBtn.type = 'button';
+      optBtn.className = 'm3-custom-select-option';
+      optBtn.setAttribute('role', 'option');
+      optBtn.setAttribute('data-value', opt.value);
+
+      const optText = document.createElement('span');
+      optText.className = 'm3-custom-select-option-text';
+      optText.textContent = opt.textContent || opt.value;
+
+      const checkSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      checkSvg.setAttribute('class', 'm3-custom-select-check');
+      checkSvg.setAttribute('aria-hidden', 'true');
+      checkSvg.setAttribute('viewBox', '0 0 24 24');
+      checkSvg.setAttribute('fill', 'none');
+      checkSvg.setAttribute('stroke', 'currentColor');
+      checkSvg.setAttribute('stroke-width', '2.6');
+      checkSvg.setAttribute('stroke-linecap', 'round');
+      checkSvg.setAttribute('stroke-linejoin', 'round');
+      const checkPoly = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+      checkPoly.setAttribute('points', '20 6 9 17 4 12');
+      checkSvg.appendChild(checkPoly);
+
+      optBtn.appendChild(optText);
+      optBtn.appendChild(checkSvg);
+
+      optBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const prevVal = selectEl.value;
+        selectEl.value = opt.value;
+        syncSingleCustomM3Select(selectEl);
+        closeAllCustomM3Selects();
+        trigger.focus();
+        if (prevVal !== opt.value) {
+          selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      });
+
+      menu.appendChild(optBtn);
+    });
+
+    wrapper.appendChild(trigger);
+    wrapper.appendChild(menu);
+
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const willOpen = !wrapper.classList.contains('open');
+      closeAllCustomM3Selects(wrapper);
+      wrapper.classList.toggle('open', willOpen);
+      trigger.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+    });
+
+    wrapper.addEventListener('keydown', (e) => {
+      const isOpen = wrapper.classList.contains('open');
+      const opts = Array.from(menu.querySelectorAll('.m3-custom-select-option'));
+      if (e.key === 'Escape' && isOpen) {
+        e.preventDefault();
+        e.stopPropagation();
+        closeAllCustomM3Selects();
+        trigger.focus();
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (!isOpen) {
+          closeAllCustomM3Selects(wrapper);
+          wrapper.classList.add('open');
+          trigger.setAttribute('aria-expanded', 'true');
+          const current = menu.querySelector('.m3-custom-select-option.selected') || opts[0];
+          current?.focus();
+        } else {
+          const idx = opts.indexOf(document.activeElement);
+          const next = opts[(idx + 1) % opts.length];
+          next?.focus();
+        }
+      } else if (e.key === 'ArrowUp' && isOpen) {
+        e.preventDefault();
+        const idx = opts.indexOf(document.activeElement);
+        const prev = opts[(idx - 1 + opts.length) % opts.length];
+        prev?.focus();
+      }
+    });
+
+    selectEl.addEventListener('change', () => {
+      syncSingleCustomM3Select(selectEl);
+    });
+
+    syncSingleCustomM3Select(selectEl);
+  });
+
+  if (!window.__M3_CUSTOM_SELECT_DOC_BOUND__) {
+    window.__M3_CUSTOM_SELECT_DOC_BOUND__ = true;
+    document.addEventListener('click', (e) => {
+      const inside = e.target && e.target.closest ? e.target.closest('.m3-custom-select') : null;
+      if (!inside) {
+        closeAllCustomM3Selects();
+      }
     });
   }
 }

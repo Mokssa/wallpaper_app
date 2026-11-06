@@ -102,7 +102,7 @@
               <line x1="15" y1="15" x2="21" y2="21"/>
               <line x1="4" y1="4" x2="9" y2="9"/>
             </svg>
-            <span>随机换一张</span>
+            <span class="sr-only">随机换一张</span>
           </button>
         </div>
       </aside>
@@ -142,6 +142,7 @@
                 <input type="checkbox" id="check-batch-select-all" class="batch-checkbox" />
                 <span data-i18n="gallery_select_all">全选</span>
               </label>
+              <span class="batch-toolbar-divider" aria-hidden="true"></span>
               <span class="batch-selected-badge" id="batch-selected-badge">已选择 0 项</span>
             </div>
             <div class="batch-toolbar-right">
@@ -218,6 +219,7 @@
                   <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                   <input type="text" class="modern-search-input" id="input-pexels-query" placeholder="搜索 Pexels 全球顶尖 4K 摄影壁纸 (如 nature, ocean)..." />
                   <button class="search-clear-btn" id="btn-pexels-clear" title="清空">×</button>
+                  <kbd class="search-kbd-hint">Ctrl K</kbd>
                   <button class="modern-search-btn" id="btn-pexels-search">搜索</button>
                 </div>
                 <div class="contextual-chips" id="pexels-tag-chips">
@@ -237,6 +239,7 @@
                   <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                   <input type="text" class="modern-search-input" id="input-unsplash-query" placeholder="搜索 Unsplash 摄影大图 (支持中英文)..." />
                   <button class="search-clear-btn" id="btn-unsplash-clear" title="清空">×</button>
+                  <kbd class="search-kbd-hint">Ctrl K</kbd>
                   <button class="modern-search-btn" id="btn-unsplash-search">搜索</button>
                 </div>
                 <div class="contextual-chips" id="unsplash-tag-chips">
@@ -257,6 +260,7 @@
                   <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                   <input type="text" class="modern-search-input" id="input-wallhaven-query" placeholder="搜索 Wallhaven 社区壁纸..." />
                   <button class="search-clear-btn" id="btn-wallhaven-clear" title="清空">×</button>
+                  <kbd class="search-kbd-hint">Ctrl K</kbd>
                   <button class="modern-search-btn" id="btn-wallhaven-search">搜索</button>
                 </div>
                 <div class="wallhaven-filter-row">
@@ -364,18 +368,46 @@
 
         <!-- ================= PAGE 3: 设置 ================= -->
         <section id="tab-settings" class="tab-page">
-          <header class="page-header">
+          <header class="page-header settings-page-header">
             <div class="page-title-wrap">
               <h1 class="page-title">设置</h1>
             </div>
           </header>
 
-          <div class="settings-section-list">
+          <div class="settings-workspace">
+            <!-- Left Secondary Category Navigation (mock_settings.png) -->
+            <aside class="settings-subnav" id="settings-subnav" aria-label="设置分类导航">
+              <div class="settings-subnav-title">设置中心</div>
+              <nav class="settings-subnav-list">
+                <button type="button" class="settings-subnav-item active" data-target="settings-group-appearance">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+                  <span>外观与主题</span>
+                </button>
+                <button type="button" class="settings-subnav-item" data-target="settings-group-typography">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+                  <span>界面字体</span>
+                </button>
+                <button type="button" class="settings-subnav-item" data-target="settings-group-general">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                  <span>通用与显示</span>
+                </button>
+                <button type="button" class="settings-subnav-item" data-target="settings-group-api">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-6.5 6.5l3.5 3.5M4 19l4-4m0 0l2 2 4-4-2-2-4 4zm0 0L4 21"/></svg>
+                  <span>图源与 API 密钥</span>
+                </button>
+                <button type="button" class="settings-subnav-item" data-target="settings-group-storage">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                  <span>存储与自动化</span>
+                </button>
+              </nav>
+            </aside>
 
-            <!-- 主题配色 -->
-            <div class="settings-group">
-              <span class="settings-group-title">主题配色 (Material You)</span>
-              <div class="settings-card" style="padding: 14px;">
+            <div class="settings-section-list">
+
+              <!-- 主题配色 -->
+              <div class="settings-group" id="settings-group-appearance">
+                <span class="settings-group-title">主题配色 (Material You)</span>
+              <div class="settings-card settings-appearance-card">
                 <div class="theme-palette-grid" id="theme-palette-grid">
                   <div class="theme-palette-chip active" data-theme="violet" tabindex="0" role="button" aria-label="薰衣草紫">
                     <div class="palette-preview-circles">
@@ -507,7 +539,7 @@
                 </div>
 
                 <!-- 自定义取色板控制器 -->
-                <div class="settings-tile" id="custom-theme-tile" style="margin-top: 12px; padding: 12px 0; border-top: 1px solid var(--md-sys-color-outline-variant); border-bottom: 1px solid var(--md-sys-color-outline-variant);">
+                <div class="settings-tile" id="custom-theme-tile">
                   <div class="settings-tile-leading">
                     <div class="settings-icon-box" style="background: rgba(139, 92, 246, 0.15); color: var(--md-sys-color-primary);">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/></svg>
@@ -526,7 +558,7 @@
                   </div>
                 </div>
 
-                <div class="settings-tile" style="padding: 12px 0 0 0; border-top: none; border-bottom: none;">
+                <div class="settings-tile" id="amoled-theme-tile">
                   <div class="settings-tile-leading">
                     <div class="settings-icon-box purple">
                       <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -545,50 +577,50 @@
               </div>
             </div>
 
-            <!-- 界面字体风格 (涵盖多种圆润与现代字体) -->
-            <div class="settings-group">
+            <!-- 界面字体风格 (仅保留 鸿蒙舒适圆体 与 小米几何质感) -->
+            <div class="settings-group" id="settings-group-typography">
               <span class="settings-group-title">界面字体风格 (Typography)</span>
-              <div class="settings-card" style="padding: 14px;">
+              <div class="settings-card settings-typography-card">
                 <div class="font-preset-grid" id="font-preset-grid">
                   
                   <!-- 1. 鸿蒙舒适圆体 -->
                   <div class="font-preset-chip active" data-font="rounded" style="font-family: 'HarmonyOS Sans SC', 'Nunito', 'Microsoft YaHei UI', sans-serif;">
                     <div class="font-preset-header">
                       <span class="font-preset-title">鸿蒙舒适圆体</span>
-                      <span class="font-preset-tag">推荐·圆润</span>
+                      <span class="font-preset-tag">推荐</span>
                     </div>
-                    <div class="font-preset-preview">永恒之美 4K Rounded</div>
-                    <span class="font-preset-desc">柔和饱满、圆润护眼、现代质感极佳</span>
+                    <div class="font-preset-preview">Aa 永</div>
+                    <span class="font-preset-desc">圆润饱满 · 舒适护眼</span>
                   </div>
 
-                  <!-- 2. 软萌可爱幼圆 -->
-                  <div class="font-preset-chip" data-font="youyuan" style="font-family: 'YouYuan', '幼圆', 'Quicksand', sans-serif;">
+                  <!-- 2. 软萌可爱幼圆 (隐藏，仅供兼容测试) -->
+                  <div class="font-preset-chip font-preset-hidden" data-font="youyuan" hidden aria-hidden="true" style="display: none !important;">
                     <div class="font-preset-header">
                       <span class="font-preset-title">软萌可爱幼圆</span>
-                      <span class="font-preset-tag">极致圆润</span>
+                      <span class="font-preset-tag">圆润</span>
                     </div>
-                    <div class="font-preset-preview">灵动探索 4K YouYuan</div>
-                    <span class="font-preset-desc">极致弧度圆角、活泼软萌、亲和力强</span>
+                    <div class="font-preset-preview">Aa</div>
+                    <span class="font-preset-desc">圆角亲和</span>
                   </div>
 
-                  <!-- 3. 现代极简屏显 (微软 UI) -->
-                  <div class="font-preset-chip" data-font="fluent" style="font-family: 'Segoe UI', 'Microsoft YaHei UI', sans-serif;">
+                  <!-- 3. 现代极简屏显 (隐藏，仅供兼容测试) -->
+                  <div class="font-preset-chip font-preset-hidden" data-font="fluent" hidden aria-hidden="true" style="display: none !important;">
                     <div class="font-preset-header">
                       <span class="font-preset-title">现代极简屏显</span>
-                      <span class="font-preset-tag">WinUI 原生</span>
+                      <span class="font-preset-tag">原生</span>
                     </div>
-                    <div class="font-preset-preview">沉浸视界 4K Segoe UI</div>
-                    <span class="font-preset-desc">Windows 11 原生微软 UI、清晰利落</span>
+                    <div class="font-preset-preview">Aa</div>
+                    <span class="font-preset-desc">清晰利落</span>
                   </div>
 
                   <!-- 4. 小米几何质感 -->
                   <div class="font-preset-chip" data-font="misans" style="font-family: 'MiSans', 'Noto Sans SC', sans-serif;">
                     <div class="font-preset-header">
                       <span class="font-preset-title">小米几何质感</span>
-                      <span class="font-preset-tag">现代几何</span>
+                      <span class="font-preset-tag">几何</span>
                     </div>
-                    <div class="font-preset-preview">科技灵感 4K MiSans</div>
-                    <span class="font-preset-desc">现代几何圆转、科技感与平衡美学</span>
+                    <div class="font-preset-preview">Aa 永</div>
+                    <span class="font-preset-desc">现代几何 · 清晰利落</span>
                   </div>
 
                 </div>
@@ -596,7 +628,7 @@
             </div>
 
             <!-- 偏好与设置 -->
-            <div class="settings-group">
+            <div class="settings-group" id="settings-group-general">
               <span class="settings-group-title" data-i18n="settings_general_group">通用偏好 (Preferences)</span>
               <div class="settings-card">
                 <!-- 界面语言 (Language) -->
@@ -621,7 +653,7 @@
                 </div>
 
 
-                <div class="settings-tile">
+                <div class="settings-tile" aria-hidden="true" style="display: none;">
                   <div class="settings-tile-leading">
                     <div class="settings-icon-box blue">
                       <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
@@ -633,7 +665,6 @@
                   <div class="settings-tile-action">
                     <select class="m3-select" id="select-config-cardratio">
                       <option value="uniform" selected>统一比例 (16:10)</option>
-                      <option value="original">原始比例</option>
                     </select>
                   </div>
                 </div>
@@ -641,7 +672,7 @@
             </div>
 
             <!-- 搜索与 API -->
-            <div class="settings-group">
+            <div class="settings-group" id="settings-group-api">
               <span class="settings-group-title">搜索与 API</span>
               <div class="settings-card">
                 <div class="settings-tile">
@@ -690,7 +721,7 @@
             </div>
 
             <!-- 存储与自动化 -->
-            <div class="settings-group">
+            <div class="settings-group" id="settings-group-storage">
               <span class="settings-group-title">存储与自动化</span>
               <div class="settings-card">
                 <!-- 随机壁纸图源范围配置 (网格胶囊芯片，零遮挡、零覆盖) -->
@@ -806,6 +837,7 @@
               </div>
             </div>
 
+            </div>
           </div>
         </section>
 
@@ -915,76 +947,166 @@
 
   </div>
 
-  <!-- 3) Details Dialog (M3 28px Corner, Surface Container High, Color Palette Swatches) -->
+  <!-- 3) Details Dialog (M3 28px Corner, Surface Container High, Split-Pane Horizontal Layout) -->
   <div class="m3-dialog-backdrop" id="detail-modal">
-    <div class="m3-dialog-surface">
-      <div class="m3-dialog-header">
-        <h3 class="m3-dialog-title">壁纸详情</h3>
-        <button class="m3-dialog-close-btn" id="btn-close-modal" title="关闭">✕</button>
-      </div>
-
-      <div class="m3-dialog-body">
-        <div class="dialog-preview-box" id="dialog-preview-box" title="点击全屏查看并放大缩小">
-          <img id="modal-wallpaper-img" src="" alt="Wallpaper Preview" />
-          <div class="dialog-preview-hint">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
-            <span>全屏查看</span>
+    <div class="m3-dialog-surface detail-split-surface">
+      <div class="detail-split-layout">
+        <!-- Left Pane (64%): 16:9 Edge-to-Edge Preview & Floating Fullscreen Hint -->
+        <div class="detail-preview-pane">
+          <div class="dialog-preview-box" id="dialog-preview-box" title="点击全屏查看并放大缩小">
+            <img id="modal-wallpaper-img" src="" alt="Wallpaper Preview" />
+            <button class="detail-expand-fab" id="modal-btn-lightbox" type="button" title="全屏查看" aria-label="全屏查看">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 3 21 3 21 9"/>
+                <polyline points="9 21 3 21 3 15"/>
+                <line x1="21" y1="3" x2="14" y2="10"/>
+                <line x1="3" y1="21" x2="10" y2="14"/>
+              </svg>
+            </button>
+            <div class="dialog-preview-hint">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 3 21 3 21 9"/>
+                <polyline points="9 21 3 21 3 15"/>
+                <line x1="21" y1="3" x2="14" y2="10"/>
+                <line x1="3" y1="21" x2="10" y2="14"/>
+              </svg>
+              <span>点击进入全屏无损查看</span>
+            </div>
           </div>
         </div>
 
-        <div class="dialog-meta-list">
-          <!-- 1. 分辨率 -->
-          <div class="detail-info-row">
-            <div class="detail-row-leading">
-              <div class="detail-icon-box blue">
-                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-              </div>
-              <span class="detail-row-title">壁纸分辨率</span>
+        <!-- Right Pane (36%): Header, Structured Spec Groups, Dominant Swatches & Pill Action Stack -->
+        <div class="detail-info-pane">
+          <div class="m3-dialog-header">
+            <div class="detail-header-titles">
+              <h3 class="m3-dialog-title" id="modal-title">壁纸详情</h3>
+              <span class="detail-header-subtitle" id="modal-subtitle">4K UHD · 精选桌面壁纸</span>
             </div>
-            <div class="detail-row-trailing">
-              <span class="detail-resolution-badge" id="modal-meta-resolution">-</span>
+            <button class="m3-dialog-close-btn" id="btn-close-modal" title="关闭">✕</button>
+          </div>
+
+          <div class="m3-dialog-body">
+            <!-- Section 1: 图像规格 (2x2 Bento Grid) -->
+            <div class="detail-section-block">
+              <span class="detail-section-label">图像规格</span>
+              <div class="dialog-meta-list detail-bento-grid">
+                <!-- 1. 原始分辨率 -->
+                <div class="detail-info-row detail-bento-card">
+                  <div class="detail-row-leading">
+                    <div class="detail-icon-box blue">
+                      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    </div>
+                    <span class="detail-row-title">原始分辨率</span>
+                  </div>
+                  <div class="detail-row-trailing">
+                    <span class="detail-resolution-badge" id="modal-meta-resolution">-</span>
+                  </div>
+                </div>
+
+                <!-- 2. 画幅比例 -->
+                <div class="detail-info-row detail-bento-card">
+                  <div class="detail-row-leading">
+                    <div class="detail-icon-box emerald">
+                      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 15h4M7 9h2"/></svg>
+                    </div>
+                    <span class="detail-row-title">画幅比例</span>
+                  </div>
+                  <div class="detail-row-trailing">
+                    <span class="detail-bento-val" id="modal-meta-aspect">16:9 UHD</span>
+                  </div>
+                </div>
+
+                <!-- 3. 文件格式 -->
+                <div class="detail-info-row detail-bento-card">
+                  <div class="detail-row-leading">
+                    <div class="detail-icon-box purple">
+                      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    </div>
+                    <span class="detail-row-title">文件格式</span>
+                  </div>
+                  <div class="detail-row-trailing">
+                    <span class="detail-bento-val" id="modal-meta-format">JPEG / UHD</span>
+                  </div>
+                </div>
+
+                <!-- 4. 来源平台 -->
+                <div class="detail-info-row detail-bento-card">
+                  <div class="detail-row-leading">
+                    <div class="detail-icon-box emerald">
+                      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                    </div>
+                    <span class="detail-row-title">来源平台</span>
+                  </div>
+                  <div class="detail-row-trailing">
+                    <span class="detail-source-pill" id="modal-meta-source">ONLINE</span>
+                    <span class="detail-bento-sub" id="modal-meta-author" style="display: none;">Curated 4K</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 2: 来源与存储 (不向用户展示地址) -->
+            <div class="detail-section-block" id="detail-storage-section" hidden aria-hidden="true" style="display: none !important;">
+              <span class="detail-section-label">来源与存储</span>
+              <div class="detail-storage-card">
+                <div class="detail-info-row detail-storage-row" id="detail-link-row">
+                  <div class="detail-row-leading">
+                    <div class="detail-icon-box purple">
+                      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                    </div>
+                    <div class="detail-storage-text">
+                      <span class="detail-row-title">源地址链接</span>
+                      <span class="detail-link-url" id="modal-meta-link-text">本地文件</span>
+                    </div>
+                  </div>
+                  <div class="detail-row-trailing">
+                    <button class="m3-btn m3-btn-tonal md-btn-tonal" id="btn-open-browser" style="padding: 4px 12px; font-size: 12px;">
+                      <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                      <span>打开</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- 2. 源地址链接 -->
-          <div class="detail-info-row">
-            <div class="detail-row-leading">
-              <div class="detail-icon-box purple">
-                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-              </div>
-              <span class="detail-row-title">源地址链接</span>
-              <span id="modal-meta-link-text" style="display: none;"></span>
-            </div>
-            <div class="detail-row-trailing">
-              <button class="m3-btn m3-btn-tonal md-btn-tonal" id="btn-open-browser" style="padding: 4px 16px; font-size: 13px;">
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                <span>打开</span>
+          <div class="m3-dialog-footer detail-split-footer">
+            <button class="m3-btn m3-btn-primary md-btn-filled detail-btn-apply-full" id="modal-btn-apply">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>设为桌面壁纸</span>
+            </button>
+            <div class="detail-secondary-actions">
+              <button class="m3-btn m3-btn-tonal md-btn-tonal" id="modal-btn-download">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <span>保存到本地</span>
+              </button>
+              <button class="m3-btn m3-btn-tonal md-btn-tonal" id="modal-btn-fullscreen" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+                <span>全屏预览</span>
+              </button>
+              <button class="m3-btn m3-btn-tonal md-btn-tonal" id="btn-copy-link" hidden aria-hidden="true" style="display: none !important;">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                <span>复制链接</span>
+              </button>
+              <button class="m3-btn m3-btn-danger md-btn-danger" id="modal-btn-delete" style="display: none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                <span>删除壁纸</span>
               </button>
             </div>
           </div>
         </div>
-      </div>
-
-      <div class="m3-dialog-footer">
-        <button class="m3-btn m3-btn-danger md-btn-danger" id="modal-btn-delete" style="display: none;">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-          <span>删除壁纸</span>
-        </button>
-        <div style="flex: 1;"></div>
-        <button class="m3-btn m3-btn-tonal md-btn-tonal" id="modal-btn-download">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          <span>保存到本地</span>
-        </button>
-        <button class="m3-btn m3-btn-primary md-btn-filled" id="modal-btn-apply">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-          <span>设为桌面壁纸</span>
-        </button>
       </div>
     </div>
   </div>
 
   <!-- 4) Fullscreen Lightbox & Interactive Photo Viewer (占全屏可放大缩小、拖拽) -->
   <div class="fullscreen-lightbox-backdrop" id="fullscreen-lightbox">
+    <!-- Top-left floating wallpaper title & index pill (mock_lightbox.png) -->
+    <div class="lightbox-top-meta">
+      <span class="lightbox-wallpaper-title" id="lb-wallpaper-title">4K Ultra HD Wallpaper</span>
+      <span class="lightbox-index-badge" id="lb-index-badge">1 / 24</span>
+    </div>
+
     <!-- Floating Toolbar -->
     <div class="lightbox-floating-toolbar">
       <button class="lightbox-tool-btn" id="lb-btn-zoom-out" title="缩小 (滚轮向后)">
@@ -998,9 +1120,13 @@
       <button class="lightbox-tool-btn" id="lb-btn-reset" title="还原自适应 (双击图片)">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
       </button>
+      <button class="lightbox-tool-btn" id="lb-btn-download" title="保存壁纸到本地">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      </button>
       <div class="lightbox-tool-divider"></div>
-      <button class="lightbox-tool-btn" id="lb-btn-apply" title="一键设为桌面壁纸">
+      <button class="lightbox-tool-btn lightbox-apply-pill" id="lb-btn-apply" title="一键设为桌面壁纸">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>设为壁纸</span>
       </button>
     </div>
 

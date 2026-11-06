@@ -779,11 +779,10 @@ describe('Milestone 5 Phase 2 — White-Box Adversarial Coverage Suite', () => {
   // 8. Settings & Config Management Synchronization
   // ===========================================================================
   describe('8. Settings Synchronization & Config State Engine', () => {
-    it('persists card ratio and load mode preferences to backend config', async () => {
+    it('enforces uniform 16:10 card ratio and persists load mode preferences to backend config', async () => {
       const selectRatio = document.getElementById('select-config-cardratio');
-      const selectLoadmode = document.getElementById('select-config-loadmode');
 
-      // Switch to original ratio
+      // Even if a legacy value is dispatched, uniform 16:10 ratio is strictly enforced
       if (selectRatio) {
         selectRatio.value = 'original';
         selectRatio.dispatchEvent(new Event('change', { bubbles: true }));
@@ -792,10 +791,15 @@ describe('Milestone 5 Phase 2 — White-Box Adversarial Coverage Suite', () => {
 
       const galleryGrid = document.getElementById('gallery-grid');
       const onlineGrid = document.getElementById('online-grid');
-      expect(galleryGrid?.classList.contains('ratio-original')).toBe(true);
-      expect(onlineGrid?.classList.contains('ratio-original')).toBe(true);
+      const historyGrid = document.getElementById('history-grid');
+      expect(galleryGrid?.classList.contains('ratio-uniform')).toBe(true);
+      expect(galleryGrid?.classList.contains('ratio-original')).toBe(false);
+      expect(onlineGrid?.classList.contains('ratio-uniform')).toBe(true);
+      expect(onlineGrid?.classList.contains('ratio-original')).toBe(false);
+      expect(historyGrid?.classList.contains('ratio-uniform')).toBe(true);
+      expect(historyGrid?.classList.contains('ratio-original')).toBe(false);
 
-      expect(mockBackendState.config.card_ratio).toBe('original');
+      expect(mockBackendState.config.card_ratio).toBe('uniform');
       expect(mockBackendState.config.load_mode).toBe('infinite');
     });
 

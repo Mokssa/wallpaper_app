@@ -96,6 +96,7 @@ impl AppConfig {
         self.auto_update_interval_minutes = self.auto_update_interval_minutes.clamp(5, 1440);
         self.batch_count = self.batch_count.clamp(1, 24);
         self.load_mode = "infinite".into();
+        self.card_ratio = "uniform".into();
         if !["all", "local", "bing", "pexels", "unsplash", "wallhaven"]
             .contains(&self.random_source.as_str())
         {
@@ -188,7 +189,7 @@ mod tests {
         let mut config: AppConfig = serde_json::from_str(
             r##"{
             "theme_color":"custom", "custom_theme_color":"#123456", "amoled_mode":true,
-            "random_source":"local", "auto_update_interval_minutes":0
+            "random_source":"local", "auto_update_interval_minutes":0, "card_ratio":"original"
         }"##,
         )
         .unwrap();
@@ -200,6 +201,7 @@ mod tests {
         assert!(restored.amoled_mode);
         assert_eq!(restored.random_source, "local");
         assert_eq!(restored.auto_update_interval_minutes, 5);
+        assert_eq!(restored.card_ratio, "uniform");
     }
 
     #[test]
