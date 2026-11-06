@@ -27,7 +27,9 @@ fn thumbnail_in(source: &Path, cache: &Path) -> Result<PathBuf, String> {
         .hash(&mut hash);
     480u32.hash(&mut hash);
     let target = cache.join(format!("{:016x}.jpg", hash.finish()));
-    if target.metadata().is_ok_and(|m| m.len() > 0) && crate::network::validate_image(&target).is_ok() {
+    if target.metadata().is_ok_and(|m| m.len() > 0)
+        && crate::network::validate_image(&target).is_ok()
+    {
         return Ok(crate::gallery::clean_windows_path(target));
     }
     let mut reader = ImageReader::open(&source)
